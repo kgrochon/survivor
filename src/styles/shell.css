@@ -1,0 +1,216 @@
+/* Survivor Header */
+.survivor-header {
+    text-align: center;
+    animation: fadeInUp 0.6s ease;
+}
+
+.survivor-subtitle {
+    font-weight: 500;
+    font-size: 14px;
+    padding-top: 10px;
+    letter-spacing: 4px;
+    color: var(--color-orange);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.survivor-title {
+    font-weight: 700;
+    font-size: 2rem;
+    letter-spacing: 2px;
+    color: var(--color-text);
+    line-height: 1;
+    margin-bottom: 0;
+    margin-top: 10px;
+}
+
+.survivor-overview {
+    font-weight: 400;
+    font-size: 15px;
+    color: var(--color-text-muted);
+    max-width: 500px;
+    margin: 20px auto;
+}
+
+.survivor-subtext {
+    font-weight: 400;
+    font-size: 14px;
+    color: var(--color-text-muted);
+    max-width: 500px;
+    margin: 0 auto;
+    margin-top: 20px;
+}
+
+.survivor-nav-container {
+    margin: 0 auto;
+    width: fit-content;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+}
+
+/* Chart navigation + spoiler preference (distinct from nav tabs) */
+.survivor-nav-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+}
+
+.survivor-spoiler-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.survivor-spoiler-label {
+    font-family: "Apfel Grotezk", system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    letter-spacing: 0.02em;
+    max-width: 260px;
+    line-height: 1.35;
+    text-align: right;
+}
+
+@media (max-width: 480px) {
+    .survivor-spoiler-label {
+        text-align: center;
+        max-width: none;
+    }
+}
+
+.survivor-spoiler-switch {
+    position: relative;
+    width: 48px;
+    height: 26px;
+    flex-shrink: 0;
+    border-radius: 999px;
+    border: 2px solid var(--color-text);
+    background-color: var(--color-bg-alt);
+    cursor: pointer;
+    padding: 0;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.survivor-spoiler-switch:hover {
+    box-shadow: var(--shadow-sm);
+}
+
+.survivor-spoiler-switch:focus-visible {
+    outline: 2px solid var(--color-orange);
+    outline-offset: 3px;
+}
+
+.survivor-spoiler-switch.is-on {
+    background-color: var(--color-orange);
+}
+
+.survivor-spoiler-thumb {
+    position: absolute;
+    top: 2px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    border: 1px solid var(--color-text);
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s ease;
+    pointer-events: none;
+}
+
+.survivor-spoiler-switch.is-on .survivor-spoiler-thumb {
+    transform: translateX(20px);
+}
+
+/* Chart Navigation */
+.survivor-nav {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.survivor-nav-button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.survivor-nav-button:disabled:hover {
+    transform: none;
+    background-color: #f8eddd;
+    box-shadow: none;
+}
+
+.survivor-nav-button {
+    background-color: #f8eddd;
+    padding: 12px 24px;
+    font-family: "Apfel Grotezk", system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--color-text);
+    border: 2px solid var(--color-text);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.survivor-nav-button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    background-color: var(--color-yellow);
+}
+
+.survivor-nav-button.active {
+    background-color: var(--color-orange);
+    color: #ffffff;
+    border-color: var(--color-text);
+    font-weight: 600;
+    box-shadow: var(--shadow-md);
+}
+
+.survivor-nav-button:active {
+    transform: translateY(0);
+}
+
+/* Content Area */
+.survivor-content {
+    animation: fadeInUp 0.4s ease;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .survivor-nav {
+        gap: 8px;
+    }
+
+    .survivor-nav-button {
+        padding: 10px 16px;
+        font-size: 12px;
+    }
+}
