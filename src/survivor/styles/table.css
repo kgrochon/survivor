@@ -1,344 +1,352 @@
 .survivor-table-container {
-    min-height: 100vh;
-    background-color: var(--color-bg);
-    font-family: "Apfel Grotezk", system-ui, -apple-system, BlinkMacSystemFont,
-        "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    color: var(--color-text);
-    padding: 0 20px 40px 20px;
+  min-height: 100vh;
+  background-color: var(--color-bg);
+  font-family:
+    "Apfel Grotezk",
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  color: var(--color-text);
+  padding: 0 20px 40px 20px;
 }
 
 .survivor-table-wrapper {
-    max-width: 960px;
-    margin: 0 auto;
+  max-width: 960px;
+  margin: 0 auto;
 }
 
 /* Header Section */
 .table-header {
-    text-align: center;
-    margin-bottom: 48px;
-    animation: fadeInUp 0.6s ease;
+  text-align: center;
+  margin-bottom: 48px;
+  animation: fadeInUp 0.6s ease;
 }
 
 .table-subtitle {
-    font-weight: 500;
-    font-size: 14px;
-    letter-spacing: 4px;
-    color: var(--color-orange);
-    margin-bottom: 8px;
-    text-transform: uppercase;
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: 4px;
+  color: var(--color-orange);
+  margin-bottom: 8px;
+  text-transform: uppercase;
 }
 
 .table-title {
-    font-weight: 700;
-    font-size: clamp(2.5rem, 6vw, 3.25rem);
-    letter-spacing: 2px;
-    color: var(--color-text);
-    line-height: 1;
-    margin-bottom: 16px;
+  font-weight: 700;
+  font-size: clamp(2.5rem, 6vw, 3.25rem);
+  letter-spacing: 2px;
+  color: var(--color-text);
+  line-height: 1;
+  margin-bottom: 16px;
 }
 
 .table-description {
-    font-weight: 400;
-    font-size: 15px;
-    color: var(--color-text-muted);
-    max-width: 500px;
-    margin: 0 auto;
+  font-weight: 400;
+  font-size: 15px;
+  color: var(--color-text-muted);
+  max-width: 500px;
+  margin: 0 auto;
 }
 
 .table-toolbar {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
 }
 
 .table-toolbar .survivor-spoiler-label {
-    max-width: 220px;
+  max-width: 220px;
 }
 
 /* Era Legend */
 .era-legend {
-    display: flex;
-    justify-content: center;
-    gap: 24px;
-    margin-bottom: 36px;
-    flex-wrap: wrap;
-    animation: fadeInUp 0.6s ease 0.1s both;
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 36px;
+  flex-wrap: wrap;
+  animation: fadeInUp 0.6s ease 0.1s both;
 }
 
 .era-item {
-    background-color: #f8eddd;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
-    background-color: #ffffff;
-    border: 2px solid var(--color-text);
-    border-radius: var(--radius-sm);
+  background-color: #f8eddd;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: #ffffff;
+  border: 2px solid var(--color-text);
+  border-radius: var(--radius-sm);
 }
 
 .era-dot {
-    width: 12px;
-    height: 12px;
-    border: 2px solid var(--color-text);
-    border-radius: var(--radius-sm);
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--color-text);
+  border-radius: var(--radius-sm);
 }
 
 .era-label {
-    font-size: 12px;
-    color: var(--color-text);
-    font-weight: 500;
-    letter-spacing: 0.5px;
+  font-size: 12px;
+  color: var(--color-text);
+  font-weight: 500;
+  letter-spacing: 0.5px;
 }
 
 /* Season Table */
 .seasons-container {
-    display: flex;
-    flex-direction: column;
-    width: fit-content;
-    margin: auto;
+  display: flex;
+  flex-direction: column;
+  width: fit-content;
+  margin: auto;
 }
 
 .season-row:first-child {
-    border-top: 2px solid var(--color-text);
+  border-top: 2px solid var(--color-text);
 }
 
 .season-row {
-    display: flex;
-    height: fit-content;
-    align-items: center;
-    flex-direction: row;
-    border-bottom: 2px solid var(--color-text);
-    overflow: hidden;
-    transition: all var(--transition-fast);
-    background-color: #ffffff;
+  display: flex;
+  height: fit-content;
+  align-items: center;
+  flex-direction: row;
+  border-bottom: 2px solid var(--color-text);
+  overflow: hidden;
+  transition: all var(--transition-fast);
+  background-color: #ffffff;
 }
 
 .season-row:hover {
-    transform: translateX(4px);
-    box-shadow: var(--shadow-md);
+  transform: translateX(4px);
+  box-shadow: var(--shadow-md);
 }
 
 .season-row.highlighted {
-    /* border-width: 3px; */
-    transform: scale(1.005);
+  /* border-width: 3px; */
+  transform: scale(1.005);
 }
 
 .season-row.dimmed {
-    opacity: 0.3;
+  opacity: 0.3;
 }
 
 /* Season Label */
 .season-label {
-    padding: 2px 5px;
-    display: flex;
-    flex-direction: column;
-    /* justify-content: center; */
-    transition: background-color var(--transition-fast);
-    width: 100px;
+  padding: 2px 5px;
+  display: flex;
+  flex-direction: column;
+  /* justify-content: center; */
+  transition: background-color var(--transition-fast);
+  width: 100px;
 }
 
 .season-number {
-    text-align: left;
-    font-weight: 600;
-    font-size: 16px;
-    line-height: 1;
-    letter-spacing: 1px;
-    color: var(--color-text);
+  text-align: left;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1;
+  letter-spacing: 1px;
+  color: var(--color-text);
 }
 
 .season-subtitle {
-    font-size: 12px;
-    font-weight: 400;
-    margin-top: 1px;
-    letter-spacing: 0.3px;
-    color: var(--color-text);
-    text-align: left;
+  font-size: 12px;
+  font-weight: 400;
+  margin-top: 1px;
+  letter-spacing: 0.3px;
+  color: var(--color-text);
+  text-align: left;
 }
 
 .season-era {
-    font-size: 10px;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-top: 2px;
-    display: flex;
-    align-items: center;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
 }
 
 /* Players Section */
 .players-container {
-    display: flex;
-    overflow: auto;
-    gap: 12px;
-    justify-content: flex-start;
-    scroll-behavior: smooth;
+  display: flex;
+  overflow: auto;
+  gap: 12px;
+  justify-content: flex-start;
+  scroll-behavior: smooth;
 }
 
 /* Player Cards */
 .player-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: fit-content;
-    margin: 5px;
-    gap: 3px;
-    transition: all var(--transition-fast);
-    cursor: pointer;
-    border: 2px solid black;
-    border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: fit-content;
+  margin: 5px;
+  gap: 3px;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  border: 2px solid black;
+  border-radius: var(--radius-sm);
 }
 
 .player-card:hover {
-    transform: scale(1.05);
+  transform: scale(1.05);
 }
 
 .player-card.dimmed {
-    opacity: 0.5;
+  opacity: 0.5;
 }
 
 .photo-frame {
-    width: 90px;
-    height: 90px;
-    overflow: visible;
-    border-top-left-radius: 2px;    
-    border-top-right-radius: 2px;
-    position: relative;
-    transition: all var(--transition-fast);
+  width: 90px;
+  height: 90px;
+  overflow: visible;
+  border-top-left-radius: 2px;
+  border-top-right-radius: 2px;
+  position: relative;
+  transition: all var(--transition-fast);
 }
 
 .player-photo {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    transition: filter var(--transition-fast);
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: filter var(--transition-fast);
 }
 
 .placement-badge {
-    position: absolute;
-    bottom: -2px;
-    left: -2px;
-    font-size: 8px;
-    font-weight: 700;
-    min-width: 22px;
-    height: 22px;
-    padding: 0 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid var(--color-text);
-    border-radius: var(--radius-sm);
+  position: absolute;
+  bottom: -2px;
+  left: -2px;
+  font-size: 8px;
+  font-weight: 700;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-text);
+  border-radius: var(--radius-sm);
 }
 
 .times-played-badge {
-    position: absolute;
-    top: -2px;
-    right: -2px;
-    color: #ffffff;
-    font-size: 9px;
-    font-weight: 700;
-    width: 18px;
-    height: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid var(--color-text);
-    border-radius: var(--radius-sm);
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 700;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-text);
+  border-radius: var(--radius-sm);
 }
 
 .player-name {
-    font-size: 10px;
-    text-align: center;
-    line-height: 1.3;
-    transition: all var(--transition-fast);
-    max-width: 75px;
+  font-size: 10px;
+  text-align: center;
+  line-height: 1.3;
+  transition: all var(--transition-fast);
+  max-width: 75px;
 }
 
 /* Footer */
 .table-footer {
-    text-align: center;
-    margin-top: 40px;
-    font-size: 12px;
-    color: var(--color-text-muted);
-    letter-spacing: 0.5px;
-    font-weight: 400;
+  text-align: center;
+  margin-top: 40px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  letter-spacing: 0.5px;
+  font-weight: 400;
 }
 
 /* Animations */
 @keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(12px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Eliminated Player Styles */
 .player-card.eliminated {
-    opacity: 0.6;
-    background-color: #f5f5f5 !important;
-    border-style: dashed;
+  opacity: 0.6;
+  background-color: #f5f5f5 !important;
+  border-style: dashed;
 }
 
 .player-card.eliminated .player-photo {
-    filter: grayscale(100%);
+  filter: grayscale(100%);
 }
 
 .elimination-badge {
-    position: absolute;
-    top: 4px;
-    left: 4px;
-    background-color: #ad373b;
-    color: white;
-    font-size: 7px;
-    font-weight: 700;
-    padding: 2px 4px;
-    border-radius: 2px;
-    letter-spacing: 0.5px;
-    z-index: 1;
-    border: 1px solid var(--color-text);
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  background-color: #ad373b;
+  color: white;
+  font-size: 7px;
+  font-weight: 700;
+  padding: 2px 4px;
+  border-radius: 2px;
+  letter-spacing: 0.5px;
+  z-index: 1;
+  border: 1px solid var(--color-text);
 }
 
 .player-card.eliminated.injury .elimination-badge {
-    background-color: #fcdc4d;
-    color: #1a1a18;
+  background-color: #fcdc4d;
+  color: #1a1a18;
 }
 
 /* Responsive Styles */
 @media (max-width: 768px) {
-    .survivor-table-container {
-        padding: 0;
-    }
+  .survivor-table-container {
+    padding: 0;
+  }
 
-    .season-label {
-        width: 70px;
-        min-width: 70px;
-        /* padding: 14px 16px; */
-    }
+  .season-label {
+    width: 70px;
+    min-width: 70px;
+    /* padding: 14px 16px; */
+  }
 
-    .players-container {
-        /* padding: 16px; */
-        gap: 12px;
-    }
+  .players-container {
+    /* padding: 16px; */
+    gap: 12px;
+  }
 
-    .era-legend {
-        gap: 12px;
-    }
+  .era-legend {
+    gap: 12px;
+  }
 
-    .era-item {
-        padding: 6px 10px;
-    }
+  .era-item {
+    padding: 6px 10px;
+  }
 
-    .player-card {
-        min-width: 75px;
-    }
+  .player-card {
+    min-width: 75px;
+  }
 
-    .photo-frame {
-        /* width: 60px;
+  .photo-frame {
+    /* width: 60px;
         height: 60px; */
-    }
+  }
 }

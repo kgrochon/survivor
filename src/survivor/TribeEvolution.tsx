@@ -16,7 +16,12 @@ function parseColorToRgb(color: string): [number, number, number] | null {
   if (c.startsWith("#")) {
     const h = c.slice(1);
     const full =
-      h.length === 3 ? h.split("").map((ch) => ch + ch).join("") : h;
+      h.length === 3
+        ? h
+            .split("")
+            .map((ch) => ch + ch)
+            .join("")
+        : h;
     if (full.length !== 6) return null;
     return [
       parseInt(full.slice(0, 2), 16),
@@ -85,8 +90,8 @@ export default function TribeEvolution() {
       <div className="tribe-evolution-wrapper">
         <p className="evolution-description">
           Elimination order for Season 50. Scroll horizontally to see each
-          player; card color is the tribe they were on when voted out (or
-          their latest tribe if still in the game).
+          player; card color is the tribe they were on when voted out (or their
+          latest tribe if still in the game).
         </p>
 
         <div className="evolution-legend">
@@ -148,7 +153,10 @@ export default function TribeEvolution() {
                   {statusLine}
                 </div>
                 {subLine && (
-                  <div className="elimination-card-sub" style={{ color: mutedColor }}>
+                  <div
+                    className="elimination-card-sub"
+                    style={{ color: mutedColor }}
+                  >
                     {subLine}
                   </div>
                 )}

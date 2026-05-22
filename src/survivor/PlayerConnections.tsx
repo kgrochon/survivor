@@ -8,7 +8,12 @@ function parseColorToRgb(color: string): [number, number, number] | null {
   if (c.startsWith("#")) {
     const h = c.slice(1);
     const full =
-      h.length === 3 ? h.split("").map((ch) => ch + ch).join("") : h;
+      h.length === 3
+        ? h
+            .split("")
+            .map((ch) => ch + ch)
+            .join("")
+        : h;
     if (full.length !== 6) return null;
     return [
       parseInt(full.slice(0, 2), 16),
@@ -200,9 +205,7 @@ export default function PlayerConnections({
                 onMouseEnter={() =>
                   !selectedPlayer && setHoveredPlayer(player.name)
                 }
-                onMouseLeave={() =>
-                  !selectedPlayer && setHoveredPlayer(null)
-                }
+                onMouseLeave={() => !selectedPlayer && setHoveredPlayer(null)}
                 style={{
                   backgroundColor: isActive ? tribeColor : "#ffffff",
                   borderColor: isConnected ? tribeColor : "var(--color-text)",
@@ -232,7 +235,9 @@ export default function PlayerConnections({
                   <div
                     className="connection-name"
                     style={{
-                      color: isActive ? highlightNameColor : "var(--color-text)",
+                      color: isActive
+                        ? highlightNameColor
+                        : "var(--color-text)",
                       fontWeight: isActive || isConnected ? 600 : 400,
                     }}
                   >

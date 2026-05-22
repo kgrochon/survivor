@@ -1,7 +1,10 @@
 import { eliminated, type Eliminated } from "../data/connections";
 
 const normalizeName = (name: string) =>
-  name.toLowerCase().replace(/[^a-z\s]/g, "").trim();
+  name
+    .toLowerCase()
+    .replace(/[^a-z\s]/g, "")
+    .trim();
 
 const firstName = (name: string) => normalizeName(name).split(/\s+/)[0] || "";
 
@@ -52,7 +55,5 @@ export function matchesEliminationRecord(
 export function findEliminationRecord(
   playerName: string,
 ): Eliminated | undefined {
-  return eliminated.find((el) =>
-    matchesEliminationRecord(playerName, el.name),
-  );
+  return eliminated.find((el) => matchesEliminationRecord(playerName, el.name));
 }

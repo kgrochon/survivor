@@ -20,10 +20,7 @@ export default function SurvivorPage() {
 
       <div className="survivor-nav-row">
         <div className="survivor-spoiler-wrap">
-          <span
-            className="survivor-spoiler-label"
-            id="survivor-spoilers-label"
-          >
+          <span className="survivor-spoiler-label" id="survivor-spoilers-label">
             Show elimination spoilers
           </span>
           <button
@@ -78,9 +75,7 @@ export default function SurvivorPage() {
       </div>
 
       <div className="survivor-content">
-        {activeChart === "seasons" && (
-          <Table showSpoilers={spoilersEnabled} />
-        )}
+        {activeChart === "seasons" && <Table showSpoilers={spoilersEnabled} />}
         {activeChart === "connections" && (
           <PlayerConnections showSpoilers={spoilersEnabled} />
         )}
