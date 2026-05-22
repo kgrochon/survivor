@@ -491,10 +491,9 @@ export const castData = [
 export type SeasonGroup = {
   season: number;
   subtitle: string;
-  players: { name: string; photo: string; tribe: string; placement: number }[];
+  players: { name: string; photo: string; tribe: string }[];
 };
 
-export const teamSwitch = ["Week 1", "Week 3"];
 /* Mid-century palette: warm creams, terracotta, olive, mustard, with bold black strokes */
 export const palette = {
   bg: "#F5EDE0",
@@ -535,46 +534,4 @@ export function getEra(season: number) {
   if (season <= 34) return "middle";
   if (season <= 42) return "modern";
   return "new";
-}
-
-/* Geometric SVG decorations */
-export function DiamondDeco({
-  color,
-  size = 12,
-}: {
-  color: string;
-  size?: number;
-}) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 12 12"
-      style={{ display: "inline-block", verticalAlign: "middle" }}
-    >
-      <rect
-        x="6"
-        y="0"
-        width="6"
-        height="6"
-        transform="rotate(45 6 6)"
-        fill={color}
-      />
-    </svg>
-  );
-}
-
-export function TrioDots({ color }: { color: string }) {
-  return (
-    <svg
-      width="28"
-      height="8"
-      viewBox="0 0 28 8"
-      style={{ display: "block", margin: "6px auto 0" }}
-    >
-      <circle cx="4" cy="4" r="3" fill={color} />
-      <circle cx="14" cy="4" r="3" fill={color} opacity="0.5" />
-      <circle cx="24" cy="4" r="3" fill={color} opacity="0.2" />
-    </svg>
-  );
 }

@@ -29,10 +29,7 @@ export default function Table({ showSpoilers }: TableProps) {
       number,
       {
         subtitle: string;
-        players: Map<
-          string,
-          { photo: string; tribe: string; placement: number }
-        >;
+        players: Map<string, { photo: string; tribe: string }>;
       }
     >();
     castData.forEach((player) => {
@@ -43,7 +40,6 @@ export default function Table({ showSpoilers }: TableProps) {
         map.get(s.season)!.players.set(player.name, {
           photo: player.photo,
           tribe: player.tribe[player.tribe.length - 1],
-          placement: s.placement,
         });
       });
     });
@@ -52,15 +48,9 @@ export default function Table({ showSpoilers }: TableProps) {
       .map(([season, data]) => ({
         season,
         subtitle: data.subtitle,
-        tribes: [],
         players: Array.from(data.players.entries())
           .sort(([a], [b]) => a.localeCompare(b))
-          .map(([name, { photo, tribe, placement }]) => ({
-            name,
-            photo,
-            tribe,
-            placement,
-          })),
+          .map(([name, { photo, tribe }]) => ({ name, photo, tribe })),
       }));
   }, []);
 
@@ -206,9 +196,6 @@ export default function Table({ showSpoilers }: TableProps) {
                 >
                   <div className="season-number">Season {group.season}</div>
                   <div className="season-subtitle">{group.subtitle}</div>
-                  {/* <div className="season-era" style={{ color: style.color }}>
-                      {style.label}
-                    </div> */}
                 </div>
 
                 {/* Players Grid */}
@@ -265,17 +252,6 @@ export default function Table({ showSpoilers }: TableProps) {
                                 : "ELIMINATED"}
                             </div>
                           )}
-                          {/* Placement badge */}
-                          {/* <div
-                              className="placement-badge"
-                              style={{
-                                backgroundColor: placementStyle.bg,
-                                color: placementStyle.text,
-                                borderRadius: placementStyle.borderRadius
-                              }}
-                            >
-                              {player.placement}
-                            </div> */}
                           {/* Times played badge */}
                           {timesPlayed > 1 && (
                             <div

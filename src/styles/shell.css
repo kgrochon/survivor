@@ -41,18 +41,6 @@
   margin-top: 20px;
 }
 
-.survivor-nav-container {
-  margin: 0 auto;
-  width: fit-content;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 32px;
-  flex-wrap: wrap;
-}
-
 /* Chart navigation + spoiler preference (distinct from nav tabs) */
 .survivor-nav-row {
   display: flex;
