@@ -1,0 +1,6 @@
+# Revisions to skip in `git blame`. Bulk-formatting commits only — no logic.
+# Enable locally with:
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+# style: apply repo-wide Prettier formatting pass
+4cf21594f7ddc25a6229f659249f92dacd3e2ca0
