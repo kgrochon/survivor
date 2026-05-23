@@ -7,6 +7,7 @@ import {
   palette,
 } from "../data/table";
 import { findEliminationRecord } from "../data/connections";
+import { getSeasonSubtitle } from "../data/seasons";
 import { handleImageError } from "./imageFallback";
 import "./styles/table.css";
 
@@ -54,7 +55,10 @@ export default function Table({ showSpoilers }: TableProps) {
     castData.forEach((player) => {
       player.seasons.forEach((s) => {
         if (!map.has(s.season)) {
-          map.set(s.season, { subtitle: s.subtitle, players: new Map() });
+          map.set(s.season, {
+            subtitle: getSeasonSubtitle(s.season),
+            players: new Map(),
+          });
         }
         map.get(s.season)!.players.set(player.name, {
           id: player.id,
