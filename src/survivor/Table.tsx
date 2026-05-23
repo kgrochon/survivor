@@ -6,7 +6,7 @@ import {
   getEra,
   palette,
 } from "../data/table";
-import { findEliminationRecord } from "./eliminationMatch";
+import { findEliminationRecord } from "../data/connections";
 import "./styles/table.css";
 
 type TableProps = {
@@ -29,7 +29,7 @@ export default function Table({ showSpoilers }: TableProps) {
       number,
       {
         subtitle: string;
-        players: Map<string, { photo: string; tribe: string }>;
+        players: Map<string, { id: string; photo: string; tribe: string }>;
       }
     >();
     castData.forEach((player) => {
@@ -38,6 +38,7 @@ export default function Table({ showSpoilers }: TableProps) {
           map.set(s.season, { subtitle: s.subtitle, players: new Map() });
         }
         map.get(s.season)!.players.set(player.name, {
+          id: player.id,
           photo: player.photo,
           tribe: player.tribe[player.tribe.length - 1],
         });
@@ -50,7 +51,7 @@ export default function Table({ showSpoilers }: TableProps) {
         subtitle: data.subtitle,
         players: Array.from(data.players.entries())
           .sort(([a], [b]) => a.localeCompare(b))
-          .map(([name, { photo, tribe }]) => ({ name, photo, tribe })),
+          .map(([name, { id, photo, tribe }]) => ({ id, name, photo, tribe })),
       }));
   }, []);
 
@@ -70,7 +71,7 @@ export default function Table({ showSpoilers }: TableProps) {
     return seasonGroups
       .map((group) => ({
         ...group,
-        players: group.players.filter((p) => !findEliminationRecord(p.name)),
+        players: group.players.filter((p) => !findEliminationRecord(p.id)),
       }))
       .filter((group) => group.players.length > 0);
   }, [seasonGroups, showSpoilers, showActiveOnly]);
@@ -214,7 +215,7 @@ export default function Table({ showSpoilers }: TableProps) {
                       ] || palette.ink;
 
                     const eliminationRecord = showSpoilers
-                      ? findEliminationRecord(player.name)
+                      ? findEliminationRecord(player.id)
                       : undefined;
                     const isEliminated = !!eliminationRecord;
                     const eliminationType = eliminationRecord?.type;

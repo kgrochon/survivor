@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { castData, palette } from "../data/table";
-import { findEliminationRecord } from "./eliminationMatch";
+import { findEliminationRecord } from "../data/connections";
 import "./styles/connections.css";
 
 function parseColorToRgb(color: string): [number, number, number] | null {
@@ -109,7 +109,7 @@ export default function PlayerConnections({
 
   const displayPlayers = useMemo(() => {
     if (!showSpoilers || !showActiveOnly) return sortedPlayers;
-    return sortedPlayers.filter((p) => !findEliminationRecord(p.name));
+    return sortedPlayers.filter((p) => !findEliminationRecord(p.id));
   }, [sortedPlayers, showActiveOnly, showSpoilers]);
 
   useEffect(() => {
@@ -180,7 +180,7 @@ export default function PlayerConnections({
             const sharedSeasons = activeConnections?.get(player.name) || [];
 
             const eliminationRecord = showSpoilers
-              ? findEliminationRecord(player.name)
+              ? findEliminationRecord(player.id)
               : undefined;
             const isEliminated = !!eliminationRecord;
             const eliminationType = eliminationRecord?.type;

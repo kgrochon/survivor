@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { castData, palette, tribeColors } from "../data/table";
-import { findEliminationRecord } from "./eliminationMatch";
+import { findEliminationRecord } from "../data/connections";
 import "./styles/tribeevolution.css";
 
 interface JourneyCard {
@@ -62,7 +62,7 @@ function tribeAtEpisode(tribes: string[], episode: number | undefined) {
 export default function TribeEvolution() {
   const orderedPlayers: JourneyCard[] = useMemo(() => {
     const journeys = castData.map((player) => {
-      const eliminationRecord = findEliminationRecord(player.name);
+      const eliminationRecord = findEliminationRecord(player.id);
       return {
         name: player.name,
         photo: player.photo,

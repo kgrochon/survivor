@@ -1,5 +1,6 @@
 export const castData = [
   {
+    id: "jenna-lewis-dougherty",
     name: "Jenna Lewis-Dougherty",
     tribe: [
       "Cila",
@@ -22,6 +23,7 @@ export const castData = [
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_559,y_183,w_1379,h_775/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbc432rdmgmh0ddkp.jpg",
   },
   {
+    id: "colby-donaldson",
     name: "Colby Donaldson",
     tribe: [
       "Vatu",
@@ -45,6 +47,7 @@ export const castData = [
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_0,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbbv7bnygssr2nfmx.jpg",
   },
   {
+    id: "stephenie-lagrossa-kendrick",
     name: "Stephenie LaGrossa Kendrick",
     tribe: [
       "Vatu",
@@ -68,6 +71,7 @@ export const castData = [
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_0,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbcxf91v1vq94ya8s.jpg",
   },
   {
+    id: "cirie-fields",
     name: "Cirie Fields",
     tribe: [
       "Cila",
@@ -92,6 +96,7 @@ export const castData = [
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_90,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbbqghycsf9h7ehyt.jpg",
   },
   {
+    id: "ozzy-lusth",
     name: "Ozzy Lusth",
     tribe: [
       "Cila",
@@ -116,6 +121,7 @@ export const castData = [
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_65,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbcgr596217xbpqwe.jpg",
   },
   {
+    id: "coach-wade",
     name: "Coach Wade",
     tribe: [
       "Kalo",
@@ -139,6 +145,7 @@ export const castData = [
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_407,w_2000,h_1125/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjb82jcg73nb58hbcb.jpg",
   },
   {
+    id: "aubry-bracco",
     name: "Aubry Bracco",
     tribe: [
       "Vatu",
@@ -162,6 +169,7 @@ export const castData = [
       "https://parade.com/.image/c_fill,w_1200,h_1200,g_faces:center/ODowMDAwMDAwMDAxNTY4Njk1/survivor-50-aubry-bracco-header.jpg",
   },
   {
+    id: "chrissy-hofbeck",
     name: "Chrissy Hofbeck",
     tribe: [
       "Kalo",
@@ -183,6 +191,7 @@ export const castData = [
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_41,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbbgp9t969nt0jppn.jpg",
   },
   {
+    id: "christian-hubicki",
     name: "Christian Hubicki",
     tribe: [
       "Cila",
@@ -202,6 +211,7 @@ export const castData = [
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_101,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbbp3vqeea2tmtw0g.jpg",
   },
   {
+    id: "angelina-keeley",
     name: "Angelina Keeley",
     tribe: [
       "Vatu",
@@ -221,6 +231,7 @@ export const castData = [
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_99,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjb8081kem9qb8xkc7.jpg",
   },
   {
+    id: "mike-white",
     name: "Mike White",
     tribe: [
       "Kalo",
@@ -240,6 +251,7 @@ export const castData = [
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_0,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbcdv1vrhwx0a430c.jpg",
   },
   {
+    id: "rick-devens",
     name: "Rick Devens",
     tribe: [
       "Cila",
@@ -259,6 +271,7 @@ export const castData = [
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_135,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbcsq1fqbn7jydxyg.jpg",
   },
   {
+    id: "jonathan-young",
     name: "Jonathan Young",
     tribe: [
       "Kalo",
@@ -278,6 +291,7 @@ export const castData = [
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_58,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbc9t98b0cwy300ww.jpg",
   },
   {
+    id: "dee-valladares",
     name: "Dee Valladares",
     tribe: [
       "Kalo",
@@ -297,6 +311,7 @@ export const castData = [
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_57,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbbxp7t3r2kzbsdyq.jpg",
   },
   {
+    id: "emily-flippen",
     name: "Emily Flippen",
     tribe: [
       "Cila",
@@ -316,6 +331,7 @@ export const castData = [
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_87,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbbzj1ks7aq7e201d.jpg",
   },
   {
+    id: "q-burdette",
     name: "Q Burdette",
     tribe: [
       "Vatu",
@@ -335,6 +351,7 @@ export const castData = [
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_0,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbcpgv7qrngg8yarh.jpg",
   },
   {
+    id: "tiffany-ervin",
     name: "Tiffany Ervin",
     tribe: [
       "Kalo",
@@ -354,6 +371,7 @@ export const castData = [
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_0,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbcyg8ewdk8asekq5.jpg",
   },
   {
+    id: "charlie-davis",
     name: "Charlie Davis",
     tribe: [
       "Kalo",
@@ -373,6 +391,7 @@ export const castData = [
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_0,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbbete4cdr38y67bq.jpg",
   },
   {
+    id: "genevieve-mushaluk",
     name: "Genevieve Mushaluk",
     tribe: [
       "Vatu",
@@ -392,6 +411,7 @@ export const castData = [
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_0,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbc2nqtywch35ckfa.jpg",
   },
   {
+    id: "kamilla-karthigesu",
     name: "Kamilla Karthigesu",
     tribe: [
       "Kalo",
@@ -411,6 +431,7 @@ export const castData = [
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_0,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbcam24z4kyy60a3f.jpg",
   },
   {
+    id: "kyle-fraser",
     name: "Kyle Fraser",
     tribe: [
       "Vatu",
@@ -430,6 +451,7 @@ export const castData = [
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_158,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbcc9818tdf6denz5.jpg",
   },
   {
+    id: "joe-hunter",
     name: "Joe Hunter",
     tribe: [
       "Cila",
@@ -449,6 +471,7 @@ export const castData = [
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_189,w_2000,h_1125/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbc886bzp0p3kcdjx.jpg",
   },
   {
+    id: "rizo-velovic",
     name: "Rizo Velovic",
     tribe: [
       "Vatu",
@@ -468,6 +491,7 @@ export const castData = [
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_64,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbcv3a8f373fhnyb6.jpg",
   },
   {
+    id: "savannah-louie",
     name: "Savannah Louie",
     tribe: [
       "Cila",
@@ -491,7 +515,7 @@ export const castData = [
 export type SeasonGroup = {
   season: number;
   subtitle: string;
-  players: { name: string; photo: string; tribe: string }[];
+  players: { id: string; name: string; photo: string; tribe: string }[];
 };
 
 /* Mid-century palette: warm creams, terracotta, olive, mustard, with bold black strokes */
