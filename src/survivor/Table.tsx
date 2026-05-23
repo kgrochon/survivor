@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import {
   type SeasonGroup,
   castData,
+  currentTribe,
   eraStyles,
   getEra,
   palette,
@@ -63,7 +64,7 @@ export default function Table({ showSpoilers }: TableProps) {
         map.get(s.season)!.players.set(player.name, {
           id: player.id,
           photo: player.photo,
-          tribe: player.tribe[player.tribe.length - 1],
+          tribe: currentTribe(player.tribeJourney),
         });
       });
     });

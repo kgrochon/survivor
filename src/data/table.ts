@@ -7,36 +7,55 @@ export interface PriorSeason {
   placement: number;
 }
 
+/**
+ * A point in a player's Season-50 journey where their tribe assignment
+ * starts. The first entry is the starting tribe (`fromEpisode: 1`); later
+ * entries record swaps and the merge.
+ */
+export interface TribeAssignment {
+  fromEpisode: number;
+  tribe: TribeName;
+}
+
 export interface CastMember {
   /** Stable kebab-case slug used to link records (e.g. `eliminated[i].id`). */
   id: string;
   name: string;
   /** Cropped square portrait, currently hot-linked from a third-party CDN. */
   photo: string;
-  /**
-   * One entry per episode of Season 50 (currently 11 slots). Step 3 of the
-   * data refactor will replace this with an event-encoded journey.
-   */
-  tribe: TribeName[];
+  /** Season-50 tribe events, ordered earliest first. Must contain at least one entry. */
+  tribeJourney: TribeAssignment[];
   seasons: PriorSeason[];
+}
+
+/** The player's current tribe (the most recent event in their journey). */
+export function currentTribe(journey: TribeAssignment[]): TribeName {
+  return journey[journey.length - 1].tribe;
+}
+
+/**
+ * Tribe the player was on as of `episode`. Uses the latest event whose
+ * `fromEpisode` is `<= episode`; falls back to the starting tribe.
+ */
+export function tribeAtEpisode(
+  journey: TribeAssignment[],
+  episode: number,
+): TribeName {
+  let result = journey[0].tribe;
+  for (const event of journey) {
+    if (event.fromEpisode <= episode) result = event.tribe;
+    else break;
+  }
+  return result;
 }
 
 export const castData: CastMember[] = [
   {
     id: "jenna-lewis-dougherty",
     name: "Jenna Lewis-Dougherty",
-    tribe: [
-      "Cila",
-      "Cila",
-      "Cila",
-      "Cila",
-      "Cila",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
+    tribeJourney: [
+      { fromEpisode: 1, tribe: "Cila" },
+      { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [
       { season: 1, placement: 8 },
@@ -48,18 +67,10 @@ export const castData: CastMember[] = [
   {
     id: "colby-donaldson",
     name: "Colby Donaldson",
-    tribe: [
-      "Vatu",
-      "Vatu",
-      "Kalo",
-      "Kalo",
-      "Kalo",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
+    tribeJourney: [
+      { fromEpisode: 1, tribe: "Vatu" },
+      { fromEpisode: 3, tribe: "Kalo" },
+      { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [
       { season: 2, placement: 2 },
@@ -72,18 +83,9 @@ export const castData: CastMember[] = [
   {
     id: "stephenie-lagrossa-kendrick",
     name: "Stephenie LaGrossa Kendrick",
-    tribe: [
-      "Vatu",
-      "Vatu",
-      "Vatu",
-      "Vatu",
-      "Vatu",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
+    tribeJourney: [
+      { fromEpisode: 1, tribe: "Vatu" },
+      { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [
       { season: 10, placement: 7 },
@@ -96,18 +98,9 @@ export const castData: CastMember[] = [
   {
     id: "cirie-fields",
     name: "Cirie Fields",
-    tribe: [
-      "Cila",
-      "Cila",
-      "Cila",
-      "Cila",
-      "Cila",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
+    tribeJourney: [
+      { fromEpisode: 1, tribe: "Cila" },
+      { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [
       { season: 12, placement: 4 },
@@ -121,18 +114,10 @@ export const castData: CastMember[] = [
   {
     id: "ozzy-lusth",
     name: "Ozzy Lusth",
-    tribe: [
-      "Cila",
-      "Cila",
-      "Vatu",
-      "Vatu",
-      "Vatu",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
+    tribeJourney: [
+      { fromEpisode: 1, tribe: "Cila" },
+      { fromEpisode: 3, tribe: "Vatu" },
+      { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [
       { season: 13, placement: 2 },
@@ -146,18 +131,9 @@ export const castData: CastMember[] = [
   {
     id: "coach-wade",
     name: "Coach Wade",
-    tribe: [
-      "Kalo",
-      "Kalo",
-      "Kalo",
-      "Kalo",
-      "Kalo",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
+    tribeJourney: [
+      { fromEpisode: 1, tribe: "Kalo" },
+      { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [
       { season: 18, placement: 5 },
@@ -170,18 +146,10 @@ export const castData: CastMember[] = [
   {
     id: "aubry-bracco",
     name: "Aubry Bracco",
-    tribe: [
-      "Vatu",
-      "Vatu",
-      "Kalo",
-      "Kalo",
-      "Kalo",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
+    tribeJourney: [
+      { fromEpisode: 1, tribe: "Vatu" },
+      { fromEpisode: 3, tribe: "Kalo" },
+      { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [
       { season: 32, placement: 2 },
@@ -194,18 +162,9 @@ export const castData: CastMember[] = [
   {
     id: "chrissy-hofbeck",
     name: "Chrissy Hofbeck",
-    tribe: [
-      "Kalo",
-      "Kalo",
-      "Kalo",
-      "Kalo",
-      "Kalo",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
+    tribeJourney: [
+      { fromEpisode: 1, tribe: "Kalo" },
+      { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [{ season: 35, placement: 2 }],
     photo:
@@ -214,18 +173,10 @@ export const castData: CastMember[] = [
   {
     id: "christian-hubicki",
     name: "Christian Hubicki",
-    tribe: [
-      "Cila",
-      "Cila",
-      "Vatu",
-      "Vatu",
-      "Vatu",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
+    tribeJourney: [
+      { fromEpisode: 1, tribe: "Cila" },
+      { fromEpisode: 3, tribe: "Vatu" },
+      { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [{ season: 37, placement: 7 }],
     photo:
@@ -234,18 +185,9 @@ export const castData: CastMember[] = [
   {
     id: "angelina-keeley",
     name: "Angelina Keeley",
-    tribe: [
-      "Vatu",
-      "Vatu",
-      "Vatu",
-      "Vatu",
-      "Vatu",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
+    tribeJourney: [
+      { fromEpisode: 1, tribe: "Vatu" },
+      { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [{ season: 37, placement: 3 }],
     photo:
@@ -254,18 +196,10 @@ export const castData: CastMember[] = [
   {
     id: "mike-white",
     name: "Mike White",
-    tribe: [
-      "Kalo",
-      "Kalo",
-      "Vatu",
-      "Vatu",
-      "Vatu",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
+    tribeJourney: [
+      { fromEpisode: 1, tribe: "Kalo" },
+      { fromEpisode: 3, tribe: "Vatu" },
+      { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [{ season: 37, placement: 2 }],
     photo:
@@ -274,18 +208,9 @@ export const castData: CastMember[] = [
   {
     id: "rick-devens",
     name: "Rick Devens",
-    tribe: [
-      "Cila",
-      "Cila",
-      "Cila",
-      "Cila",
-      "Cila",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
+    tribeJourney: [
+      { fromEpisode: 1, tribe: "Cila" },
+      { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [{ season: 38, placement: 4 }],
     photo:
@@ -294,18 +219,10 @@ export const castData: CastMember[] = [
   {
     id: "jonathan-young",
     name: "Jonathan Young",
-    tribe: [
-      "Kalo",
-      "Kalo",
-      "Cila",
-      "Cila",
-      "Cila",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
+    tribeJourney: [
+      { fromEpisode: 1, tribe: "Kalo" },
+      { fromEpisode: 3, tribe: "Cila" },
+      { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [{ season: 42, placement: 4 }],
     photo:
@@ -314,18 +231,10 @@ export const castData: CastMember[] = [
   {
     id: "dee-valladares",
     name: "Dee Valladares",
-    tribe: [
-      "Kalo",
-      "Kalo",
-      "Cila",
-      "Cila",
-      "Cila",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
+    tribeJourney: [
+      { fromEpisode: 1, tribe: "Kalo" },
+      { fromEpisode: 3, tribe: "Cila" },
+      { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [{ season: 45, placement: 1 }],
     photo:
@@ -334,18 +243,10 @@ export const castData: CastMember[] = [
   {
     id: "emily-flippen",
     name: "Emily Flippen",
-    tribe: [
-      "Cila",
-      "Cila",
-      "Vatu",
-      "Vatu",
-      "Vatu",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
+    tribeJourney: [
+      { fromEpisode: 1, tribe: "Cila" },
+      { fromEpisode: 3, tribe: "Vatu" },
+      { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [{ season: 45, placement: 7 }],
     photo:
@@ -354,18 +255,9 @@ export const castData: CastMember[] = [
   {
     id: "q-burdette",
     name: "Q Burdette",
-    tribe: [
-      "Vatu",
-      "Vatu",
-      "Vatu",
-      "Vatu",
-      "Vatu",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
+    tribeJourney: [
+      { fromEpisode: 1, tribe: "Vatu" },
+      { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [{ season: 46, placement: 6 }],
     photo:
@@ -374,18 +266,9 @@ export const castData: CastMember[] = [
   {
     id: "tiffany-ervin",
     name: "Tiffany Ervin",
-    tribe: [
-      "Kalo",
-      "Kalo",
-      "Kalo",
-      "Kalo",
-      "Kalo",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
+    tribeJourney: [
+      { fromEpisode: 1, tribe: "Kalo" },
+      { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [{ season: 46, placement: 8 }],
     photo:
@@ -394,18 +277,10 @@ export const castData: CastMember[] = [
   {
     id: "charlie-davis",
     name: "Charlie Davis",
-    tribe: [
-      "Kalo",
-      "Kalo",
-      "Cila",
-      "Cila",
-      "Cila",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
+    tribeJourney: [
+      { fromEpisode: 1, tribe: "Kalo" },
+      { fromEpisode: 3, tribe: "Cila" },
+      { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [{ season: 46, placement: 2 }],
     photo:
@@ -414,18 +289,10 @@ export const castData: CastMember[] = [
   {
     id: "genevieve-mushaluk",
     name: "Genevieve Mushaluk",
-    tribe: [
-      "Vatu",
-      "Vatu",
-      "Kalo",
-      "Kalo",
-      "Kalo",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
+    tribeJourney: [
+      { fromEpisode: 1, tribe: "Vatu" },
+      { fromEpisode: 3, tribe: "Kalo" },
+      { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [{ season: 47, placement: 5 }],
     photo:
@@ -434,18 +301,10 @@ export const castData: CastMember[] = [
   {
     id: "kamilla-karthigesu",
     name: "Kamilla Karthigesu",
-    tribe: [
-      "Kalo",
-      "Kalo",
-      "Cila",
-      "Cila",
-      "Cila",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
+    tribeJourney: [
+      { fromEpisode: 1, tribe: "Kalo" },
+      { fromEpisode: 3, tribe: "Cila" },
+      { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [{ season: 48, placement: 4 }],
     photo:
@@ -454,18 +313,9 @@ export const castData: CastMember[] = [
   {
     id: "kyle-fraser",
     name: "Kyle Fraser",
-    tribe: [
-      "Vatu",
-      "Vatu",
-      "Vatu",
-      "Vatu",
-      "Vatu",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
+    tribeJourney: [
+      { fromEpisode: 1, tribe: "Vatu" },
+      { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [{ season: 48, placement: 1 }],
     photo:
@@ -474,18 +324,10 @@ export const castData: CastMember[] = [
   {
     id: "joe-hunter",
     name: "Joe Hunter",
-    tribe: [
-      "Cila",
-      "Cila",
-      "Kalo",
-      "Kalo",
-      "Kalo",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
+    tribeJourney: [
+      { fromEpisode: 1, tribe: "Cila" },
+      { fromEpisode: 3, tribe: "Kalo" },
+      { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [{ season: 48, placement: 3 }],
     photo:
@@ -494,18 +336,10 @@ export const castData: CastMember[] = [
   {
     id: "rizo-velovic",
     name: "Rizo Velovic",
-    tribe: [
-      "Vatu",
-      "Vatu",
-      "Cila",
-      "Cila",
-      "Cila",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
+    tribeJourney: [
+      { fromEpisode: 1, tribe: "Vatu" },
+      { fromEpisode: 3, tribe: "Cila" },
+      { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [{ season: 49, placement: 4 }],
     photo:
@@ -514,18 +348,9 @@ export const castData: CastMember[] = [
   {
     id: "savannah-louie",
     name: "Savannah Louie",
-    tribe: [
-      "Cila",
-      "Cila",
-      "Cila",
-      "Cila",
-      "Cila",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
-      "Merge",
+    tribeJourney: [
+      { fromEpisode: 1, tribe: "Cila" },
+      { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [{ season: 49, placement: 1 }],
     photo:

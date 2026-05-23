@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { castData, palette } from "../data/table";
+import { castData, currentTribe, palette } from "../data/table";
 import { findEliminationRecord } from "../data/connections";
 import { handleImageError } from "./imageFallback";
 import { readableOnBackground } from "./colorUtils";
@@ -121,9 +121,9 @@ export default function PlayerConnections({
           {displayPlayers.map((player) => {
             const tribeColor =
               palette[
-                player.tribe[
-                  player.tribe.length - 1
-                ].toLowerCase() as keyof typeof palette
+                currentTribe(
+                  player.tribeJourney,
+                ).toLowerCase() as keyof typeof palette
               ] || palette.ink;
             const isActive = activePlayer === player.name;
             const isConnected = activeConnections?.has(player.name);

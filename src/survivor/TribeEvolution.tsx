@@ -1,5 +1,12 @@
 import { useMemo } from "react";
-import { castData, palette, tribeColors } from "../data/table";
+import {
+  type TribeAssignment,
+  castData,
+  currentTribe,
+  palette,
+  tribeAtEpisode,
+  tribeColors,
+} from "../data/table";
 import { findEliminationRecord } from "../data/connections";
 import { handleImageError } from "./imageFallback";
 import { readableOnBackground } from "./colorUtils";
@@ -8,7 +15,7 @@ import "./styles/tribeevolution.css";
 interface JourneyCard {
   name: string;
   photo: string;
-  tribes: string[];
+  journey: TribeAssignment[];
   eliminated?: number;
   eliminationType?: "tribalCouncil" | "injury";
 }
@@ -21,13 +28,6 @@ function colorForTribeName(tribeName: string) {
   );
 }
 
-function tribeAtEpisode(tribes: string[], episode: number | undefined) {
-  if (!episode || episode < 1) return tribes[tribes.length - 1];
-  const idx = episode - 1;
-  if (idx >= 0 && idx < tribes.length) return tribes[idx];
-  return tribes[tribes.length - 1];
-}
-
 export default function TribeEvolution() {
   const orderedPlayers: JourneyCard[] = useMemo(() => {
     const journeys = castData.map((player) => {
@@ -35,7 +35,7 @@ export default function TribeEvolution() {
       return {
         name: player.name,
         photo: player.photo,
-        tribes: player.tribe,
+        journey: player.tribeJourney,
         eliminated: eliminationRecord?.episode,
         eliminationType: eliminationRecord?.type,
       };
@@ -77,7 +77,9 @@ export default function TribeEvolution() {
 
         <div className="elimination-strip" role="list">
           {orderedPlayers.map((player) => {
-            const tribeName = tribeAtEpisode(player.tribes, player.eliminated);
+            const tribeName = player.eliminated
+              ? tribeAtEpisode(player.journey, player.eliminated)
+              : currentTribe(player.journey);
             const cardBg = colorForTribeName(tribeName);
             const textColor = readableOnBackground(cardBg);
             const mutedColor =
