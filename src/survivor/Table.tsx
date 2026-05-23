@@ -14,6 +14,30 @@ type TableProps = {
   showSpoilers: boolean;
 };
 
+// Build the era legend from the data so labels reflect the actual seasons
+// present rather than a hardcoded range that drifts from `getEra`.
+const seasonsByEra = new Map<string, number[]>();
+castData.forEach((p) =>
+  p.seasons.forEach((s) => {
+    const era = getEra(s.season);
+    const list = seasonsByEra.get(era);
+    if (list) list.push(s.season);
+    else seasonsByEra.set(era, [s.season]);
+  }),
+);
+const eras = (Object.keys(eraStyles) as Array<keyof typeof eraStyles>).map(
+  (key) => {
+    const seasons = seasonsByEra.get(key) ?? [];
+    if (seasons.length === 0) {
+      return { key, label: eraStyles[key].label };
+    }
+    const min = Math.min(...seasons);
+    const max = Math.max(...seasons);
+    const range = min === max ? `${min}` : `${min}–${max}`;
+    return { key, label: `${eraStyles[key].label} (${range})` };
+  },
+);
+
 export default function Table({ showSpoilers }: TableProps) {
   const [hoveredPlayer, setHoveredPlayer] = useState<string | null>(null);
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
@@ -100,13 +124,6 @@ export default function Table({ showSpoilers }: TableProps) {
       setHoveredPlayer(null);
     }
   };
-
-  const eras = [
-    { key: "classic", label: "Classic Era (1–20)" },
-    { key: "middle", label: "Mid Era (23–34)" },
-    { key: "modern", label: "Modern Era (35–42)" },
-    { key: "new", label: "New Era (45–49)" },
-  ] as const;
 
   return (
     <div className="survivor-table-container" onClick={handleContainerClick}>

@@ -6,9 +6,7 @@
     url("../assets/fonts/apfel-grotezk-main/fonts/ApfelGrotezk-Brukt.woff2")
       format("woff2"),
     url("../assets/fonts/apfel-grotezk-main/fonts/ApfelGrotezk-Brukt.woff")
-      format("woff"),
-    url("../assets/fonts/apfel-grotezk-main/fonts/ApfelGrotezk-Brukt.otf")
-      format("opentype");
+      format("woff");
   font-weight: 300;
   font-style: normal;
   font-display: swap;
@@ -20,9 +18,7 @@
     url("../assets/fonts/apfel-grotezk-main/fonts/ApfelGrotezk-Regular.woff2")
       format("woff2"),
     url("../assets/fonts/apfel-grotezk-main/fonts/ApfelGrotezk-Regular.woff")
-      format("woff"),
-    url("../assets/fonts/apfel-grotezk-main/fonts/ApfelGrotezk-Regular.otf")
-      format("opentype");
+      format("woff");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -34,9 +30,7 @@
     url("../assets/fonts/apfel-grotezk-main/fonts/ApfelGrotezk-Mittel.woff2")
       format("woff2"),
     url("../assets/fonts/apfel-grotezk-main/fonts/ApfelGrotezk-Mittel.woff")
-      format("woff"),
-    url("../assets/fonts/apfel-grotezk-main/fonts/ApfelGrotezk-Mittel.otf")
-      format("opentype");
+      format("woff");
   font-weight: 500;
   font-style: normal;
   font-display: swap;
@@ -48,9 +42,7 @@
     url("../assets/fonts/apfel-grotezk-main/fonts/ApfelGrotezk-Satt.woff2")
       format("woff2"),
     url("../assets/fonts/apfel-grotezk-main/fonts/ApfelGrotezk-Satt.woff")
-      format("woff"),
-    url("../assets/fonts/apfel-grotezk-main/fonts/ApfelGrotezk-Satt.otf")
-      format("opentype");
+      format("woff");
   font-weight: 600;
   font-style: normal;
   font-display: swap;
@@ -62,9 +54,7 @@
     url("../assets/fonts/apfel-grotezk-main/fonts/ApfelGrotezk-Fett.woff2")
       format("woff2"),
     url("../assets/fonts/apfel-grotezk-main/fonts/ApfelGrotezk-Fett.woff")
-      format("woff"),
-    url("../assets/fonts/apfel-grotezk-main/fonts/ApfelGrotezk-Fett.otf")
-      format("opentype");
+      format("woff");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -145,7 +135,7 @@ button {
   font-family: inherit;
 }
 
-.notes {
+.survivor-app {
   min-height: 100vh;
   height: fit-content;
 }
