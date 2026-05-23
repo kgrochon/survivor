@@ -7,6 +7,7 @@ import {
   palette,
 } from "../data/table";
 import { findEliminationRecord } from "../data/connections";
+import { handleImageError } from "./imageFallback";
 import "./styles/table.css";
 
 type TableProps = {
@@ -224,6 +225,10 @@ export default function Table({ showSpoilers }: TableProps) {
                       <div
                         key={player.name}
                         className={`player-card ${isPlayerDimmed ? "dimmed" : ""} ${isEliminated ? "eliminated" : ""} ${eliminationType === "injury" ? "injury" : ""}`}
+                        role="button"
+                        tabIndex={0}
+                        aria-pressed={selectedPlayer === player.name}
+                        aria-label={`${player.name}, view seasons`}
                         onMouseEnter={() =>
                           !selectedPlayer && setHoveredPlayer(player.name)
                         }
@@ -233,6 +238,13 @@ export default function Table({ showSpoilers }: TableProps) {
                         onClick={(e) => {
                           e.stopPropagation();
                           handlePlayerClick(player.name);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handlePlayerClick(player.name);
+                          }
                         }}
                         style={{
                           backgroundColor: tribeColor,
@@ -244,6 +256,9 @@ export default function Table({ showSpoilers }: TableProps) {
                             src={player.photo}
                             alt={player.name}
                             className="player-photo"
+                            loading="lazy"
+                            decoding="async"
+                            onError={handleImageError}
                           />
                           {/* Elimination badge */}
                           {isEliminated && (

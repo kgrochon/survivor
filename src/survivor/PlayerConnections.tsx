@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { castData, palette } from "../data/table";
 import { findEliminationRecord } from "../data/connections";
+import { handleImageError } from "./imageFallback";
 import "./styles/connections.css";
 
 function parseColorToRgb(color: string): [number, number, number] | null {
@@ -198,9 +199,20 @@ export default function PlayerConnections({
               <div
                 key={player.name}
                 className={`connection-card ${isDimmed ? "dimmed" : ""} ${isActive ? "active" : ""} ${isConnected ? "connected" : ""} ${isEliminated ? "eliminated" : ""} ${eliminationType === "injury" ? "injury" : ""}`}
+                role="button"
+                tabIndex={0}
+                aria-pressed={selectedPlayer === player.name}
+                aria-label={`${player.name}, view shared seasons`}
                 onClick={(e) => {
                   e.stopPropagation();
                   handlePlayerClick(player.name);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handlePlayerClick(player.name);
+                  }
                 }}
                 onMouseEnter={() =>
                   !selectedPlayer && setHoveredPlayer(player.name)
@@ -216,6 +228,9 @@ export default function PlayerConnections({
                     src={player.photo}
                     alt={player.name}
                     className="connection-photo"
+                    loading="lazy"
+                    decoding="async"
+                    onError={handleImageError}
                   />
                   {isEliminated && (
                     <div className="elimination-badge-conn">

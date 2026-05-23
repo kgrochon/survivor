@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { castData, palette, tribeColors } from "../data/table";
 import { findEliminationRecord } from "../data/connections";
+import { handleImageError } from "./imageFallback";
 import "./styles/tribeevolution.css";
 
 interface JourneyCard {
@@ -141,6 +142,9 @@ export default function TribeEvolution() {
                     src={player.photo}
                     alt={player.name}
                     className="elimination-card-photo"
+                    loading="lazy"
+                    decoding="async"
+                    onError={handleImageError}
                   />
                 </div>
                 <div className="elimination-card-name">

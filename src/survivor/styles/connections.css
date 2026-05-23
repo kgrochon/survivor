@@ -93,6 +93,11 @@
   box-shadow: var(--shadow-md);
 }
 
+.connection-card:focus-visible {
+  outline: 3px solid var(--color-orange);
+  outline-offset: 2px;
+}
+
 .connection-card.active {
   border-width: 3px;
   box-shadow: var(--shadow-lg);

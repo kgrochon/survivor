@@ -201,6 +201,11 @@
   transform: scale(1.05);
 }
 
+.player-card:focus-visible {
+  outline: 3px solid var(--color-orange);
+  outline-offset: 2px;
+}
+
 .player-card.dimmed {
   opacity: 0.5;
 }
