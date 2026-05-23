@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import {
   type SeasonGroup,
   castData,
@@ -18,12 +18,6 @@ export default function Table({ showSpoilers }: TableProps) {
   const [hoveredPlayer, setHoveredPlayer] = useState<string | null>(null);
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   const [showActiveOnly, setShowActiveOnly] = useState(false);
-
-  useEffect(() => {
-    if (!showSpoilers) {
-      setShowActiveOnly(false);
-    }
-  }, [showSpoilers]);
 
   const seasonGroups: SeasonGroup[] = useMemo(() => {
     const map = new Map<
@@ -77,21 +71,20 @@ export default function Table({ showSpoilers }: TableProps) {
       .filter((group) => group.players.length > 0);
   }, [seasonGroups, showSpoilers, showActiveOnly]);
 
-  const activePlayer = selectedPlayer || hoveredPlayer;
+  // Derive the active player — null it out if the underlying player has
+  // been filtered out of the current view, so we don't need a cleanup
+  // effect to chase stale selections.
+  const rawActivePlayer = selectedPlayer || hoveredPlayer;
+  const activePlayer =
+    rawActivePlayer &&
+    displaySeasonGroups.some((g) =>
+      g.players.some((p) => p.name === rawActivePlayer),
+    )
+      ? rawActivePlayer
+      : null;
   const highlightedSeasons = activePlayer
     ? new Set(playerSeasons.get(activePlayer) || [])
     : new Set<number>();
-
-  useEffect(() => {
-    if (!activePlayer) return;
-    const visible = displaySeasonGroups.some((g) =>
-      g.players.some((p) => p.name === activePlayer),
-    );
-    if (!visible) {
-      setSelectedPlayer(null);
-      setHoveredPlayer(null);
-    }
-  }, [activePlayer, displaySeasonGroups]);
 
   const handlePlayerClick = (playerName: string) => {
     if (selectedPlayer === playerName) {

@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { castData, palette } from "../data/table";
 import { findEliminationRecord } from "../data/connections";
 import { handleImageError } from "./imageFallback";
@@ -49,12 +49,6 @@ export default function PlayerConnections({
   const [hoveredPlayer, setHoveredPlayer] = useState<string | null>(null);
   const [showActiveOnly, setShowActiveOnly] = useState(false);
 
-  useEffect(() => {
-    if (!showSpoilers) {
-      setShowActiveOnly(false);
-    }
-  }, [showSpoilers]);
-
   // Calculate connections between players (shared seasons)
   const connections = useMemo(() => {
     const connectionMap = new Map<string, Map<string, number[]>>();
@@ -81,8 +75,6 @@ export default function PlayerConnections({
     return connectionMap;
   }, []);
 
-  const activePlayer = selectedPlayer || hoveredPlayer;
-
   const handlePlayerClick = (playerName: string) => {
     if (selectedPlayer === playerName) {
       setSelectedPlayer(null);
@@ -95,9 +87,6 @@ export default function PlayerConnections({
     setSelectedPlayer(null);
     setHoveredPlayer(null);
   };
-
-  // Get connections for active player
-  const activeConnections = activePlayer ? connections.get(activePlayer) : null;
 
   // Sort players by number of connections
   const sortedPlayers = useMemo(() => {
@@ -113,20 +102,15 @@ export default function PlayerConnections({
     return sortedPlayers.filter((p) => !findEliminationRecord(p.id));
   }, [sortedPlayers, showActiveOnly, showSpoilers]);
 
-  useEffect(() => {
-    if (
-      selectedPlayer &&
-      !displayPlayers.some((p) => p.name === selectedPlayer)
-    ) {
-      setSelectedPlayer(null);
-    }
-    if (
-      hoveredPlayer &&
-      !displayPlayers.some((p) => p.name === hoveredPlayer)
-    ) {
-      setHoveredPlayer(null);
-    }
-  }, [displayPlayers, selectedPlayer, hoveredPlayer]);
+  // Derive the active player — null it out if the underlying player has
+  // been filtered out of the current view, so we don't need a cleanup
+  // effect to chase stale selections.
+  const rawActivePlayer = selectedPlayer || hoveredPlayer;
+  const activePlayer =
+    rawActivePlayer && displayPlayers.some((p) => p.name === rawActivePlayer)
+      ? rawActivePlayer
+      : null;
+  const activeConnections = activePlayer ? connections.get(activePlayer) : null;
 
   return (
     <div className="connections-container" onClick={handleContainerClick}>
