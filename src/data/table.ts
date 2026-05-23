@@ -1,4 +1,28 @@
-export const castData = [
+/** The four valid tribes for Season 50 — `Merge` is a phase sentinel for now. */
+export type TribeName = "Cila" | "Vatu" | "Kalo" | "Merge";
+
+/** A previous Survivor season a returning player competed on. */
+export interface PriorSeason {
+  season: number;
+  subtitle: string;
+  placement: number;
+}
+
+export interface CastMember {
+  /** Stable kebab-case slug used to link records (e.g. `eliminated[i].id`). */
+  id: string;
+  name: string;
+  /** Cropped square portrait, currently hot-linked from a third-party CDN. */
+  photo: string;
+  /**
+   * One entry per episode of Season 50 (currently 11 slots). Step 3 of the
+   * data refactor will replace this with an event-encoded journey.
+   */
+  tribe: TribeName[];
+  seasons: PriorSeason[];
+}
+
+export const castData: CastMember[] = [
   {
     id: "jenna-lewis-dougherty",
     name: "Jenna Lewis-Dougherty",
