@@ -4,7 +4,7 @@ export interface Eliminated {
   /** Stable id matching a `castData` member. */
   id: string;
   episode: number;
-  type: "tribalCouncil" | "injury";
+  type: "tribalCouncil" | "injury" | "fire" | "jury";
 }
 
 export const eliminated: Eliminated[] = [
@@ -27,6 +27,10 @@ export const eliminated: Eliminated[] = [
   { id: "ozzy-lusth", episode: 11, type: "tribalCouncil" },
   { id: "rick-devens", episode: 12, type: "tribalCouncil" },
   { id: "cirie-fields", episode: 12, type: "tribalCouncil" },
+  { id: "tiffany-ervin", episode: 13, type: "tribalCouncil" },
+  { id: "rizo-velovic", episode: 13, type: "fire" },
+  { id: "joe-hunter", episode: 13, type: "jury" }, 
+  { id: "jonathan-young", episode: 13, type: "jury"}
 ];
 
 const eliminatedById = new Map(eliminated.map((record) => [record.id, record]));
