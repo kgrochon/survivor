@@ -3,17 +3,17 @@ import { castData, currentTribe } from "../data/cast";
 import { TRIBE_COLORS } from "../data/tribes";
 import { PALETTE } from "../theme/palette";
 import { findEliminationRecord } from "../data/connections";
-import { handleImageError } from "./imageFallback";
-import { readableOnBackground } from "./colorUtils";
+import { handleImageError } from "../lib/imageFallback";
+import { readableOnBackground } from "../lib/colorUtils";
 import "./styles/connections.css";
 
-type PlayerConnectionsProps = {
+type ConnectionsViewProps = {
   showSpoilers: boolean;
 };
 
-export default function PlayerConnections({
+export default function ConnectionsView({
   showSpoilers,
-}: PlayerConnectionsProps) {
+}: ConnectionsViewProps) {
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   const [hoveredPlayer, setHoveredPlayer] = useState<string | null>(null);
   const [showActiveOnly, setShowActiveOnly] = useState(false);

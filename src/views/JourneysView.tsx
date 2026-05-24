@@ -7,9 +7,9 @@ import {
 } from "../data/cast";
 import { TRIBE_COLORS, TRIBES } from "../data/tribes";
 import { findEliminationRecord } from "../data/connections";
-import { handleImageError } from "./imageFallback";
-import { readableOnBackground } from "./colorUtils";
-import "./styles/tribeevolution.css";
+import { handleImageError } from "../lib/imageFallback";
+import { readableOnBackground } from "../lib/colorUtils";
+import "./styles/journeys.css";
 
 interface JourneyCard {
   name: string;
@@ -19,7 +19,7 @@ interface JourneyCard {
   eliminationType?: "tribalCouncil" | "injury";
 }
 
-export default function TribeEvolution() {
+export default function JourneysView() {
   const orderedPlayers: JourneyCard[] = useMemo(() => {
     const journeys = castData.map((player) => {
       const eliminationRecord = findEliminationRecord(player.id);

@@ -1,7 +1,7 @@
 import { useState } from "react";
-import Table from "./survivor/Table";
-import PlayerConnections from "./survivor/PlayerConnections";
-import TribeEvolution from "./survivor/TribeEvolution";
+import SeasonsView from "./views/SeasonsView";
+import ConnectionsView from "./views/ConnectionsView";
+import JourneysView from "./views/JourneysView";
 
 type ChartView = "seasons" | "connections" | "evolution";
 
@@ -10,7 +10,7 @@ export default function SurvivorPage() {
   const [spoilersEnabled, setSpoilersEnabled] = useState(false);
 
   return (
-    <div className="notes">
+    <div className="survivor-app">
       <div className="survivor-header">
         <h1 className="survivor-title">SURVIVOR</h1>
         <div className="survivor-subtitle">
@@ -75,11 +75,13 @@ export default function SurvivorPage() {
       </div>
 
       <div className="survivor-content">
-        {activeChart === "seasons" && <Table showSpoilers={spoilersEnabled} />}
-        {activeChart === "connections" && (
-          <PlayerConnections showSpoilers={spoilersEnabled} />
+        {activeChart === "seasons" && (
+          <SeasonsView showSpoilers={spoilersEnabled} />
         )}
-        {activeChart === "evolution" && spoilersEnabled && <TribeEvolution />}
+        {activeChart === "connections" && (
+          <ConnectionsView showSpoilers={spoilersEnabled} />
+        )}
+        {activeChart === "evolution" && spoilersEnabled && <JourneysView />}
       </div>
     </div>
   );

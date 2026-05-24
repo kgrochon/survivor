@@ -5,8 +5,8 @@ import { getSeasonSubtitle } from "../data/seasons";
 import { TRIBE_COLORS, type TribeName } from "../data/tribes";
 import { ERA_STYLES, getEra } from "../theme/eras";
 import { PALETTE } from "../theme/palette";
-import { handleImageError } from "./imageFallback";
-import "./styles/table.css";
+import { handleImageError } from "../lib/imageFallback";
+import "./styles/seasons.css";
 
 /** View-model: one season block with the players who appeared on it. */
 interface SeasonGroup {
@@ -15,7 +15,7 @@ interface SeasonGroup {
   players: { id: string; name: string; photo: string; tribe: TribeName }[];
 }
 
-type TableProps = {
+type SeasonsViewProps = {
   showSpoilers: boolean;
 };
 
@@ -43,7 +43,7 @@ const eras = (Object.keys(ERA_STYLES) as Array<keyof typeof ERA_STYLES>).map(
   },
 );
 
-export default function Table({ showSpoilers }: TableProps) {
+export default function SeasonsView({ showSpoilers }: SeasonsViewProps) {
   const [hoveredPlayer, setHoveredPlayer] = useState<string | null>(null);
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   const [showActiveOnly, setShowActiveOnly] = useState(false);
