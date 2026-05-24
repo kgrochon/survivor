@@ -1,5 +1,7 @@
 import { useState, useMemo } from "react";
-import { castData, currentTribe, palette } from "../data/table";
+import { castData, currentTribe } from "../data/cast";
+import { TRIBE_COLORS } from "../data/tribes";
+import { PALETTE } from "../theme/palette";
 import { findEliminationRecord } from "../data/connections";
 import { handleImageError } from "./imageFallback";
 import { readableOnBackground } from "./colorUtils";
@@ -120,11 +122,7 @@ export default function PlayerConnections({
         <div className="connections-grid">
           {displayPlayers.map((player) => {
             const tribeColor =
-              palette[
-                currentTribe(
-                  player.tribeJourney,
-                ).toLowerCase() as keyof typeof palette
-              ] || palette.ink;
+              TRIBE_COLORS[currentTribe(player.tribeJourney)] ?? PALETTE.ink;
             const isActive = activePlayer === player.name;
             const isConnected = activeConnections?.has(player.name);
             const isDimmed = activePlayer !== null && !isActive && !isConnected;

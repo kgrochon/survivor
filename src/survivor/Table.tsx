@@ -1,16 +1,19 @@
 import { useState, useMemo } from "react";
-import {
-  type SeasonGroup,
-  castData,
-  currentTribe,
-  eraStyles,
-  getEra,
-  palette,
-} from "../data/table";
+import { castData, currentTribe } from "../data/cast";
 import { findEliminationRecord } from "../data/connections";
 import { getSeasonSubtitle } from "../data/seasons";
+import { TRIBE_COLORS, type TribeName } from "../data/tribes";
+import { ERA_STYLES, getEra } from "../theme/eras";
+import { PALETTE } from "../theme/palette";
 import { handleImageError } from "./imageFallback";
 import "./styles/table.css";
+
+/** View-model: one season block with the players who appeared on it. */
+interface SeasonGroup {
+  season: number;
+  subtitle: string;
+  players: { id: string; name: string; photo: string; tribe: TribeName }[];
+}
 
 type TableProps = {
   showSpoilers: boolean;
@@ -27,16 +30,16 @@ castData.forEach((p) =>
     else seasonsByEra.set(era, [s.season]);
   }),
 );
-const eras = (Object.keys(eraStyles) as Array<keyof typeof eraStyles>).map(
+const eras = (Object.keys(ERA_STYLES) as Array<keyof typeof ERA_STYLES>).map(
   (key) => {
     const seasons = seasonsByEra.get(key) ?? [];
     if (seasons.length === 0) {
-      return { key, label: eraStyles[key].label };
+      return { key, label: ERA_STYLES[key].label };
     }
     const min = Math.min(...seasons);
     const max = Math.max(...seasons);
     const range = min === max ? `${min}` : `${min}–${max}`;
-    return { key, label: `${eraStyles[key].label} (${range})` };
+    return { key, label: `${ERA_STYLES[key].label} (${range})` };
   },
 );
 
@@ -50,7 +53,7 @@ export default function Table({ showSpoilers }: TableProps) {
       number,
       {
         subtitle: string;
-        players: Map<string, { id: string; photo: string; tribe: string }>;
+        players: Map<string, { id: string; photo: string; tribe: TribeName }>;
       }
     >();
     castData.forEach((player) => {
@@ -177,7 +180,7 @@ export default function Table({ showSpoilers }: TableProps) {
             <div key={e.key} className="era-item">
               <div
                 className="era-dot"
-                style={{ backgroundColor: eraStyles[e.key].color }}
+                style={{ backgroundColor: ERA_STYLES[e.key].color }}
               />
               <span className="era-label">{e.label}</span>
             </div>
@@ -188,7 +191,7 @@ export default function Table({ showSpoilers }: TableProps) {
         <div className="seasons-container">
           {displaySeasonGroups.map((group, i) => {
             const era = getEra(group.season);
-            const style = eraStyles[era];
+            const style = ERA_STYLES[era];
             const isHighlighted = highlightedSeasons.has(group.season);
             const isDimmed = activePlayer !== null && !isHighlighted;
 
@@ -226,9 +229,7 @@ export default function Table({ showSpoilers }: TableProps) {
                       !isThisPlayerActive &&
                       !isHighlighted;
                     const tribeColor =
-                      palette[
-                        player.tribe.toLowerCase() as keyof typeof palette
-                      ] || palette.ink;
+                      TRIBE_COLORS[player.tribe] ?? PALETTE.ink;
 
                     const eliminationRecord = showSpoilers
                       ? findEliminationRecord(player.id)

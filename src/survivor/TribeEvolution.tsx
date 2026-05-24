@@ -3,10 +3,9 @@ import {
   type TribeAssignment,
   castData,
   currentTribe,
-  palette,
   tribeAtEpisode,
-  tribeColors,
-} from "../data/table";
+} from "../data/cast";
+import { TRIBE_COLORS, TRIBES } from "../data/tribes";
 import { findEliminationRecord } from "../data/connections";
 import { handleImageError } from "./imageFallback";
 import { readableOnBackground } from "./colorUtils";
@@ -18,14 +17,6 @@ interface JourneyCard {
   journey: TribeAssignment[];
   eliminated?: number;
   eliminationType?: "tribalCouncil" | "injury";
-}
-
-function colorForTribeName(tribeName: string) {
-  const fromList = tribeColors.find((t) => t.name === tribeName)?.color;
-  if (fromList) return fromList;
-  return (
-    palette[tribeName.toLowerCase() as keyof typeof palette] || palette.warmGray
-  );
 }
 
 export default function TribeEvolution() {
@@ -64,13 +55,13 @@ export default function TribeEvolution() {
         </p>
 
         <div className="evolution-legend">
-          {tribeColors.map((tribe) => (
-            <div key={tribe.name} className="legend-item">
+          {TRIBES.map((tribe) => (
+            <div key={tribe} className="legend-item">
               <div
                 className="legend-color-box"
-                style={{ backgroundColor: tribe.color }}
+                style={{ backgroundColor: TRIBE_COLORS[tribe] }}
               />
-              <span>{tribe.name}</span>
+              <span>{tribe}</span>
             </div>
           ))}
         </div>
@@ -80,7 +71,7 @@ export default function TribeEvolution() {
             const tribeName = player.eliminated
               ? tribeAtEpisode(player.journey, player.eliminated)
               : currentTribe(player.journey);
-            const cardBg = colorForTribeName(tribeName);
+            const cardBg = TRIBE_COLORS[tribeName];
             const textColor = readableOnBackground(cardBg);
             const mutedColor =
               textColor === "#ffffff"

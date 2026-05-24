@@ -1,5 +1,4 @@
-/** The four valid tribes for Season 50 — `Merge` is a phase sentinel for now. */
-export type TribeName = "Cila" | "Vatu" | "Kalo" | "Merge";
+import type { TribeName } from "./tribes";
 
 /** A previous Survivor season a returning player competed on. */
 export interface PriorSeason {
@@ -357,51 +356,3 @@ export const castData: CastMember[] = [
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_100,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbcwej4vgb44q5chq.jpg",
   },
 ];
-
-export type SeasonGroup = {
-  season: number;
-  subtitle: string;
-  players: { id: string; name: string; photo: string; tribe: string }[];
-};
-
-/* Mid-century palette: warm creams, terracotta, olive, mustard, with bold black strokes */
-export const palette = {
-  bg: "#F5EDE0",
-  bgAlt: "#EDE3D1",
-  ink: "#1A1A18",
-  cream: "#FAF6EE",
-  terracotta: "#C1533C",
-  mustard: "#D4982A",
-  olive: "#6dad5a",
-  slate: "#799db5",
-  warmGray: "#8C8578",
-  lightStroke: "#D4CABB",
-  cila: "rgb(234 105 51)",
-  vatu: "rgb(230 19 100)",
-  kalo: "rgb(47 141 126)",
-  merge: "#D4982A",
-};
-
-export const tribeColors = [
-  { name: "Cila", color: palette.cila },
-  { name: "Vatu", color: palette.vatu },
-  { name: "Kalo", color: palette.kalo },
-  { name: "Merge", color: palette.mustard },
-];
-
-export const eraStyles: Record<
-  string,
-  { color: string; label: string; shape: string }
-> = {
-  classic: { color: palette.terracotta, label: "Classic Era", shape: "●" },
-  middle: { color: palette.olive, label: "Mid Era", shape: "◆" },
-  modern: { color: palette.slate, label: "Modern Era", shape: "▲" },
-  new: { color: palette.mustard, label: "New Era", shape: "■" },
-};
-
-export function getEra(season: number) {
-  if (season <= 20) return "classic";
-  if (season <= 34) return "middle";
-  if (season <= 42) return "modern";
-  return "new";
-}

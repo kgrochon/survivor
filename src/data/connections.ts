@@ -1,4 +1,4 @@
-import { castData } from "./table";
+import { castData } from "./cast";
 
 export interface Eliminated {
   /** Stable id matching a `castData` member. */
