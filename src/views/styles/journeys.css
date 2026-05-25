@@ -1,7 +1,7 @@
+/* Elimination strip — sand body, driftwood borders */
+
 .tribe-evolution-container {
   width: 100%;
-  padding: 20px;
-  background: var(--color-bg);
 }
 
 .tribe-evolution-wrapper {
@@ -10,21 +10,13 @@
 }
 
 .evolution-description {
-  text-align: center;
-  font-size: 1.05em;
-  color: var(--color-text);
-  margin-bottom: 24px;
-  max-width: 640px;
-  margin-left: auto;
-  margin-right: auto;
-  line-height: 1.45;
+  display: none;
 }
 
-/* Legend */
 .evolution-legend {
   display: flex;
   justify-content: center;
-  gap: 24px;
+  gap: 10px;
   margin-bottom: 28px;
   flex-wrap: wrap;
 }
@@ -32,21 +24,27 @@
 .evolution-legend .legend-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.95em;
-  font-weight: 500;
+  gap: 10px;
+  padding: 8px 14px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 600;
   color: var(--color-text);
+  box-shadow: var(--shadow-sm);
 }
 
 .legend-color-box {
-  width: 22px;
-  height: 22px;
-  border-radius: 4px;
-  border: 2px solid var(--color-text);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.18);
   flex-shrink: 0;
 }
 
-/* Horizontal elimination strip */
 .elimination-strip {
   display: flex;
   flex-direction: row;
@@ -54,42 +52,64 @@
   gap: 14px;
   overflow-x: auto;
   overflow-y: visible;
-  padding: 12px 8px 20px;
+  padding: 12px 8px 24px;
   scroll-snap-type: x proximity;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-strong) transparent;
+}
+
+.elimination-strip::-webkit-scrollbar {
+  height: 6px;
+}
+
+.elimination-strip::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: 3px;
 }
 
 .elimination-card {
   flex: 0 0 auto;
   width: min(168px, 42vw);
-  min-height: 220px;
-  border: 3px solid var(--color-text);
-  border-radius: 10px;
+  min-height: 230px;
+  border: 2px solid rgba(0, 0, 0, 0.35);
+  border-radius: var(--radius-lg);
   scroll-snap-align: start;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 14px 12px 16px;
-  box-shadow: var(--shadow-sm);
+  padding: 16px 12px 18px;
+  box-shadow: var(--shadow-md);
   transition:
     transform var(--transition-fast),
     box-shadow var(--transition-fast);
 }
 
 .elimination-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.elimination-card.is-winner {
+  border-color: var(--color-torch);
+  box-shadow:
+    var(--shadow-md),
+    var(--shadow-glow-torch);
+}
+
+.elimination-card.is-winner .elimination-card-photo-wrap {
+  border-color: var(--color-torch);
 }
 
 .elimination-card-photo-wrap {
-  width: 100px;
-  height: 100px;
+  width: 96px;
+  height: 96px;
   flex-shrink: 0;
-  border: 2px solid var(--color-text);
-  border-radius: var(--radius-sm);
+  border: 2px solid rgba(0, 0, 0, 0.3);
+  border-radius: var(--radius-md);
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.25);
 }
 
 .elimination-card-photo {
@@ -100,40 +120,38 @@
 }
 
 .elimination-card-name {
-  margin-top: 12px;
-  font-size: 1rem;
+  margin-top: 14px;
+  font-size: 15px;
   font-weight: 700;
   letter-spacing: 0.02em;
   line-height: 1.2;
 }
 
 .elimination-card-episode {
-  margin-top: 8px;
-  font-size: 0.9rem;
-  font-weight: 600;
+  margin-top: 6px;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 700;
 }
 
 .elimination-card-sub {
   margin-top: 4px;
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 10px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.18em;
+  opacity: 0.85;
 }
 
 @media (max-width: 768px) {
-  .tribe-evolution-container {
-    padding: 15px;
-  }
-
   .elimination-card {
-    width: 140px;
-    min-height: 200px;
-    padding: 12px 10px 14px;
+    width: 144px;
+    min-height: 210px;
   }
 
   .elimination-card-photo-wrap {
-    width: 88px;
-    height: 88px;
+    width: 84px;
+    height: 84px;
   }
 }

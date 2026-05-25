@@ -71,33 +71,70 @@
     "Helvetica Neue",
     Arial,
     sans-serif;
-  line-height: 1.6;
+  line-height: 1.55;
   font-weight: 400;
 
-  --color-orange: #a54433;
-  --color-red: #c17b7d;
-  --color-yellow: #fae480;
+  /* Sun-bleached beach base */
+  --color-bg: #ecdab1;
+  --color-bg-alt: #f3e5c2;
+  --color-surface: #faf1dc;
+  --color-surface-2: #e0c697;
+  --color-border: #c9b07d;
+  --color-border-strong: #8e7344;
 
-  --color-text: #202020;
-  --color-text-muted: #3e3e3e;
-  --color-bg: #deb68d;
-  --color-bg-alt: #ede3d1;
-  --color-border: #183246;
+  /* Ink / text — driftwood + deep night-water */
+  --color-text: #1a2230;
+  --color-text-muted: #5c4f36;
+  --color-text-dim: #8a7c5f;
+
+  /* Survivor brand colors (lifted from the logo) */
+  --color-night: #111821; /* deep navy */
+  --color-night-2: #1c2839; /* navy panel hover */
+  --color-ocean: #0082cb; /* logo blue */
+  --color-ocean-deep: #04527a;
+  --color-palm: #3aae2a; /* logo green */
+  --color-palm-dark: #1f6b16;
+  --color-torch: #f8d000; /* logo yellow — torch flame */
+  --color-flame: #e87a1e; /* warm fire */
+  --color-ember: #c1533c; /* sunset */
+  --color-sand-shadow: #d8b988;
+
+  /* Compat aliases (old token names used across views) */
+  --color-orange: var(--color-flame);
+  --color-red: var(--color-ember);
+  --color-yellow: var(--color-torch);
+  --color-amber: var(--color-torch);
+
+  /* Tribe accents */
+  --tribe-cila: rgb(234 105 51);
+  --tribe-vatu: rgb(230 19 100);
+  --tribe-kalo: rgb(47 141 126);
+  --tribe-merge: #d4982a;
 
   --radius-sm: 4px;
   --radius-md: 8px;
-  --radius-lg: 12px;
+  --radius-lg: 14px;
+  --radius-xl: 22px;
   --radius-full: 9999px;
 
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-sm: 0 1px 2px rgba(40, 28, 10, 0.18);
+  --shadow-md: 0 10px 24px -10px rgba(40, 28, 10, 0.28);
+  --shadow-lg: 0 22px 48px -18px rgba(40, 28, 10, 0.4);
+  --shadow-glow-torch: 0 0 28px -2px rgba(248, 208, 0, 0.55);
+  --shadow-glow-palm: 0 0 22px -4px rgba(58, 174, 42, 0.45);
 
-  --transition-fast: 150ms ease;
-  --transition-normal: 250ms ease;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.7, 0, 0.3, 1);
+  --transition-fast: 160ms var(--ease-out);
+  --transition-normal: 260ms var(--ease-out);
+  --transition-slow: 520ms var(--ease-out);
+
+  --container: 1180px;
+  --container-narrow: 760px;
 
   color: var(--color-text);
   background-color: var(--color-bg);
+  color-scheme: light;
 }
 
 *,
@@ -117,6 +154,34 @@ body {
   margin: 0;
   width: 100%;
   overflow-x: hidden;
+  background:
+    /* faint coconut speckle */
+    radial-gradient(
+        circle at 20% 30%,
+        rgba(94, 64, 25, 0.06) 0 1px,
+        transparent 2px
+      )
+      0 0 / 80px 80px,
+    /* warm sunlight pool top-right */
+      radial-gradient(
+        900px 600px at 90% -10%,
+        rgba(248, 208, 0, 0.16),
+        transparent 70%
+      ),
+    /* shaded palm-grove cool tone top-left */
+      radial-gradient(
+        700px 500px at -5% 5%,
+        rgba(58, 174, 42, 0.1),
+        transparent 70%
+      ),
+    /* lagoon mist near footer */
+      radial-gradient(
+        1000px 600px at 50% 110%,
+        rgba(0, 130, 203, 0.08),
+        transparent 70%
+      ),
+    var(--color-bg);
+  background-attachment: fixed;
 }
 
 #root {

@@ -16,7 +16,7 @@ interface JourneyCard {
   photo: string;
   journey: TribeAssignment[];
   eliminated?: number;
-  eliminationType?: "tribalCouncil" | "injury";
+  eliminationType?: "tribalCouncil" | "injury" | "fire" | "jury";
 }
 
 export default function JourneysView() {
@@ -78,19 +78,24 @@ export default function JourneysView() {
                 ? "rgba(255,255,255,0.85)"
                 : "var(--color-text-muted)";
 
-            const statusLine = player.eliminated
-              ? `Episode ${player.eliminated}`
-              : "Still in";
-            const subLine = player.eliminated
-              ? player.eliminationType === "injury"
+            const isWinner = !player.eliminated;
+            const statusLine = isWinner
+              ? "Winner"
+              : `Episode ${player.eliminated}`;
+            const subLine = isWinner
+              ? "Sole Survivor"
+              : player.eliminationType === "injury"
                 ? "Medical"
-                : "Tribal"
-              : null;
+                : player.eliminationType === "fire"
+                  ? "Fire"
+                  : player.eliminationType === "jury"
+                    ? "Jury"
+                    : "Tribal";
 
             return (
               <article
                 key={player.name}
-                className="elimination-card"
+                className={`elimination-card ${isWinner ? "is-winner" : ""}`}
                 role="listitem"
                 style={{
                   backgroundColor: cardBg,
@@ -117,14 +122,12 @@ export default function JourneysView() {
                 >
                   {statusLine}
                 </div>
-                {subLine && (
-                  <div
-                    className="elimination-card-sub"
-                    style={{ color: mutedColor }}
-                  >
-                    {subLine}
-                  </div>
-                )}
+                <div
+                  className="elimination-card-sub"
+                  style={{ color: mutedColor }}
+                >
+                  {subLine}
+                </div>
               </article>
             );
           })}

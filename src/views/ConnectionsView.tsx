@@ -2,21 +2,13 @@ import { useState, useMemo } from "react";
 import { castData, currentTribe } from "../data/cast";
 import { TRIBE_COLORS } from "../data/tribes";
 import { PALETTE } from "../theme/palette";
-import { findEliminationRecord } from "../data/connections";
 import { handleImageError } from "../lib/imageFallback";
 import { readableOnBackground } from "../lib/colorUtils";
 import "./styles/connections.css";
 
-type ConnectionsViewProps = {
-  showSpoilers: boolean;
-};
-
-export default function ConnectionsView({
-  showSpoilers,
-}: ConnectionsViewProps) {
+export default function ConnectionsView() {
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   const [hoveredPlayer, setHoveredPlayer] = useState<string | null>(null);
-  const [showActiveOnly, setShowActiveOnly] = useState(false);
 
   // Calculate connections between players (shared seasons)
   const connections = useMemo(() => {
@@ -66,17 +58,9 @@ export default function ConnectionsView({
     });
   }, [connections]);
 
-  const displayPlayers = useMemo(() => {
-    if (!showSpoilers || !showActiveOnly) return sortedPlayers;
-    return sortedPlayers.filter((p) => !findEliminationRecord(p.id));
-  }, [sortedPlayers, showActiveOnly, showSpoilers]);
-
-  // Derive the active player — null it out if the underlying player has
-  // been filtered out of the current view, so we don't need a cleanup
-  // effect to chase stale selections.
   const rawActivePlayer = selectedPlayer || hoveredPlayer;
   const activePlayer =
-    rawActivePlayer && displayPlayers.some((p) => p.name === rawActivePlayer)
+    rawActivePlayer && sortedPlayers.some((p) => p.name === rawActivePlayer)
       ? rawActivePlayer
       : null;
   const activeConnections = activePlayer ? connections.get(activePlayer) : null;
@@ -84,43 +68,9 @@ export default function ConnectionsView({
   return (
     <div className="connections-container" onClick={handleContainerClick}>
       <div className="connections-wrapper">
-        {/* Overview */}
-        <div className="survivor-overview">
-          <p>Explore the web of relationships between returning players</p>
-          <p className="survivor-subtext">
-            Click or hover over a player to see their network
-          </p>
-        </div>
-
-        {showSpoilers && (
-          <div className="connections-toolbar">
-            <div className="survivor-spoiler-wrap">
-              <span
-                className="survivor-spoiler-label"
-                id="connections-show-active-label"
-              >
-                Show active players only
-              </span>
-              <button
-                type="button"
-                className={`survivor-spoiler-switch ${showActiveOnly ? "is-on" : ""}`}
-                role="switch"
-                aria-checked={showActiveOnly}
-                aria-labelledby="connections-show-active-label"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowActiveOnly((v) => !v);
-                }}
-              >
-                <span className="survivor-spoiler-thumb" aria-hidden />
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* Players Grid */}
         <div className="connections-grid">
-          {displayPlayers.map((player) => {
+          {sortedPlayers.map((player) => {
             const tribeColor =
               TRIBE_COLORS[currentTribe(player.tribeJourney)] ?? PALETTE.ink;
             const isActive = activePlayer === player.name;
@@ -129,25 +79,16 @@ export default function ConnectionsView({
             const connectionCount = connections.get(player.name)?.size || 0;
             const sharedSeasons = activeConnections?.get(player.name) || [];
 
-            const eliminationRecord = showSpoilers
-              ? findEliminationRecord(player.id)
-              : undefined;
-            const isEliminated = !!eliminationRecord;
-            const eliminationType = eliminationRecord?.type;
-
-            const highlightNameColor = isEliminated
-              ? "var(--color-text)"
-              : readableOnBackground(tribeColor);
-            const highlightCountColor = isEliminated
-              ? "var(--color-text-muted)"
-              : readableOnBackground(tribeColor) === "#ffffff"
+            const activeNameColor = readableOnBackground(tribeColor);
+            const activeCountColor =
+              activeNameColor === "#ffffff"
                 ? "rgba(255, 255, 255, 0.88)"
                 : "var(--color-text-muted)";
 
             return (
               <div
                 key={player.name}
-                className={`connection-card ${isDimmed ? "dimmed" : ""} ${isActive ? "active" : ""} ${isConnected ? "connected" : ""} ${isEliminated ? "eliminated" : ""} ${eliminationType === "injury" ? "injury" : ""}`}
+                className={`connection-card ${isDimmed ? "dimmed" : ""} ${isActive ? "active" : ""} ${isConnected ? "connected" : ""}`}
                 role="button"
                 tabIndex={0}
                 aria-pressed={selectedPlayer === player.name}
@@ -168,8 +109,8 @@ export default function ConnectionsView({
                 }
                 onMouseLeave={() => !selectedPlayer && setHoveredPlayer(null)}
                 style={{
-                  backgroundColor: isActive ? tribeColor : "#ffffff",
-                  borderColor: isConnected ? tribeColor : "var(--color-text)",
+                  backgroundColor: isActive ? tribeColor : undefined,
+                  borderColor: isConnected ? tribeColor : undefined,
                 }}
               >
                 <div className="connection-photo-container">
@@ -181,11 +122,6 @@ export default function ConnectionsView({
                     decoding="async"
                     onError={handleImageError}
                   />
-                  {isEliminated && (
-                    <div className="elimination-badge-conn">
-                      {eliminationType === "injury" ? "INJURED" : "ELIMINATED"}
-                    </div>
-                  )}
                   {isConnected && sharedSeasons.length > 0 && (
                     <div
                       className="shared-seasons-badge"
@@ -199,9 +135,7 @@ export default function ConnectionsView({
                   <div
                     className="connection-name"
                     style={{
-                      color: isActive
-                        ? highlightNameColor
-                        : "var(--color-text)",
+                      color: isActive ? activeNameColor : undefined,
                       fontWeight: isActive || isConnected ? 600 : 400,
                     }}
                   >
@@ -210,9 +144,7 @@ export default function ConnectionsView({
                   <div
                     className="connection-count"
                     style={{
-                      color: isActive
-                        ? highlightCountColor
-                        : "var(--color-text-muted)",
+                      color: isActive ? activeCountColor : undefined,
                     }}
                   >
                     {connectionCount}{" "}

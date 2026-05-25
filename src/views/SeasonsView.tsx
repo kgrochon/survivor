@@ -1,6 +1,5 @@
 import { useState, useMemo } from "react";
 import { castData, currentTribe } from "../data/cast";
-import { findEliminationRecord } from "../data/connections";
 import { getSeasonSubtitle } from "../data/seasons";
 import { TRIBE_COLORS, type TribeName } from "../data/tribes";
 import { ERA_STYLES, getEra } from "../theme/eras";
@@ -14,10 +13,6 @@ interface SeasonGroup {
   subtitle: string;
   players: { id: string; name: string; photo: string; tribe: TribeName }[];
 }
-
-type SeasonsViewProps = {
-  showSpoilers: boolean;
-};
 
 // Build the era legend from the data so labels reflect the actual seasons
 // present rather than a hardcoded range that drifts from `getEra`.
@@ -43,10 +38,9 @@ const eras = (Object.keys(ERA_STYLES) as Array<keyof typeof ERA_STYLES>).map(
   },
 );
 
-export default function SeasonsView({ showSpoilers }: SeasonsViewProps) {
+export default function SeasonsView() {
   const [hoveredPlayer, setHoveredPlayer] = useState<string | null>(null);
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
-  const [showActiveOnly, setShowActiveOnly] = useState(false);
 
   const seasonGroups: SeasonGroup[] = useMemo(() => {
     const map = new Map<
@@ -93,23 +87,10 @@ export default function SeasonsView({ showSpoilers }: SeasonsViewProps) {
     return map;
   }, []);
 
-  const displaySeasonGroups = useMemo(() => {
-    if (!showSpoilers || !showActiveOnly) return seasonGroups;
-    return seasonGroups
-      .map((group) => ({
-        ...group,
-        players: group.players.filter((p) => !findEliminationRecord(p.id)),
-      }))
-      .filter((group) => group.players.length > 0);
-  }, [seasonGroups, showSpoilers, showActiveOnly]);
-
-  // Derive the active player — null it out if the underlying player has
-  // been filtered out of the current view, so we don't need a cleanup
-  // effect to chase stale selections.
   const rawActivePlayer = selectedPlayer || hoveredPlayer;
   const activePlayer =
     rawActivePlayer &&
-    displaySeasonGroups.some((g) =>
+    seasonGroups.some((g) =>
       g.players.some((p) => p.name === rawActivePlayer),
     )
       ? rawActivePlayer
@@ -136,44 +117,6 @@ export default function SeasonsView({ showSpoilers }: SeasonsViewProps) {
   return (
     <div className="survivor-table-container" onClick={handleContainerClick}>
       <div className="survivor-table-wrapper">
-        {/* Overview */}
-        <div className="survivor-overview">
-          <p>
-            A comprehensive timeline of all Season 50 contestants across their
-            Survivor careers
-          </p>
-          <p className="survivor-subtext">
-            Click or hover over any player to see all the seasons they competed
-            in.
-          </p>
-        </div>
-
-        {showSpoilers && (
-          <div className="table-toolbar">
-            <div className="survivor-spoiler-wrap">
-              <span
-                className="survivor-spoiler-label"
-                id="table-show-active-label"
-              >
-                Show active players only
-              </span>
-              <button
-                type="button"
-                className={`survivor-spoiler-switch ${showActiveOnly ? "is-on" : ""}`}
-                role="switch"
-                aria-checked={showActiveOnly}
-                aria-labelledby="table-show-active-label"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowActiveOnly((v) => !v);
-                }}
-              >
-                <span className="survivor-spoiler-thumb" aria-hidden />
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* Era Legend */}
         <div className="era-legend">
           {eras.map((e) => (
@@ -189,7 +132,7 @@ export default function SeasonsView({ showSpoilers }: SeasonsViewProps) {
 
         {/* Season Blocks */}
         <div className="seasons-container">
-          {displaySeasonGroups.map((group, i) => {
+          {seasonGroups.map((group, i) => {
             const era = getEra(group.season);
             const style = ERA_STYLES[era];
             const isHighlighted = highlightedSeasons.has(group.season);
@@ -231,16 +174,10 @@ export default function SeasonsView({ showSpoilers }: SeasonsViewProps) {
                     const tribeColor =
                       TRIBE_COLORS[player.tribe] ?? PALETTE.ink;
 
-                    const eliminationRecord = showSpoilers
-                      ? findEliminationRecord(player.id)
-                      : undefined;
-                    const isEliminated = !!eliminationRecord;
-                    const eliminationType = eliminationRecord?.type;
-
                     return (
                       <div
                         key={player.name}
-                        className={`player-card ${isPlayerDimmed ? "dimmed" : ""} ${isEliminated ? "eliminated" : ""} ${eliminationType === "injury" ? "injury" : ""}`}
+                        className={`player-card ${isPlayerDimmed ? "dimmed" : ""}`}
                         role="button"
                         tabIndex={0}
                         aria-pressed={selectedPlayer === player.name}
@@ -276,14 +213,6 @@ export default function SeasonsView({ showSpoilers }: SeasonsViewProps) {
                             decoding="async"
                             onError={handleImageError}
                           />
-                          {/* Elimination badge */}
-                          {isEliminated && (
-                            <div className="elimination-badge">
-                              {eliminationType === "injury"
-                                ? "INJURED"
-                                : "ELIMINATED"}
-                            </div>
-                          )}
                           {/* Times played badge */}
                           {timesPlayed > 1 && (
                             <div
