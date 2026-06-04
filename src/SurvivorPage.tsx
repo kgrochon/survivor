@@ -8,6 +8,7 @@ import { twists } from "./data/twists";
 import { eliminated } from "./data/connections";
 import logoUrl from "./img/survivor-50-logo.png";
 import castPhotoUrl from "./img/cast-photo.jpg";
+import DashboardView from "./views/DashboardView";
 
 interface Section {
   id: string;
@@ -86,7 +87,8 @@ export default function SurvivorPage() {
         </nav>
 
       </header>
-
+      <DashboardView />
+{/* 
       <main id="top">
         <section className="s50-hero">
           <div className="s50-hero-inner">
@@ -189,7 +191,7 @@ export default function SurvivorPage() {
             <span>An unofficial fan dashboard</span>
           </div>
         </footer>
-      </main>
-    </div>
+      </main> */}
+    </div> 
   );
 }

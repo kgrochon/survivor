@@ -1,5 +1,30 @@
 import type { TribeName } from "./tribes";
 
+import angelinaPhoto from "../img/players/angela-headshot.png";
+import aubryPhoto from "../img/players/aubrey-headshot.png";
+import charliePhoto from "../img/players/charlie-headshot.png";
+import chrissyPhoto from "../img/players/chrissy-headshot.png";
+import christianPhoto from "../img/players/christian-headshot.png";
+import ciriePhoto from "../img/players/cirie-headshot.png";
+import coachPhoto from "../img/players/coach-headshot.png";
+import colbyPhoto from "../img/players/colby-headshot.png";
+import deePhoto from "../img/players/dee-headshot.png";
+import emilyPhoto from "../img/players/emily-headshot.png";
+import genevievePhoto from "../img/players/genevieve-headshot.png";
+import jennaPhoto from "../img/players/jenna-headshot.png";
+import joePhoto from "../img/players/joe-headshot.png";
+import jonathanPhoto from "../img/players/jonathon-headshot.png";
+import kamillaPhoto from "../img/players/kamilla-headshot.png";
+import kylePhoto from "../img/players/kyle-headshot.png";
+import mikePhoto from "../img/players/mike-headshot.png";
+import ozzyPhoto from "../img/players/ozzy-headshot.png";
+import qPhoto from "../img/players/q-headshot.png";
+import rickPhoto from "../img/players/rick-headshot.png";
+import rizoPhoto from "../img/players/rizzo-headshot.png";
+import savannahPhoto from "../img/players/savannah-headshot.png";
+import stepheniePhoto from "../img/players/stephanie-headshot.png";
+import tiffanyPhoto from "../img/players/tiffany-headshot.png";
+
 /** A previous Survivor season a returning player competed on. */
 export interface PriorSeason {
   season: number;
@@ -20,8 +45,10 @@ export interface CastMember {
   /** Stable kebab-case slug used to link records (e.g. `eliminated[i].id`). */
   id: string;
   name: string;
-  /** Cropped square portrait, currently hot-linked from a third-party CDN. */
+  /** Local headshot bundled with the app. Used everywhere by default. */
   photo: string;
+  /** Larger CDN-hosted portrait, used in the player detail panel. */
+  httpPhoto: string;
   /** Season-50 tribe events, ordered earliest first. Must contain at least one entry. */
   tribeJourney: TribeAssignment[];
   seasons: PriorSeason[];
@@ -60,7 +87,8 @@ export const castData: CastMember[] = [
       { season: 1, placement: 8 },
       { season: 8, placement: 3 },
     ],
-    photo:
+    photo: jennaPhoto,
+    httpPhoto:
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_559,y_183,w_1379,h_775/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbc432rdmgmh0ddkp.jpg",
   },
   {
@@ -76,7 +104,8 @@ export const castData: CastMember[] = [
       { season: 8, placement: 12 },
       { season: 20, placement: 5 },
     ],
-    photo:
+    photo: colbyPhoto,
+    httpPhoto:
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_0,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbbv7bnygssr2nfmx.jpg",
   },
   {
@@ -91,7 +120,8 @@ export const castData: CastMember[] = [
       { season: 11, placement: 2 },
       { season: 20, placement: 19 },
     ],
-    photo:
+    photo: stepheniePhoto,
+    httpPhoto:
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_0,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbcxf91v1vq94ya8s.jpg",
   },
   {
@@ -107,7 +137,8 @@ export const castData: CastMember[] = [
       { season: 20, placement: 17 },
       { season: 34, placement: 6 },
     ],
-    photo:
+    photo: ciriePhoto,
+    httpPhoto:
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_90,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbbqghycsf9h7ehyt.jpg",
   },
   {
@@ -124,7 +155,8 @@ export const castData: CastMember[] = [
       { season: 23, placement: 4 },
       { season: 34, placement: 12 },
     ],
-    photo:
+    photo: ozzyPhoto,
+    httpPhoto:
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_65,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbcgr596217xbpqwe.jpg",
   },
   {
@@ -139,7 +171,8 @@ export const castData: CastMember[] = [
       { season: 20, placement: 12 },
       { season: 23, placement: 2 },
     ],
-    photo:
+    photo: coachPhoto,
+    httpPhoto:
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_407,w_2000,h_1125/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjb82jcg73nb58hbcb.jpg",
   },
   {
@@ -155,7 +188,8 @@ export const castData: CastMember[] = [
       { season: 34, placement: 5 },
       { season: 38, placement: 16 },
     ],
-    photo:
+    photo: aubryPhoto,
+    httpPhoto:
       "https://parade.com/.image/c_fill,w_1200,h_1200,g_faces:center/ODowMDAwMDAwMDAxNTY4Njk1/survivor-50-aubry-bracco-header.jpg",
   },
   {
@@ -166,7 +200,8 @@ export const castData: CastMember[] = [
       { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [{ season: 35, placement: 2 }],
-    photo:
+    photo: chrissyPhoto,
+    httpPhoto:
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_41,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbbgp9t969nt0jppn.jpg",
   },
   {
@@ -178,7 +213,8 @@ export const castData: CastMember[] = [
       { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [{ season: 37, placement: 7 }],
-    photo:
+    photo: christianPhoto,
+    httpPhoto:
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_101,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbbp3vqeea2tmtw0g.jpg",
   },
   {
@@ -189,7 +225,8 @@ export const castData: CastMember[] = [
       { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [{ season: 37, placement: 3 }],
-    photo:
+    photo: angelinaPhoto,
+    httpPhoto:
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_99,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjb8081kem9qb8xkc7.jpg",
   },
   {
@@ -201,7 +238,8 @@ export const castData: CastMember[] = [
       { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [{ season: 37, placement: 2 }],
-    photo:
+    photo: mikePhoto,
+    httpPhoto:
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_0,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbcdv1vrhwx0a430c.jpg",
   },
   {
@@ -212,7 +250,8 @@ export const castData: CastMember[] = [
       { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [{ season: 38, placement: 4 }],
-    photo:
+    photo: rickPhoto,
+    httpPhoto:
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_135,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbcsq1fqbn7jydxyg.jpg",
   },
   {
@@ -224,7 +263,8 @@ export const castData: CastMember[] = [
       { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [{ season: 42, placement: 4 }],
-    photo:
+    photo: jonathanPhoto,
+    httpPhoto:
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_58,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbc9t98b0cwy300ww.jpg",
   },
   {
@@ -236,7 +276,8 @@ export const castData: CastMember[] = [
       { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [{ season: 45, placement: 1 }],
-    photo:
+    photo: deePhoto,
+    httpPhoto:
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_57,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbbxp7t3r2kzbsdyq.jpg",
   },
   {
@@ -248,7 +289,8 @@ export const castData: CastMember[] = [
       { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [{ season: 45, placement: 7 }],
-    photo:
+    photo: emilyPhoto,
+    httpPhoto:
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_87,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbbzj1ks7aq7e201d.jpg",
   },
   {
@@ -259,7 +301,8 @@ export const castData: CastMember[] = [
       { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [{ season: 46, placement: 6 }],
-    photo:
+    photo: qPhoto,
+    httpPhoto:
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_0,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbcpgv7qrngg8yarh.jpg",
   },
   {
@@ -270,7 +313,8 @@ export const castData: CastMember[] = [
       { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [{ season: 46, placement: 8 }],
-    photo:
+    photo: tiffanyPhoto,
+    httpPhoto:
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_0,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbcyg8ewdk8asekq5.jpg",
   },
   {
@@ -282,7 +326,8 @@ export const castData: CastMember[] = [
       { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [{ season: 46, placement: 2 }],
-    photo:
+    photo: charliePhoto,
+    httpPhoto:
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_0,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbbete4cdr38y67bq.jpg",
   },
   {
@@ -294,7 +339,8 @@ export const castData: CastMember[] = [
       { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [{ season: 47, placement: 5 }],
-    photo:
+    photo: genevievePhoto,
+    httpPhoto:
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_0,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbc2nqtywch35ckfa.jpg",
   },
   {
@@ -306,7 +352,8 @@ export const castData: CastMember[] = [
       { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [{ season: 48, placement: 4 }],
-    photo:
+    photo: kamillaPhoto,
+    httpPhoto:
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_0,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbcam24z4kyy60a3f.jpg",
   },
   {
@@ -317,7 +364,8 @@ export const castData: CastMember[] = [
       { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [{ season: 48, placement: 1 }],
-    photo:
+    photo: kylePhoto,
+    httpPhoto:
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_158,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbcc9818tdf6denz5.jpg",
   },
   {
@@ -329,7 +377,8 @@ export const castData: CastMember[] = [
       { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [{ season: 48, placement: 3 }],
-    photo:
+    photo: joePhoto,
+    httpPhoto:
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_189,w_2000,h_1125/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbc886bzp0p3kcdjx.jpg",
   },
   {
@@ -341,7 +390,8 @@ export const castData: CastMember[] = [
       { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [{ season: 49, placement: 4 }],
-    photo:
+    photo: rizoPhoto,
+    httpPhoto:
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_64,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbcv3a8f373fhnyb6.jpg",
   },
   {
@@ -352,7 +402,8 @@ export const castData: CastMember[] = [
       { fromEpisode: 6, tribe: "Merge" },
     ],
     seasons: [{ season: 49, placement: 1 }],
-    photo:
+    photo: savannahPhoto,
+    httpPhoto:
       "https://images2.minutemediacdn.com/image/upload/c_crop,x_0,y_100,w_3000,h_1687/c_fill,w_280,ar_1:1,f_auto,q_auto,g_face/images/ImageExchange/mmsport/399/01kjbcwej4vgb44q5chq.jpg",
   },
 ];

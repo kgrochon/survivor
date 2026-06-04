@@ -62,7 +62,7 @@ export const twists: Twist[] = [
   {
     id: "in-the-hands-of-the-fans",
     title: "In the Hands of the Fans",
-    episode: 1,
+    episode: 0,
     mechanic:
       "The season's defining premise. Viewers vote on real game mechanics and production choices, while celebrity superfans pitch and lend their names to special twists and advantages.",
     howItPlayedOut:
