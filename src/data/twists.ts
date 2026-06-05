@@ -163,7 +163,7 @@ export const twists: Twist[] = [
     svgImage: UrnSVG,
   },
   {
-    id: "mrbeast-super-beware-advantage",
+    id: "The MrBeast Super Beware Advantage",
     title: "The MrBeast Super Beware Advantage",
     episode: 10,
     mechanic:
@@ -174,3 +174,45 @@ export const twists: Twist[] = [
     svgImage: BewareSVG,
   },
 ];
+
+interface GameFact {
+  id: string;
+  name: string;
+  stat: string;
+  twistId?: string;
+  banner?: string;
+}
+
+export const gameFacts: GameFact[] = [
+  {
+    id: "sole-survivor",
+    name: "Sole Survivor",
+    stat: "Aubry Bracco",
+    banner: "Wins Season 50 in an 8–3–0 Vote",
+  },
+  {
+    id: "winning-pot",
+    name: "Winning Pot",
+    stat: "$2M",
+    banner: "Rick Devens Wins $2M Coin Flip Twist",
+    twistId: "The MrBeast Super Beware Advantage"
+  },
+  {
+    id: "castaways",
+    name: "Castaways",
+    stat: "24",
+    banner: "Largest Cast in Show History",
+  },
+{
+  id: "premiere-length",
+  name: "Premiere Runtime",
+  stat: "3 Hours",
+  banner: "Longest Non-Finale Episode Ever",
+},
+{
+  id: "season-days",
+  name: "Days Played",
+  stat: "26",
+}
+
+]

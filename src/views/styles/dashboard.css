@@ -91,6 +91,94 @@
   font-weight: 700;
 }
 
+/* --- Section nav (default aside state) --- */
+.dashboard-aside-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.dashboard-aside-nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dashboard-aside-nav a {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  color: rgba(250, 241, 220, 0.78);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition:
+    color 220ms var(--ease-out),
+    background-color 220ms var(--ease-out),
+    border-color 220ms var(--ease-out),
+    transform 220ms var(--ease-out);
+}
+
+.dashboard-aside-nav a:hover,
+.dashboard-aside-nav a:focus-visible {
+  color: var(--color-torch);
+  background: rgba(248, 208, 0, 0.1);
+  border-color: rgba(248, 208, 0, 0.32);
+  transform: translateX(2px);
+  outline: none;
+}
+
+.dashboard-aside-nav-num {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: rgba(250, 241, 220, 0.35);
+  font-variant-numeric: tabular-nums;
+  transition: color 220ms var(--ease-out);
+}
+
+.dashboard-aside-nav a:hover .dashboard-aside-nav-num,
+.dashboard-aside-nav a:focus-visible .dashboard-aside-nav-num {
+  color: var(--color-torch);
+}
+
+.dashboard-aside-nav-arrow {
+  font-size: 14px;
+  line-height: 1;
+  color: rgba(250, 241, 220, 0.3);
+  transform: translateX(-4px);
+  opacity: 0;
+  transition:
+    transform 240ms var(--ease-out),
+    opacity 240ms var(--ease-out),
+    color 240ms var(--ease-out);
+}
+
+.dashboard-aside-nav a:hover .dashboard-aside-nav-arrow,
+.dashboard-aside-nav a:focus-visible .dashboard-aside-nav-arrow {
+  opacity: 1;
+  transform: translateX(0);
+  color: var(--color-torch);
+}
+
+/* Smooth scroll between sections and clear the sticky topbar. */
+.dashboard-section {
+  scroll-margin-top: clamp(16px, 2.4vh, 32px);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
 /* Resize handle covering the full right edge.
    Hit area is wider than the visible line for forgiving pointer targeting. */
 .dashboard-aside-handle {
@@ -487,12 +575,78 @@
 }
 
 .dashboard-section-title {
+  position: relative;
   font-size: clamp(22px, 2.6vw, 32px);
   font-weight: 700;
   letter-spacing: -0.01em;
   line-height: 1;
   margin: 0;
   color: var(--color-night);
+  /* Pre-animation pose — settled in by `.is-revealed` below. */
+  opacity: 0;
+  transform: translateX(-14px);
+}
+
+/* Torch-yellow underline that strokes across after the title settles. */
+.dashboard-section-title::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -8px;
+  height: 3px;
+  width: 60%;
+  border-radius: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--color-torch),
+    var(--color-flame)
+  );
+  transform: scaleX(0);
+  transform-origin: left center;
+  box-shadow: 0 0 12px -2px rgba(248, 208, 0, 0.55);
+}
+
+.dashboard-section-head.is-revealed .dashboard-section-title {
+  animation: section-title-enter 480ms var(--ease-out) forwards;
+}
+
+.dashboard-section-head.is-revealed .dashboard-section-title::after {
+  animation: section-title-underline 520ms 180ms cubic-bezier(0.22, 1, 0.36, 1)
+    forwards;
+}
+
+@keyframes section-title-enter {
+  from {
+    opacity: 0;
+    transform: translateX(-14px);
+    letter-spacing: 0.04em;
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+    letter-spacing: -0.01em;
+  }
+}
+
+@keyframes section-title-underline {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-section-title,
+  .dashboard-section-title::after {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+  .dashboard-section-title::after {
+    transform: scaleX(1);
+  }
 }
 
 .dashboard-section-count {
@@ -650,26 +804,102 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  /* The gap is between every pair of items, including collapsed ones — so
+     transition it down to 0 alongside the option collapse so the winner
+     lands at y=0 regardless of how many losers used to sit above it. */
+  transition: gap 1000ms var(--ease-in-out);
 }
 
+.dashboard-vote.phase-collapsed .dashboard-vote-options {
+  gap: 0;
+}
+
+/* Each option is a clickable button inside its <li>. The li carries the
+   visual state classes (is-winner, is-user-pick) and provides the relative
+   container for the percentage bar. */
 .dashboard-vote-option {
+  list-style: none;
   position: relative;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  /* Animatable so losers can collapse smoothly after a guess. The winner
+     keeps its own height and rises to the top as the losers shrink. */
+  max-height: 200px;
+  transition:
+    max-height 1000ms var(--ease-in-out),
+    opacity 1000ms var(--ease-out),
+    margin 1000ms var(--ease-in-out),
+    padding 1000ms var(--ease-in-out),
+    transform 1000ms var(--ease-out);
+}
+
+.dashboard-vote-option.is-collapsing {
+  max-height: 0;
+  opacity: 0;
+  margin: 0;
+  padding: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+}
+
+.dashboard-vote-option-button {
+  appearance: none;
+  background: transparent;
+  border: 1px solid transparent;
+  margin: 0;
+  padding: 4px 6px;
+  font: inherit;
+  color: var(--color-text-muted);
+  font-size: 11.5px;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
   display: grid;
   grid-template-columns: 14px 1fr auto;
   align-items: center;
   column-gap: 6px;
-  padding: 4px 6px;
   border-radius: var(--radius-sm);
-  font-size: 11.5px;
-  color: var(--color-text-muted);
-  background: transparent;
-  overflow: hidden;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast);
 }
 
-.dashboard-vote-option.is-winner {
+.dashboard-vote-option-button:disabled {
+  cursor: default;
+}
+
+.dashboard-vote-option-button:focus-visible {
+  outline: 2px solid var(--color-torch);
+  outline-offset: 2px;
+}
+
+/* Pre-guess: option buttons are highlighted as actionable choices. */
+.dashboard-vote:not(.is-answered) .dashboard-vote-option-button {
+  background: var(--color-bg-alt);
+  border-color: var(--color-border);
   color: var(--color-night);
+}
+
+.dashboard-vote:not(.is-answered) .dashboard-vote-option-button:hover {
   background: rgba(248, 208, 0, 0.18);
+  border-color: var(--color-torch);
+}
+
+/* Post-guess: winner row gets the yellow background. */
+.dashboard-vote-option.is-winner .dashboard-vote-option-button {
+  color: var(--color-night);
+  background: rgba(248, 208, 0, 0.22);
   font-weight: 600;
+}
+
+/* User's pick (the one they chose). */
+.dashboard-vote-option.is-user-pick .dashboard-vote-option-button {
+  border-color: var(--color-flame);
+}
+
+.dashboard-vote-option.is-user-pick.is-winner .dashboard-vote-option-button {
+  border-color: var(--color-palm);
 }
 
 .dashboard-vote-marker {
@@ -682,6 +912,14 @@
 
 .dashboard-vote-option.is-winner .dashboard-vote-marker {
   color: var(--color-flame);
+}
+
+.dashboard-vote-option.is-user-pick:not(.is-winner) .dashboard-vote-marker {
+  color: var(--color-flame);
+}
+
+.dashboard-vote-option.is-user-pick.is-winner .dashboard-vote-marker {
+  color: var(--color-palm-dark);
 }
 
 .dashboard-vote-label {
@@ -724,6 +962,17 @@
   background: var(--color-border-strong);
   opacity: 0.45;
 }
+
+/* --- Pre-guess prompt + verdict (post-guess) --- */
+.dashboard-vote-prompt {
+  margin: 0;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--color-ocean);
+}
+
 
 /* --- Immunity Leaderboard --- */
 .dashboard-immunity-list {

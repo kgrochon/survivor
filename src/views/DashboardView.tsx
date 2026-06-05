@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { castData, tribeAtEpisode, type CastMember } from "../data/cast";
 import {
   twists,
@@ -14,8 +14,9 @@ import {
 } from "../data/challenges";
 import { getSeasonSubtitle } from "../data/seasons";
 import { TRIBE_COLORS } from "../data/tribes";
-import { fanVotes } from "../data/fanVotes";
+import { fanVotes, type FanVote } from "../data/fanVotes";
 import { handleImageError } from "../lib/imageFallback";
+import { useReveal } from "../lib/useReveal";
 import logoUrl from "../img/survivor-50-logo.png";
 import "./styles/dashboard.css";
 
@@ -412,6 +413,171 @@ function TwistDetail({ twist, onClose }: TwistDetailProps) {
   );
 }
 
+/**
+ * Section header that fades + slides its title in (with a torch-yellow
+ * underline that draws across) the first time the section scrolls into
+ * view. Honors `prefers-reduced-motion` via the underlying hook.
+ */
+function SectionHead({ title, count }: { title: string; count: number }) {
+  const { ref, visible } = useReveal<HTMLElement>();
+  return (
+    <header
+      ref={ref}
+      className={`dashboard-section-head ${visible ? "is-revealed" : ""}`}
+    >
+      <h2 className="dashboard-section-title">{title}</h2>
+      <span className="dashboard-section-count">{count}</span>
+    </header>
+  );
+}
+
+const NAV_SECTIONS: ReadonlyArray<{ id: string; label: string }> = [
+  { id: "section-cast", label: "Cast" },
+  { id: "section-votes", label: "Audience Votes" },
+  { id: "section-immunity", label: "Immunity Leaderboard" },
+  { id: "section-twists", label: "Twists" },
+];
+
+/**
+ * In-page navigation for the dashboard's main pane sections. Each link
+ * smooth-scrolls to its target so the aside stays put while the main
+ * content moves underneath.
+ */
+function SectionNav() {
+  const handleNavigate =
+    (id: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
+      e.preventDefault();
+      const target = document.getElementById(id);
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    };
+
+  return (
+    <nav className="dashboard-aside-nav" aria-label="Dashboard sections">
+      <span className="dashboard-aside-eyebrow">Sections</span>
+      <ul>
+        {NAV_SECTIONS.map((s, i) => (
+          <li key={s.id}>
+            <a href={`#${s.id}`} onClick={handleNavigate(s.id)}>
+              <span className="dashboard-aside-nav-num">
+                {(i + 1).toString().padStart(2, "0")}
+              </span>
+              <span className="dashboard-aside-nav-label">{s.label}</span>
+              <span className="dashboard-aside-nav-arrow" aria-hidden>
+                →
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}
+
+/**
+ * Audience-vote card with a "guess first" interaction. The options render as
+ * neutral buttons until the user picks one; after that, the real results
+ * (percentages, winner highlight) are revealed and the card scores the guess.
+ */
+function VoteCard({ vote }: { vote: FanVote }) {
+  const [guessIndex, setGuessIndex] = useState<number | null>(null);
+  /**
+   * Three-stage flow after a guess:
+   *   interactive → revealed (1s of "current UI") → collapsed (losers fade,
+   *   leaving the winner slid up to the top).
+   */
+  const [phase, setPhase] = useState<"interactive" | "revealed" | "collapsed">(
+    "interactive",
+  );
+  const hasGuessed = guessIndex !== null;
+  const userPickWasRight =
+    hasGuessed && vote.options[guessIndex].winner === true;
+
+  useEffect(() => {
+    if (phase !== "revealed") return;
+    const id = window.setTimeout(() => setPhase("collapsed"), 1000);
+    return () => window.clearTimeout(id);
+  }, [phase]);
+
+  const handleGuess = (i: number) => {
+    if (hasGuessed) return;
+    setGuessIndex(i);
+    setPhase("revealed");
+  };
+
+  return (
+    <article
+      className={`dashboard-vote ${hasGuessed ? "is-answered" : ""} ${
+        hasGuessed
+          ? userPickWasRight
+            ? "is-correct"
+            : "is-wrong"
+          : ""
+      } phase-${phase}`}
+    >
+      <header className="dashboard-vote-head">
+        <span className="dashboard-vote-subject">{vote.subject}</span>
+        <span className="dashboard-vote-ep">
+          EP {vote.episodeRevealed.toString().padStart(2, "0")}
+        </span>
+      </header>
+
+      {!hasGuessed && (
+        <></>
+        // <p className="dashboard-vote-prompt">What did the audience pick?</p>
+      )}
+
+      <ul className="dashboard-vote-options">
+        {vote.options.map((opt, i) => {
+          const isUserPick = guessIndex === i;
+          const showResult = hasGuessed;
+          const isCollapsing = phase === "collapsed" && !opt.winner;
+          return (
+            <li
+              key={i}
+              className={`dashboard-vote-option ${
+                showResult && opt.winner ? "is-winner" : ""
+              } ${isUserPick ? "is-user-pick" : ""} ${
+                isCollapsing ? "is-collapsing" : ""
+              }`}
+            >
+              <button
+                type="button"
+                className="dashboard-vote-option-button"
+                onClick={() => handleGuess(i)}
+                disabled={hasGuessed}
+                aria-pressed={isUserPick}
+              >
+                <span className="dashboard-vote-marker" aria-hidden>
+                  {showResult && opt.winner
+                    ? "✓"
+                    : isUserPick && !opt.winner
+                      ? "✗"
+                      : "·"}
+                </span>
+                <span className="dashboard-vote-label">{opt.label}</span>
+                {showResult && opt.percentage !== undefined && (
+                  <span className="dashboard-vote-percent">
+                    {opt.percentage}%
+                  </span>
+                )}
+                {showResult && opt.percentage !== undefined && (
+                  <span
+                    className="dashboard-vote-bar"
+                    style={{ width: `${opt.percentage}%` }}
+                    aria-hidden
+                  />
+                )}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </article>
+  );
+}
+
 export default function DashboardView() {
   const orderedTwists = useMemo(
     () => [...twists].sort((a, b) => a.episode - b.episode),
@@ -552,6 +718,7 @@ export default function DashboardView() {
                 Click any cast member or twist to see details.
               </p>
             </div>
+            <SectionNav />
           </>
         )}
         <div
@@ -571,11 +738,11 @@ export default function DashboardView() {
       </aside>
 
       <div className="dashboard-main">
-        <section className="dashboard-section dashboard-section--cast">
-          <header className="dashboard-section-head">
-            <h2 className="dashboard-section-title">Cast</h2>
-            <span className="dashboard-section-count">{castData.length}</span>
-          </header>
+        <section
+          id="section-cast"
+          className="dashboard-section dashboard-section--cast"
+        >
+          <SectionHead title="Cast" count={castData.length} />
           <div className="dashboard-cast-grid">
             {castData.map((player) => {
               const isSelected =
@@ -609,62 +776,26 @@ export default function DashboardView() {
           </div>
         </section>
 
-        <section className="dashboard-section dashboard-section--votes">
-          <header className="dashboard-section-head">
-            <h2 className="dashboard-section-title">Audience Votes</h2>
-            <span className="dashboard-section-count">{fanVotes.length}</span>
-          </header>
+        <section
+          id="section-votes"
+          className="dashboard-section dashboard-section--votes"
+        >
+          <SectionHead title="Audience Votes" count={fanVotes.length} />
           <div className="dashboard-votes-strip">
             {fanVotes.map((vote) => (
-              <article key={vote.id} className="dashboard-vote">
-                <header className="dashboard-vote-head">
-                  <span className="dashboard-vote-subject">{vote.subject}</span>
-                  <span className="dashboard-vote-ep">
-                    EP {vote.episodeRevealed.toString().padStart(2, "0")}
-                  </span>
-                </header>
-                <ul className="dashboard-vote-options">
-                  {vote.options.map((opt, i) => (
-                    <li
-                      key={i}
-                      className={`dashboard-vote-option ${
-                        opt.winner ? "is-winner" : ""
-                      }`}
-                    >
-                      <span
-                        className="dashboard-vote-marker"
-                        aria-hidden
-                      >
-                        {opt.winner ? "✓" : "·"}
-                      </span>
-                      <span className="dashboard-vote-label">{opt.label}</span>
-                      {opt.percentage !== undefined && (
-                        <span className="dashboard-vote-percent">
-                          {opt.percentage}%
-                        </span>
-                      )}
-                      {opt.percentage !== undefined && (
-                        <span
-                          className="dashboard-vote-bar"
-                          style={{ width: `${opt.percentage}%` }}
-                          aria-hidden
-                        />
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </article>
+              <VoteCard key={vote.id} vote={vote} />
             ))}
           </div>
         </section>
 
-        <section className="dashboard-section dashboard-section--immunity">
-          <header className="dashboard-section-head">
-            <h2 className="dashboard-section-title">Immunity Leaderboard</h2>
-            <span className="dashboard-section-count">
-              {immunityRanking.length}
-            </span>
-          </header>
+        <section
+          id="section-immunity"
+          className="dashboard-section dashboard-section--immunity"
+        >
+          <SectionHead
+            title="Immunity Leaderboard"
+            count={immunityRanking.length}
+          />
           <ol className="dashboard-immunity-list">
             {immunityRanking.map((r, i) => {
               const isSelected =
@@ -711,13 +842,11 @@ export default function DashboardView() {
           </ol>
         </section>
 
-        <section className="dashboard-section dashboard-section--twists">
-          <header className="dashboard-section-head">
-            <h2 className="dashboard-section-title">Twists</h2>
-            <span className="dashboard-section-count">
-              {orderedTwists.length}
-            </span>
-          </header>
+        <section
+          id="section-twists"
+          className="dashboard-section dashboard-section--twists"
+        >
+          <SectionHead title="Twists" count={orderedTwists.length} />
           <div className="dashboard-twists-grid">
             {centerTwist && (
               <button
