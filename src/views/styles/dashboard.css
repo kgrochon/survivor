@@ -457,6 +457,10 @@
   flex-direction: column;
   gap: clamp(10px, 1.4vh, 16px);
   min-height: 0; /* allow grids to shrink inside flex */
+  /* Section shrinks to its content rather than stretching across the main pane. */
+  width: fit-content;
+  max-width: 100%;
+  align-self: flex-start;
 }
 
 .dashboard-section--twists {
@@ -464,19 +468,22 @@
   min-height: 0;
 }
 
+/* Cast and votes span the full main pane; their inner grids need the
+   horizontal room to wrap nicely. */
+.dashboard-section--cast,
+.dashboard-section--votes {
+  width: 100%;
+  align-self: stretch;
+}
+
 .dashboard-section-head {
   display: flex;
   align-items: baseline;
   gap: 14px;
   flex-wrap: wrap;
-}
-
-.dashboard-section-eyebrow {
-  font-size: 11px;
-  letter-spacing: 0.32em;
-  text-transform: uppercase;
-  color: var(--color-ocean);
-  font-weight: 700;
+  /* Heading row hugs its own content; the count sits right next to the title. */
+  width: fit-content;
+  align-self: flex-start;
 }
 
 .dashboard-section-title {
@@ -489,7 +496,6 @@
 }
 
 .dashboard-section-count {
-  margin-left: auto;
   font-size: 11px;
   letter-spacing: 0.24em;
   text-transform: uppercase;
@@ -717,6 +723,182 @@
 .dashboard-vote-option:not(.is-winner) .dashboard-vote-bar {
   background: var(--color-border-strong);
   opacity: 0.45;
+}
+
+/* --- Immunity Leaderboard --- */
+.dashboard-immunity-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  /* The widget itself is narrow so rows aren't a wall of stretched bars;
+     rows stay at 100% of this constrained column. */
+  width: 100%;
+  max-width: 420px;
+}
+
+.dashboard-immunity-row {
+  display: grid;
+  grid-template-columns: 24px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  min-width: 0;
+}
+
+.dashboard-immunity-row:nth-child(1) {
+  border-color: var(--color-torch);
+  background:
+    linear-gradient(
+      90deg,
+      rgba(248, 208, 0, 0.18),
+      var(--color-surface) 60%
+    );
+}
+
+.dashboard-immunity-row:nth-child(2),
+.dashboard-immunity-row:nth-child(3) {
+  border-color: rgba(248, 208, 0, 0.45);
+}
+
+.dashboard-immunity-rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--color-text-muted);
+  background: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  font-variant-numeric: tabular-nums;
+}
+
+.dashboard-immunity-row:nth-child(1) .dashboard-immunity-rank {
+  color: var(--color-night);
+  background: var(--color-torch);
+  border-color: var(--color-flame);
+  font-size: 14px;
+}
+
+.dashboard-immunity-row:nth-child(2) .dashboard-immunity-rank,
+.dashboard-immunity-row:nth-child(3) .dashboard-immunity-rank {
+  color: var(--color-flame);
+  background: rgba(248, 208, 0, 0.18);
+  border-color: rgba(248, 208, 0, 0.6);
+}
+
+.dashboard-immunity-player {
+  appearance: none;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  text-align: left;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast);
+}
+
+.dashboard-immunity-player img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--color-border-strong);
+  flex-shrink: 0;
+  transition: border-color var(--transition-fast);
+}
+
+.dashboard-immunity-player:hover img,
+.dashboard-immunity-player:focus-visible img,
+.dashboard-immunity-player.is-selected img {
+  border-color: var(--color-torch);
+}
+
+.dashboard-immunity-player:focus-visible {
+  outline: 2px solid var(--color-torch);
+  outline-offset: 2px;
+}
+
+.dashboard-immunity-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-night);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard-immunity-player.is-selected .dashboard-immunity-name {
+  color: var(--color-flame);
+}
+
+.dashboard-immunity-counts {
+  display: inline-flex;
+  align-items: stretch;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.dashboard-immunity-count {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.dashboard-immunity-count strong {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--color-night);
+}
+
+.dashboard-immunity-count span {
+  font-size: 8px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  margin-top: 1px;
+}
+
+.dashboard-immunity-count--ind {
+  background: rgba(248, 208, 0, 0.22);
+  border: 1px solid rgba(248, 208, 0, 0.5);
+}
+
+.dashboard-immunity-count--ind strong {
+  color: var(--color-flame);
+}
+
+.dashboard-immunity-count--ind span {
+  color: var(--color-flame);
+}
+
+.dashboard-immunity-count--grp {
+  background: rgba(216, 185, 136, 0.4);
+  border: 1px solid var(--color-border);
 }
 
 /* --- Twists grid ---

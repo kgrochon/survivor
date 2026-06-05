@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from "react";
-import { castData, type CastMember } from "../data/cast";
+import { castData, tribeAtEpisode, type CastMember } from "../data/cast";
 import {
   twists,
   productionMembers,
@@ -7,13 +7,35 @@ import {
   type ProductionMember,
 } from "../data/twists";
 import { findEliminationRecord } from "../data/connections";
-import { challengesWonBy } from "../data/challenges";
+import {
+  challenges,
+  isTribeChallenge,
+  type Challenge,
+} from "../data/challenges";
 import { getSeasonSubtitle } from "../data/seasons";
 import { TRIBE_COLORS } from "../data/tribes";
 import { fanVotes } from "../data/fanVotes";
 import { handleImageError } from "../lib/imageFallback";
 import logoUrl from "../img/survivor-50-logo.png";
 import "./styles/dashboard.css";
+
+/**
+ * True if `player` was on a winning side of `challenge`:
+ *   - Tribe challenges → was on a winning tribe at that episode.
+ *   - Individual / journey → their cast id is in winners.
+ */
+function didPlayerWin(player: CastMember, c: Challenge): boolean {
+  if (!c.confirmed && c.confirmed !== undefined) return false;
+  if (isTribeChallenge(c)) {
+    const tribe = tribeAtEpisode(player.tribeJourney, c.episode);
+    return c.winners.includes(tribe);
+  }
+  return c.winners.includes(player.id);
+}
+
+function challengesPlayerWon(player: CastMember): Challenge[] {
+  return challenges.filter((c) => didPlayerWin(player, c));
+}
 
 const CENTER_TWIST_ID = "in-the-hands-of-the-fans";
 
@@ -97,7 +119,10 @@ interface PlayerDetailProps {
 function PlayerDetail({ player, onClose }: PlayerDetailProps) {
   const elim = findEliminationRecord(player.id);
   const shared = useMemo(() => findSharedHistory(player), [player]);
-  const challenges = useMemo(() => challengesWonBy(player.id), [player]);
+  const playerChallenges = useMemo(
+    () => challengesPlayerWon(player),
+    [player],
+  );
   const { status, detail } = placementSummary(player);
 
   return (
@@ -208,14 +233,14 @@ function PlayerDetail({ player, onClose }: PlayerDetailProps) {
         <h3 className="player-detail-section-title">
           Challenges Won
           <span className="player-detail-section-count">
-            {challenges.length}
+            {playerChallenges.length}
           </span>
         </h3>
-        {challenges.length === 0 ? (
+        {playerChallenges.length === 0 ? (
           <p className="player-detail-empty">No challenge wins logged yet.</p>
         ) : (
           <ol className="player-detail-challenges">
-            {challenges.map((c) => (
+            {playerChallenges.map((c) => (
               <li key={c.id} className="player-detail-challenge-row">
                 <span className="player-detail-challenge-ep">
                   Ep {c.episode}
@@ -392,6 +417,32 @@ export default function DashboardView() {
     () => [...twists].sort((a, b) => a.episode - b.episode),
     [],
   );
+  /**
+   * Ranking of players by immunity wins. Individual immunities are the
+   * primary count (a personal accomplishment); tribe immunities are the
+   * tiebreaker. Reward challenges are excluded. Players with zero of both
+   * drop off the list.
+   */
+  const immunityRanking = useMemo(() => {
+    return castData
+      .map((p) => {
+        let individual = 0;
+        let group = 0;
+        for (const c of challenges) {
+          if (!didPlayerWin(p, c)) continue;
+          if (c.type === "individual-immunity") individual++;
+          else if (c.type === "immunity") group++;
+        }
+        return { player: p, individual, group };
+      })
+      .filter((r) => r.individual > 0 || r.group > 0)
+      .sort(
+        (a, b) =>
+          b.individual - a.individual ||
+          b.group - a.group ||
+          a.player.name.localeCompare(b.player.name),
+      );
+  }, []);
   const centerTwist = useMemo(
     () => twists.find((t) => t.id === CENTER_TWIST_ID) ?? null,
     [],
@@ -522,7 +573,6 @@ export default function DashboardView() {
       <div className="dashboard-main">
         <section className="dashboard-section dashboard-section--cast">
           <header className="dashboard-section-head">
-            <span className="dashboard-section-eyebrow">Returning players</span>
             <h2 className="dashboard-section-title">Cast</h2>
             <span className="dashboard-section-count">{castData.length}</span>
           </header>
@@ -561,9 +611,6 @@ export default function DashboardView() {
 
         <section className="dashboard-section dashboard-section--votes">
           <header className="dashboard-section-head">
-            <span className="dashboard-section-eyebrow">
-              In the Hands of the Fans
-            </span>
             <h2 className="dashboard-section-title">Audience Votes</h2>
             <span className="dashboard-section-count">{fanVotes.length}</span>
           </header>
@@ -611,11 +658,61 @@ export default function DashboardView() {
           </div>
         </section>
 
+        <section className="dashboard-section dashboard-section--immunity">
+          <header className="dashboard-section-head">
+            <h2 className="dashboard-section-title">Immunity Leaderboard</h2>
+            <span className="dashboard-section-count">
+              {immunityRanking.length}
+            </span>
+          </header>
+          <ol className="dashboard-immunity-list">
+            {immunityRanking.map((r, i) => {
+              const isSelected =
+                selection?.kind === "player" &&
+                selection.id === r.player.id;
+              return (
+                <li key={r.player.id} className="dashboard-immunity-row">
+                  <span className="dashboard-immunity-rank">{i + 1}</span>
+                  <button
+                    type="button"
+                    className={`dashboard-immunity-player ${
+                      isSelected ? "is-selected" : ""
+                    }`}
+                    onClick={() => togglePlayer(r.player.id)}
+                    title={`${r.player.name} — ${r.individual} individual, ${r.group} tribe`}
+                  >
+                    <img
+                      src={r.player.photo}
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                      onError={handleImageError}
+                    />
+                    <span className="dashboard-immunity-name">
+                      {r.player.name.split(" ")[0]}
+                    </span>
+                  </button>
+                  <span className="dashboard-immunity-counts">
+                    <span className="dashboard-immunity-count dashboard-immunity-count--ind">
+                      <strong>{r.individual}</strong>
+                      <span>Ind</span>
+                    </span>
+                    <span
+                      className="dashboard-immunity-count dashboard-immunity-count--grp"
+                      aria-hidden={r.individual === 0 ? undefined : "false"}
+                    >
+                      <strong>{r.group}</strong>
+                      <span>Tribe</span>
+                    </span>
+                  </span>
+                </li>
+              );
+            })}
+          </ol>
+        </section>
+
         <section className="dashboard-section dashboard-section--twists">
           <header className="dashboard-section-head">
-            <span className="dashboard-section-eyebrow">
-              Audience-shaped chaos
-            </span>
             <h2 className="dashboard-section-title">Twists</h2>
             <span className="dashboard-section-count">
               {orderedTwists.length}
