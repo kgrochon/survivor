@@ -31,9 +31,9 @@
   align-self: flex-start;
   height: 100vh;
   /* Width is controlled by inline style from JS; these bounds are a fallback. */
-  min-width: 220px;
+  min-width: 0;
   max-width: 560px;
-  overflow-y: auto;
+  overflow: hidden;
   overscroll-behavior: contain;
   display: flex;
   flex-direction: column;
@@ -48,6 +48,87 @@
   border-right: 1px solid rgba(248, 208, 0, 0.22);
   box-shadow: var(--shadow-lg);
   z-index: 5;
+  /* Width transitions when toggling open/closed; the `.is-dragging` class
+     turns transitions off during pointer drag so resize stays 1:1. */
+  transition:
+    width 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    padding 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.dashboard.is-aside-collapsed .dashboard-aside {
+  padding-left: 0;
+  padding-right: 0;
+  border-right-color: transparent;
+}
+
+.dashboard-aside.is-dragging {
+  transition: none;
+}
+
+/* Allow vertical scroll inside the aside (we removed it from the base rule
+   because overflow: hidden was needed to clip during the collapse). When
+   open we want it scrollable again. */
+.dashboard:not(.is-aside-collapsed) .dashboard-aside {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* --- Aside collapse toggle ---
+   Fixed-position pill that hugs the aside's right edge when open and
+   parks at the screen edge when collapsed. Animates `left` in sync with
+   the aside's width transition. */
+.dashboard-aside-toggle {
+  position: fixed;
+  top: 18px;
+  /* `left` is set inline from the effective aside width. */
+  transform: translateX(-50%);
+  z-index: 10;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--color-night);
+  color: var(--color-torch);
+  border: 1.5px solid rgba(248, 208, 0, 0.5);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow:
+    0 4px 14px -2px rgba(0, 0, 0, 0.45),
+    0 0 0 4px var(--color-bg);
+  transition:
+    left 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.dashboard-aside.is-dragging ~ .dashboard-aside-toggle {
+  transition: none;
+}
+
+.dashboard-aside-toggle:hover {
+  background: var(--color-torch);
+  color: var(--color-night);
+  transform: translateX(-50%) scale(1.08);
+}
+
+.dashboard-aside-toggle:focus-visible {
+  outline: 2px solid var(--color-torch);
+  outline-offset: 3px;
+}
+
+.dashboard-aside-toggle.is-closed {
+  /* When closed, anchor the pill to the screen edge instead of overlapping
+     it. Half-out, half-in feels best with the floating chip look. */
+  transform: translateX(0);
+}
+
+.dashboard-aside-toggle.is-closed:hover {
+  transform: translateX(0) scale(1.08);
 }
 
 .dashboard-aside::-webkit-scrollbar {
@@ -411,8 +492,7 @@ html {
 }
 
 /* Seasons list */
-.player-detail-seasons,
-.player-detail-challenges {
+.player-detail-seasons {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -421,8 +501,7 @@ html {
   gap: 6px;
 }
 
-.player-detail-season-row,
-.player-detail-challenge-row {
+.player-detail-season-row {
   display: flex;
   align-items: baseline;
   gap: 10px;
@@ -430,8 +509,7 @@ html {
   color: rgba(250, 241, 220, 0.85);
 }
 
-.player-detail-season-num,
-.player-detail-challenge-ep {
+.player-detail-season-num {
   font-weight: 700;
   color: var(--color-ocean);
   font-variant-numeric: tabular-nums;
@@ -439,8 +517,7 @@ html {
   min-width: 32px;
 }
 
-.player-detail-season-title,
-.player-detail-challenge-title {
+.player-detail-season-title {
   flex: 1;
   min-width: 0;
   overflow: hidden;
@@ -448,8 +525,7 @@ html {
   white-space: nowrap;
 }
 
-.player-detail-season-place,
-.player-detail-challenge-type {
+.player-detail-season-place {
   font-size: 11px;
   letter-spacing: 0.06em;
   color: rgba(250, 241, 220, 0.55);
@@ -466,11 +542,38 @@ html {
 }
 
 .player-detail-played-row {
+  appearance: none;
+  background: transparent;
+  border: none;
+  padding: 4px;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
   min-width: 0;
+  width: 100%;
+  border-radius: var(--radius-md);
+  transition:
+    background-color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.player-detail-played-row:hover {
+  background: rgba(248, 208, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+.player-detail-played-row:hover .player-detail-played-photo {
+  border-color: var(--color-torch);
+}
+
+.player-detail-played-row:focus-visible {
+  outline: 2px solid var(--color-torch);
+  outline-offset: 2px;
 }
 
 .player-detail-played-photo {
@@ -973,182 +1076,6 @@ html {
   color: var(--color-ocean);
 }
 
-
-/* --- Immunity Leaderboard --- */
-.dashboard-immunity-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  /* The widget itself is narrow so rows aren't a wall of stretched bars;
-     rows stay at 100% of this constrained column. */
-  width: 100%;
-  max-width: 420px;
-}
-
-.dashboard-immunity-row {
-  display: grid;
-  grid-template-columns: 24px 1fr auto;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 10px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
-  min-width: 0;
-}
-
-.dashboard-immunity-row:nth-child(1) {
-  border-color: var(--color-torch);
-  background:
-    linear-gradient(
-      90deg,
-      rgba(248, 208, 0, 0.18),
-      var(--color-surface) 60%
-    );
-}
-
-.dashboard-immunity-row:nth-child(2),
-.dashboard-immunity-row:nth-child(3) {
-  border-color: rgba(248, 208, 0, 0.45);
-}
-
-.dashboard-immunity-rank {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: var(--color-text-muted);
-  background: var(--color-bg-alt);
-  border: 1px solid var(--color-border);
-  border-radius: 50%;
-  font-variant-numeric: tabular-nums;
-}
-
-.dashboard-immunity-row:nth-child(1) .dashboard-immunity-rank {
-  color: var(--color-night);
-  background: var(--color-torch);
-  border-color: var(--color-flame);
-  font-size: 14px;
-}
-
-.dashboard-immunity-row:nth-child(2) .dashboard-immunity-rank,
-.dashboard-immunity-row:nth-child(3) .dashboard-immunity-rank {
-  color: var(--color-flame);
-  background: rgba(248, 208, 0, 0.18);
-  border-color: rgba(248, 208, 0, 0.6);
-}
-
-.dashboard-immunity-player {
-  appearance: none;
-  background: transparent;
-  border: none;
-  padding: 0;
-  margin: 0;
-  font: inherit;
-  color: inherit;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-  text-align: left;
-  border-radius: var(--radius-sm);
-  transition: color var(--transition-fast);
-}
-
-.dashboard-immunity-player img {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 1.5px solid var(--color-border-strong);
-  flex-shrink: 0;
-  transition: border-color var(--transition-fast);
-}
-
-.dashboard-immunity-player:hover img,
-.dashboard-immunity-player:focus-visible img,
-.dashboard-immunity-player.is-selected img {
-  border-color: var(--color-torch);
-}
-
-.dashboard-immunity-player:focus-visible {
-  outline: 2px solid var(--color-torch);
-  outline-offset: 2px;
-}
-
-.dashboard-immunity-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--color-night);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.dashboard-immunity-player.is-selected .dashboard-immunity-name {
-  color: var(--color-flame);
-}
-
-.dashboard-immunity-counts {
-  display: inline-flex;
-  align-items: stretch;
-  gap: 6px;
-  flex-shrink: 0;
-}
-
-.dashboard-immunity-count {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-width: 32px;
-  padding: 2px 6px;
-  border-radius: var(--radius-sm);
-  font-variant-numeric: tabular-nums;
-}
-
-.dashboard-immunity-count strong {
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1;
-  color: var(--color-night);
-}
-
-.dashboard-immunity-count span {
-  font-size: 8px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  font-weight: 700;
-  color: var(--color-text-muted);
-  margin-top: 1px;
-}
-
-.dashboard-immunity-count--ind {
-  background: rgba(248, 208, 0, 0.22);
-  border: 1px solid rgba(248, 208, 0, 0.5);
-}
-
-.dashboard-immunity-count--ind strong {
-  color: var(--color-flame);
-}
-
-.dashboard-immunity-count--ind span {
-  color: var(--color-flame);
-}
-
-.dashboard-immunity-count--grp {
-  background: rgba(216, 185, 136, 0.4);
-  border: 1px solid var(--color-border);
-}
 
 /* --- Twists grid ---
    The defining premise (episode 0) spans 2 rows so it visually dominates.
