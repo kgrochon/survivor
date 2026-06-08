@@ -64,29 +64,6 @@ export default function SurvivorPage() {
 
   return (
     <div className="s50-app">
-      <header className="s50-topbar">
-        <a className="s50-brand" href="#top">
-          <span className="s50-brand-mark">SURVIVOR 50</span>
-          <span className="s50-brand-sub">In the Hands of the Fans</span>
-        </a>
-
-        <nav aria-label="Jump to section">
-          <ul className="s50-jump">
-            {SECTIONS.map((s) => (
-              <li key={s.id}>
-                <a
-                  className="s50-jump-link"
-                  href={`#${s.id}`}
-                  aria-current={activeSection === s.id ? "true" : undefined}
-                >
-                  {s.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-
-      </header>
       <DashboardView />
 {/* 
       <main id="top">

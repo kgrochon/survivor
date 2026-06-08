@@ -1,134 +1,47 @@
-/* DashboardView — full-viewport "wallboard" overview.
-   Cast strip on top, twists grid below. No scroll: everything at a glance. */
+/* ============================================================
+   Dashboard surface
+   Two zones: the IDENTITY (left aside, burnt orange) carries the
+   Bass personality. The DATA pane (right) stays neutral, gridded,
+   tabular. They meet at a single bold vertical rule. */
 
+/* ─── Page shell ──────────────────────────────────────────── */
 .dashboard {
-  width: 100%;
   display: flex;
   flex-direction: row;
   align-items: flex-start;
-  background:
-    radial-gradient(
-      900px 500px at 90% -10%,
-      rgba(248, 208, 0, 0.14),
-      transparent 70%
-    ),
-    radial-gradient(
-      700px 500px at -5% 5%,
-      rgba(58, 174, 42, 0.1),
-      transparent 70%
-    ),
-    var(--color-bg);
-  color: var(--color-text);
+  width: 100%;
+  min-height: 100vh;
+  background: var(--color-canvas);
+  color: var(--color-ink);
 }
 
-/* --- Aside (logo + recap) ---
-   Sticky-pinned to the left of the viewport, full viewport height,
-   with its own internal scroll. Independent of the main pane's scroll. */
+/* ─── Aside: identity zone, full-height title card ────────── */
 .dashboard-aside {
   position: sticky;
   top: 0;
-  flex-shrink: 0;
   align-self: flex-start;
+  flex-shrink: 0;
   height: 100vh;
-  /* Width is controlled by inline style from JS; these bounds are a fallback. */
   min-width: 0;
   max-width: 560px;
   overflow: hidden;
   overscroll-behavior: contain;
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  padding: clamp(24px, 3vh, 36px) clamp(20px, 1.6vw, 28px);
-  background: linear-gradient(
-    180deg,
-    var(--color-night) 0%,
-    var(--color-night-2) 100%
-  );
-  color: #faf1dc;
-  border-right: 1px solid rgba(248, 208, 0, 0.22);
-  box-shadow: var(--shadow-lg);
-  z-index: 5;
-  /* Width transitions when toggling open/closed; the `.is-dragging` class
-     turns transitions off during pointer drag so resize stays 1:1. */
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-3);
+  background: var(--color-orange);
+  color: var(--color-canvas);
+  border-right: var(--rule-bold);
   transition:
-    width 320ms cubic-bezier(0.22, 1, 0.36, 1),
-    padding 320ms cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1);
+    width 320ms var(--ease),
+    padding 320ms var(--ease);
+  z-index: 5;
 }
 
-.dashboard.is-aside-collapsed .dashboard-aside {
-  padding-left: 0;
-  padding-right: 0;
-  border-right-color: transparent;
-}
-
-.dashboard-aside.is-dragging {
-  transition: none;
-}
-
-/* Allow vertical scroll inside the aside (we removed it from the base rule
-   because overflow: hidden was needed to clip during the collapse). When
-   open we want it scrollable again. */
 .dashboard:not(.is-aside-collapsed) .dashboard-aside {
   overflow-y: auto;
   overflow-x: hidden;
-}
-
-/* --- Aside collapse toggle ---
-   Fixed-position pill that hugs the aside's right edge when open and
-   parks at the screen edge when collapsed. Animates `left` in sync with
-   the aside's width transition. */
-.dashboard-aside-toggle {
-  position: fixed;
-  top: 18px;
-  /* `left` is set inline from the effective aside width. */
-  transform: translateX(-50%);
-  z-index: 10;
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: var(--color-night);
-  color: var(--color-torch);
-  border: 1.5px solid rgba(248, 208, 0, 0.5);
-  font-size: 16px;
-  line-height: 1;
-  cursor: pointer;
-  box-shadow:
-    0 4px 14px -2px rgba(0, 0, 0, 0.45),
-    0 0 0 4px var(--color-bg);
-  transition:
-    left 320ms cubic-bezier(0.22, 1, 0.36, 1),
-    background-color var(--transition-fast),
-    color var(--transition-fast),
-    transform var(--transition-fast);
-}
-
-.dashboard-aside.is-dragging ~ .dashboard-aside-toggle {
-  transition: none;
-}
-
-.dashboard-aside-toggle:hover {
-  background: var(--color-torch);
-  color: var(--color-night);
-  transform: translateX(-50%) scale(1.08);
-}
-
-.dashboard-aside-toggle:focus-visible {
-  outline: 2px solid var(--color-torch);
-  outline-offset: 3px;
-}
-
-.dashboard-aside-toggle.is-closed {
-  /* When closed, anchor the pill to the screen edge instead of overlapping
-     it. Half-out, half-in feels best with the floating chip look. */
-  transform: translateX(0);
-}
-
-.dashboard-aside-toggle.is-closed:hover {
-  transform: translateX(0) scale(1.08);
 }
 
 .dashboard-aside::-webkit-scrollbar {
@@ -136,132 +49,134 @@
   height: 0;
 }
 
+.dashboard.is-aside-collapsed .dashboard-aside {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.dashboard-aside.is-dragging {
+  transition: none;
+}
+
+/* Logo sits in a cream cut-paper rectangle inside the orange field.
+   Pure cut-paper — flat shapes layered, no shadows. */
 .dashboard-aside-logo {
   display: block;
   width: 100%;
-  max-width: 280px;
-  height: auto;
+  max-width: 240px;
   margin: 0 auto;
-  filter: drop-shadow(0 18px 40px rgba(248, 208, 0, 0.28))
-    drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
+  padding: var(--space-2);
 }
 
+/* Default-state recap (when no player/twist is selected) */
 .dashboard-aside-recap {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: var(--space-1);
+  border-top: 2px solid var(--color-canvas);
+  border-bottom: 2px solid var(--color-canvas);
+  padding: var(--space-2) 0;
 }
 
 .dashboard-aside-eyebrow {
-  font-size: 11px;
-  letter-spacing: 0.36em;
-  text-transform: uppercase;
-  color: var(--color-torch);
+  font-family: var(--font-display);
+  font-size: 13px;
   font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--color-canvas);
+  line-height: 1;
+  margin-bottom: var(--space-1);
 }
 
 .dashboard-aside-recap p {
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.6;
-  color: rgba(250, 241, 220, 0.82);
+  font-family: var(--font-data);
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--color-canvas);
 }
 
 .dashboard-aside-recap strong {
-  color: var(--color-torch);
+  color: var(--color-canvas);
   font-weight: 700;
 }
 
-/* --- Section nav (default aside state) --- */
+.dashboard-aside-hint {
+  font-family: var(--font-data);
+  font-size: 12px;
+  font-style: italic;
+  color: rgba(243, 234, 210, 0.78);
+}
+
+/* Section nav — big typographic blocks, the personality moment */
 .dashboard-aside-nav {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-top: 4px;
+  gap: var(--space-1);
 }
 
 .dashboard-aside-nav ul {
   list-style: none;
-  margin: 0;
-  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
 }
 
 .dashboard-aside-nav a {
   display: grid;
   grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
-  border-radius: var(--radius-md);
-  border: 1px solid transparent;
-  color: rgba(250, 241, 220, 0.78);
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  border-top: 1px solid rgba(243, 234, 210, 0.32);
+  color: var(--color-canvas);
   text-decoration: none;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  line-height: 1;
   transition:
-    color 220ms var(--ease-out),
-    background-color 220ms var(--ease-out),
-    border-color 220ms var(--ease-out),
-    transform 220ms var(--ease-out);
+    color var(--t),
+    background-color var(--t),
+    padding var(--t);
+}
+
+.dashboard-aside-nav a:last-child {
+  border-bottom: 1px solid rgba(243, 234, 210, 0.32);
 }
 
 .dashboard-aside-nav a:hover,
 .dashboard-aside-nav a:focus-visible {
-  color: var(--color-torch);
-  background: rgba(248, 208, 0, 0.1);
-  border-color: rgba(248, 208, 0, 0.32);
-  transform: translateX(2px);
   outline: none;
+  background: var(--color-canvas);
+  color: var(--color-orange);
+  padding-left: var(--space-2);
+  padding-right: var(--space-2);
+  margin-left: calc(-1 * var(--space-2));
+  margin-right: calc(-1 * var(--space-2));
 }
 
 .dashboard-aside-nav-num {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  color: rgba(250, 241, 220, 0.35);
+  font-family: var(--font-data);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: rgba(243, 234, 210, 0.6);
   font-variant-numeric: tabular-nums;
-  transition: color 220ms var(--ease-out);
+  align-self: center;
 }
 
 .dashboard-aside-nav a:hover .dashboard-aside-nav-num,
 .dashboard-aside-nav a:focus-visible .dashboard-aside-nav-num {
-  color: var(--color-torch);
+  color: var(--color-orange);
 }
 
 .dashboard-aside-nav-arrow {
-  font-size: 14px;
-  line-height: 1;
-  color: rgba(250, 241, 220, 0.3);
-  transform: translateX(-4px);
-  opacity: 0;
-  transition:
-    transform 240ms var(--ease-out),
-    opacity 240ms var(--ease-out),
-    color 240ms var(--ease-out);
+  display: none; /* Bass keeps it lean. The hover swap IS the affordance. */
 }
 
-.dashboard-aside-nav a:hover .dashboard-aside-nav-arrow,
-.dashboard-aside-nav a:focus-visible .dashboard-aside-nav-arrow {
-  opacity: 1;
-  transform: translateX(0);
-  color: var(--color-torch);
-}
-
-/* Smooth scroll between sections and clear the sticky topbar. */
-.dashboard-section {
-  scroll-margin-top: clamp(16px, 2.4vh, 32px);
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-/* Resize handle covering the full right edge.
-   Hit area is wider than the visible line for forgiving pointer targeting. */
+/* ─── Aside resize handle ─────────────────────────────────── */
 .dashboard-aside-handle {
   position: absolute;
   top: 0;
@@ -282,658 +197,276 @@ html {
   left: 50%;
   width: 2px;
   margin-left: -1px;
-  background: linear-gradient(
-    180deg,
-    transparent,
-    rgba(248, 208, 0, 0.2) 20%,
-    rgba(248, 208, 0, 0.4) 50%,
-    rgba(248, 208, 0, 0.2) 80%,
-    transparent
-  );
-  opacity: 0.5;
-  transition:
-    opacity var(--transition-fast),
-    background var(--transition-fast),
-    width var(--transition-fast);
+  background: var(--color-ink);
+  opacity: 0;
+  transition: opacity var(--t-fast);
 }
 
-.dashboard-aside-handle:hover::before {
-  opacity: 1;
-  width: 4px;
-  margin-left: -2px;
-}
-
+.dashboard-aside-handle:hover::before,
 .dashboard-aside-handle:active::before {
-  opacity: 1;
-  width: 4px;
-  margin-left: -2px;
-  background: var(--color-torch);
+  opacity: 0.5;
 }
 
-/* --- Main pane (cast + votes + twists) ---
-   Scrolls with the page. Aside stays pinned via `position: sticky`. */
+/* ─── Aside collapse toggle: a flat black square ──────────── */
+.dashboard-aside-toggle {
+  position: fixed;
+  top: var(--space-2);
+  transform: translateX(-50%);
+  z-index: 10;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-ink);
+  color: var(--color-canvas);
+  border: none;
+  font-family: var(--font-data);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    left 320ms var(--ease),
+    background-color var(--t-fast);
+}
+
+.dashboard-aside.is-dragging ~ .dashboard-aside-toggle {
+  transition: none;
+}
+
+.dashboard-aside-toggle:hover {
+  background: var(--color-orange);
+}
+
+.dashboard-aside-toggle:focus-visible {
+  outline: 3px solid var(--color-ink);
+  outline-offset: 3px;
+}
+
+.dashboard-aside-toggle.is-closed {
+  transform: translateX(0);
+}
+
+/* ─── Main pane: the data zone ────────────────────────────── */
 .dashboard-main {
   flex: 1;
   min-width: 0;
+  padding: var(--space-5) var(--space-5) var(--space-6);
   display: flex;
   flex-direction: column;
-  gap: clamp(16px, 2vh, 28px);
-  padding: clamp(16px, 2.4vh, 32px) clamp(20px, 3vw, 48px);
-}
-
-/* --- Player detail panel (aside content when a player is selected) --- */
-.player-detail {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.player-detail-close {
-  appearance: none;
-  align-self: flex-start;
-  background: transparent;
-  border: 1px solid rgba(248, 208, 0, 0.4);
-  color: var(--color-torch);
-  font: inherit;
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  padding: 5px 12px;
-  border-radius: var(--radius-full);
-  cursor: pointer;
-  transition:
-    color var(--transition-fast),
-    background-color var(--transition-fast);
-}
-
-.player-detail-close:hover,
-.player-detail-close:focus-visible {
-  color: var(--color-night);
-  background: var(--color-torch);
-  outline: none;
-}
-
-.player-detail-portrait {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  border: 1px solid rgba(248, 208, 0, 0.32);
-  background: var(--color-night-2);
-  box-shadow:
-    var(--shadow-md),
-    0 0 32px -10px rgba(248, 208, 0, 0.32);
-}
-
-.player-detail-portrait img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.player-detail-head {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.player-detail-name {
-  font-size: clamp(20px, 1.6vw, 26px);
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  line-height: 1.1;
-  margin: 0;
-  color: #faf1dc;
-}
-
-.player-detail-status {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.player-detail-status-badge {
-  align-self: flex-start;
-  font-size: 10px;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  font-weight: 700;
-  padding: 4px 9px;
-  border-radius: var(--radius-sm);
-  background: rgba(232, 122, 30, 0.2);
-  color: var(--color-flame);
-  border: 1px solid rgba(232, 122, 30, 0.45);
-}
-
-.player-detail-status-badge.is-winner {
-  background: var(--color-torch);
-  color: var(--color-night);
-  border-color: var(--color-torch);
-}
-
-.player-detail-status-detail {
-  font-size: 12px;
-  color: rgba(250, 241, 220, 0.7);
-  letter-spacing: 0.02em;
-}
-
-.player-detail-section {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding-top: 14px;
-  border-top: 1px dashed rgba(250, 241, 220, 0.18);
-}
-
-.player-detail-section-title {
-  font-size: 10px;
-  letter-spacing: 0.36em;
-  text-transform: uppercase;
-  font-weight: 700;
-  margin: 0;
-  color: var(--color-torch);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.player-detail-section-count {
-  font-size: 9px;
-  letter-spacing: 0.18em;
-  color: rgba(250, 241, 220, 0.6);
-  font-variant-numeric: tabular-nums;
-  margin-left: auto;
-}
-
-.player-detail-empty {
-  margin: 0;
-  font-size: 12px;
-  color: rgba(250, 241, 220, 0.5);
-  font-style: italic;
-}
-
-/* Tribe timeline */
-.player-detail-tribes {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.player-detail-tribe-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 13px;
-  color: rgba(250, 241, 220, 0.88);
-}
-
-.player-detail-tribe-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  border: 1px solid rgba(0, 0, 0, 0.35);
-}
-
-.player-detail-tribe-name {
-  font-weight: 600;
-}
-
-.player-detail-tribe-range {
-  margin-left: auto;
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  color: rgba(250, 241, 220, 0.55);
-  font-variant-numeric: tabular-nums;
-}
-
-/* Seasons list */
-.player-detail-seasons {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.player-detail-season-row {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  font-size: 13px;
-  color: rgba(250, 241, 220, 0.85);
-}
-
-.player-detail-season-num {
-  font-weight: 700;
-  color: var(--color-ocean);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.06em;
-  min-width: 32px;
-}
-
-.player-detail-season-title {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.player-detail-season-place {
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  color: rgba(250, 241, 220, 0.55);
-}
-
-/* Played With */
-.player-detail-played-with {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
-  gap: 10px;
-}
-
-.player-detail-played-row {
-  appearance: none;
-  background: transparent;
-  border: none;
-  padding: 4px;
-  margin: 0;
-  font: inherit;
-  color: inherit;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  min-width: 0;
-  width: 100%;
-  border-radius: var(--radius-md);
-  transition:
-    background-color var(--transition-fast),
-    transform var(--transition-fast);
-}
-
-.player-detail-played-row:hover {
-  background: rgba(248, 208, 0, 0.12);
-  transform: translateY(-2px);
-}
-
-.player-detail-played-row:hover .player-detail-played-photo {
-  border-color: var(--color-torch);
-}
-
-.player-detail-played-row:focus-visible {
-  outline: 2px solid var(--color-torch);
-  outline-offset: 2px;
-}
-
-.player-detail-played-photo {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  border-radius: 50%;
-  overflow: hidden;
-  border: 1.5px solid rgba(250, 241, 220, 0.3);
-  background: var(--color-night-2);
-}
-
-.player-detail-played-photo img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.player-detail-played-name {
-  font-size: 10px;
-  font-weight: 600;
-  color: rgba(250, 241, 220, 0.88);
-  text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
-}
-
-.player-detail-played-count {
-  font-size: 9px;
-  letter-spacing: 0.1em;
-  color: var(--color-torch);
-  font-variant-numeric: tabular-nums;
-}
-
-.dashboard-aside-hint {
-  font-size: 12px;
-  font-style: italic;
-  color: var(--color-torch);
-  opacity: 0.7;
-}
-
-@media (max-width: 720px) {
-  .dashboard {
-    flex-direction: column;
-  }
-
-  .dashboard-aside {
-    /* Inline JS width is overridden on small screens since the aside stacks above the main pane. */
-    width: 100% !important;
-    max-width: none;
-    /* Drop sticky pinning when stacked vertically. */
-    position: static;
-    height: auto;
-    border-right: none;
-    border-bottom: 1px solid rgba(248, 208, 0, 0.22);
-    padding: 20px clamp(16px, 4vw, 24px);
-  }
-
-  .dashboard-aside-handle {
-    display: none;
-  }
-
-  .dashboard-aside-logo {
-    max-width: 200px;
-  }
+  gap: var(--space-6);
 }
 
 .dashboard-section {
+  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: clamp(10px, 1.4vh, 16px);
-  min-height: 0; /* allow grids to shrink inside flex */
-  /* Section shrinks to its content rather than stretching across the main pane. */
-  width: fit-content;
-  max-width: 100%;
-  align-self: flex-start;
-}
-
-.dashboard-section--twists {
-  flex: 1;
-  min-height: 0;
-}
-
-/* Cast and votes span the full main pane; their inner grids need the
-   horizontal room to wrap nicely. */
-.dashboard-section--cast,
-.dashboard-section--votes {
-  width: 100%;
-  align-self: stretch;
+  gap: var(--space-3);
 }
 
 .dashboard-section-head {
   display: flex;
   align-items: baseline;
-  gap: 14px;
-  flex-wrap: wrap;
-  /* Heading row hugs its own content; the count sits right next to the title. */
-  width: fit-content;
-  align-self: flex-start;
+  gap: var(--space-2);
+  padding-bottom: var(--space-1);
+  border-bottom: var(--rule-bold);
 }
 
 .dashboard-section-title {
-  position: relative;
-  font-size: clamp(22px, 2.6vw, 32px);
+  font-family: var(--font-display);
+  font-size: clamp(36px, 5vw, 56px);
   font-weight: 700;
-  letter-spacing: -0.01em;
-  line-height: 1;
-  margin: 0;
-  color: var(--color-night);
-  /* Pre-animation pose — settled in by `.is-revealed` below. */
-  opacity: 0;
-  transform: translateX(-14px);
-}
-
-/* Torch-yellow underline that strokes across after the title settles. */
-.dashboard-section-title::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: -8px;
-  height: 3px;
-  width: 60%;
-  border-radius: 2px;
-  background: linear-gradient(
-    90deg,
-    var(--color-torch),
-    var(--color-flame)
-  );
-  transform: scaleX(0);
-  transform-origin: left center;
-  box-shadow: 0 0 12px -2px rgba(248, 208, 0, 0.55);
-}
-
-.dashboard-section-head.is-revealed .dashboard-section-title {
-  animation: section-title-enter 480ms var(--ease-out) forwards;
-}
-
-.dashboard-section-head.is-revealed .dashboard-section-title::after {
-  animation: section-title-underline 520ms 180ms cubic-bezier(0.22, 1, 0.36, 1)
-    forwards;
-}
-
-@keyframes section-title-enter {
-  from {
-    opacity: 0;
-    transform: translateX(-14px);
-    letter-spacing: 0.04em;
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-    letter-spacing: -0.01em;
-  }
-}
-
-@keyframes section-title-underline {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .dashboard-section-title,
-  .dashboard-section-title::after {
-    opacity: 1;
-    transform: none;
-    animation: none;
-  }
-  .dashboard-section-title::after {
-    transform: scaleX(1);
-  }
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  line-height: 0.95;
+  color: var(--color-ink);
 }
 
 .dashboard-section-count {
-  font-size: 11px;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: var(--color-text-muted);
+  font-family: var(--font-data);
+  font-size: 14px;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
+  color: var(--color-ink-soft);
   padding: 4px 10px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-full);
-  background: var(--color-surface);
+  border: var(--rule-hair);
+  background: var(--color-canvas);
 }
 
-/* --- Cast strip --- */
+/* ─── Cast grid: neutral, gridded, well-spaced ────────────── */
 .dashboard-cast-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(76px, 1fr));
-  gap: clamp(6px, 0.8vw, 10px);
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: var(--space-3) var(--space-2);
 }
 
 .dashboard-cast-tile {
   appearance: none;
-  background: transparent;
+  background: none;
   border: none;
-  padding: 4px;
+  padding: 0;
   margin: 0;
-  cursor: pointer;
   font: inherit;
   color: inherit;
+  cursor: pointer;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  min-width: 0;
-  border-radius: var(--radius-md);
-  transition: background-color var(--transition-fast);
+  align-items: stretch;
+  gap: var(--space-1);
+  transition: transform var(--t-fast);
 }
 
 .dashboard-cast-tile:hover,
 .dashboard-cast-tile:focus-visible {
-  background: rgba(248, 208, 0, 0.12);
   outline: none;
-}
-
-.dashboard-cast-tile.is-selected .dashboard-cast-photo {
-  border-color: var(--color-torch);
-  box-shadow:
-    0 0 0 2px var(--color-bg),
-    var(--shadow-glow-torch);
-}
-
-.dashboard-cast-tile.is-selected .dashboard-cast-name {
-  color: var(--color-night);
-  font-weight: 700;
+  transform: translateY(-2px);
 }
 
 .dashboard-cast-photo {
   width: 100%;
   aspect-ratio: 1 / 1;
-  border-radius: 50%;
+  border: var(--rule);
   overflow: hidden;
-  border: 2px solid var(--color-border);
-  background: var(--color-surface);
-  transition:
-    border-color var(--transition-fast),
-    transform var(--transition-fast);
-}
-
-.dashboard-cast-tile:hover .dashboard-cast-photo {
-  border-color: var(--color-torch);
-  transform: translateY(-2px);
+  background: var(--color-canvas-2);
+  transition: border-color var(--t-fast);
 }
 
 .dashboard-cast-photo img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
 }
 
 .dashboard-cast-name {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: var(--color-night);
-  line-height: 1.2;
+  font-family: var(--font-data);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-ink);
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 100%;
 }
 
-/* --- Audience Votes strip --- */
-.dashboard-section--votes {
-  flex: 0 0 auto;
+.dashboard-cast-tile.is-selected .dashboard-cast-photo {
+  border: 3px solid var(--color-orange);
 }
 
+.dashboard-cast-tile.is-selected .dashboard-cast-name {
+  background: var(--color-orange);
+  color: var(--color-canvas);
+  font-weight: 600;
+}
+
+/* ─── Audience Votes ──────────────────────────────────────────
+   Each card is a flat "poster": a bold colored band up top
+   carries the question in display type; the cream body below
+   carries the data. Bands cycle through the categorical palette
+   so the strip has visual rhythm without coloring the data. */
 .dashboard-votes-strip {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 10px;
+  grid-template-columns: 1fr 1fr;
+  flex-wrap: wrap;
+  gap: var(--space-2);
 }
 
 .dashboard-vote {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 10px 12px;
-  background: linear-gradient(
-    160deg,
-    var(--color-surface) 0%,
-    var(--color-bg-alt) 100%
-  );
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  padding: 0;
+  background: var(--color-canvas);
+  border: var(--rule);
   min-width: 0;
+  overflow: hidden;
+  max-width: 300px;
+  height: fit-content;
 }
 
+/* The colored band — bleeds to the card edges. */
 .dashboard-vote-head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 10px;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  background: var(--color-orange);
+  color: var(--color-canvas);
+}
+
+/* Cycle the band color through orange → mustard → teal → red.
+   Mustard gets ink text because cream-on-mustard is low contrast. */
+.dashboard-votes-strip > .dashboard-vote:nth-child(4n + 2) .dashboard-vote-head {
+  background: var(--color-mustard);
+  color: var(--color-ink);
+}
+.dashboard-votes-strip > .dashboard-vote:nth-child(4n + 3) .dashboard-vote-head {
+  background: var(--color-teal);
+}
+.dashboard-votes-strip > .dashboard-vote:nth-child(4n) .dashboard-vote-head {
+  background: var(--color-red);
 }
 
 .dashboard-vote-subject {
-  font-size: 12px;
+  font-family: var(--font-display);
+  font-size: 22px;
   font-weight: 700;
-  letter-spacing: 0.04em;
-  color: var(--color-night);
-  line-height: 1.2;
-  min-width: 0;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: inherit;
+  line-height: 1.05;
   flex: 1;
+  min-width: 0;
 }
 
+/* Episode chip — flat black rectangle, never picks up the band color. */
 .dashboard-vote-ep {
   flex-shrink: 0;
-  font-size: 9px;
+  font-family: var(--font-data);
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.16em;
-  color: var(--color-night);
-  padding: 2px 6px;
-  border-radius: var(--radius-sm);
-  background: var(--color-torch);
+  letter-spacing: 0.06em;
+  color: var(--color-canvas);
+  background: var(--color-ink);
+  padding: 4px 10px;
+  border: none;
   font-variant-numeric: tabular-nums;
+  align-self: flex-start;
+}
+
+/* Body of card — horizontal padding lives on the buttons + prompt
+   directly so options can stripe edge-to-edge with one hairline. */
+.dashboard-vote-prompt {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+  padding: var(--space-2) var(--space-2) 0;
 }
 
 .dashboard-vote-options {
   list-style: none;
-  margin: 0;
-  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  /* The gap is between every pair of items, including collapsed ones — so
-     transition it down to 0 alongside the option collapse so the winner
-     lands at y=0 regardless of how many losers used to sit above it. */
-  transition: gap 1000ms var(--ease-in-out);
+  transition: gap 800ms var(--ease);
 }
 
 .dashboard-vote.phase-collapsed .dashboard-vote-options {
   gap: 0;
 }
 
-/* Each option is a clickable button inside its <li>. The li carries the
-   visual state classes (is-winner, is-user-pick) and provides the relative
-   container for the percentage bar. */
 .dashboard-vote-option {
   list-style: none;
   position: relative;
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  /* Animatable so losers can collapse smoothly after a guess. The winner
-     keeps its own height and rises to the top as the losers shrink. */
   max-height: 200px;
+  overflow: hidden;
   transition:
-    max-height 1000ms var(--ease-in-out),
-    opacity 1000ms var(--ease-out),
-    margin 1000ms var(--ease-in-out),
-    padding 1000ms var(--ease-in-out),
-    transform 1000ms var(--ease-out);
+    max-height 800ms var(--ease),
+    opacity 800ms var(--ease),
+    margin 800ms var(--ease),
+    padding 800ms var(--ease);
 }
 
 .dashboard-vote-option.is-collapsing {
@@ -941,31 +474,35 @@ html {
   opacity: 0;
   margin: 0;
   padding: 0;
-  transform: translateY(-6px);
-  pointer-events: none;
 }
 
+/* Options: hairline rules between rows (not boxes around each) — cuts
+   the visual line count dramatically. Buttons span the full card width
+   so flood states reach the card edges naturally; horizontal padding
+   on the button gives the text breathing room. */
 .dashboard-vote-option-button {
   appearance: none;
-  background: transparent;
-  border: 1px solid transparent;
-  margin: 0;
-  padding: 4px 6px;
-  font: inherit;
-  color: var(--color-text-muted);
-  font-size: 11.5px;
-  cursor: pointer;
-  text-align: left;
   width: 100%;
+  background: transparent;
+  border: none;
+  border-top: var(--rule-hair);
+  padding: var(--space-1) var(--space-2);
+  font-family: var(--font-data);
+  font-size: 13.5px;
+  color: var(--color-ink);
+  text-align: left;
   display: grid;
-  grid-template-columns: 14px 1fr auto;
+  grid-template-columns: 18px 1fr auto;
   align-items: center;
-  column-gap: 6px;
-  border-radius: var(--radius-sm);
+  column-gap: var(--space-2);
+  cursor: pointer;
   transition:
-    background-color var(--transition-fast),
-    border-color var(--transition-fast),
-    color var(--transition-fast);
+    background-color var(--t-fast),
+    color var(--t-fast);
+}
+
+.dashboard-vote-option:first-child .dashboard-vote-option-button {
+  border-top: none;
 }
 
 .dashboard-vote-option-button:disabled {
@@ -973,60 +510,51 @@ html {
 }
 
 .dashboard-vote-option-button:focus-visible {
-  outline: 2px solid var(--color-torch);
-  outline-offset: 2px;
-}
-
-/* Pre-guess: option buttons are highlighted as actionable choices. */
-.dashboard-vote:not(.is-answered) .dashboard-vote-option-button {
-  background: var(--color-bg-alt);
-  border-color: var(--color-border);
-  color: var(--color-night);
+  outline: 2px solid var(--color-ink);
+  outline-offset: -2px;
 }
 
 .dashboard-vote:not(.is-answered) .dashboard-vote-option-button:hover {
-  background: rgba(248, 208, 0, 0.18);
-  border-color: var(--color-torch);
+  background: var(--color-ink);
+  color: var(--color-canvas);
 }
 
-/* Post-guess: winner row gets the yellow background. */
+/* Winner row — accessible green flood (correct answer). */
 .dashboard-vote-option.is-winner .dashboard-vote-option-button {
-  color: var(--color-night);
-  background: rgba(248, 208, 0, 0.22);
+  background: var(--color-green);
+  color: var(--color-canvas);
   font-weight: 600;
+  border-top-color: transparent;
 }
 
-/* User's pick (the one they chose). */
-.dashboard-vote-option.is-user-pick .dashboard-vote-option-button {
-  border-color: var(--color-flame);
+/* User's wrong pick — deep red flood. */
+.dashboard-vote-option.is-user-pick:not(.is-winner)
+  .dashboard-vote-option-button {
+  background: var(--color-red);
+  color: var(--color-canvas);
+  border-top-color: transparent;
 }
 
-.dashboard-vote-option.is-user-pick.is-winner .dashboard-vote-option-button {
-  border-color: var(--color-palm);
+.dashboard-vote-option.is-user-pick:not(.is-winner)
+  + .dashboard-vote-option
+  .dashboard-vote-option-button,
+.dashboard-vote-option.is-winner
+  + .dashboard-vote-option
+  .dashboard-vote-option-button {
+  border-top-color: transparent;
 }
 
 .dashboard-vote-marker {
-  font-size: 12px;
-  line-height: 1;
+  font-family: var(--font-display);
+  font-size: 16px;
   text-align: center;
-  color: var(--color-text-dim);
   font-weight: 700;
-}
-
-.dashboard-vote-option.is-winner .dashboard-vote-marker {
-  color: var(--color-flame);
-}
-
-.dashboard-vote-option.is-user-pick:not(.is-winner) .dashboard-vote-marker {
-  color: var(--color-flame);
-}
-
-.dashboard-vote-option.is-user-pick.is-winner .dashboard-vote-marker {
-  color: var(--color-palm-dark);
+  line-height: 1;
 }
 
 .dashboard-vote-label {
-  line-height: 1.25;
+  font-family: var(--font-data);
+  line-height: 1.3;
   min-width: 0;
   overflow: hidden;
   display: -webkit-box;
@@ -1036,58 +564,38 @@ html {
 }
 
 .dashboard-vote-percent {
-  font-size: 10px;
+  font-family: var(--font-data);
+  font-size: 13px;
   font-weight: 700;
-  letter-spacing: 0.04em;
-  color: var(--color-night);
   font-variant-numeric: tabular-nums;
-}
-
-.dashboard-vote-option:not(.is-winner) .dashboard-vote-percent {
-  color: var(--color-text-dim);
+  letter-spacing: 0.02em;
 }
 
 .dashboard-vote-bar {
   position: absolute;
   left: 0;
   bottom: 0;
-  height: 2px;
-  background: linear-gradient(
-    90deg,
-    var(--color-torch),
-    var(--color-flame)
-  );
-  border-radius: 0 2px 2px 0;
+  height: 4px;
+  background: var(--color-ink);
   pointer-events: none;
 }
 
-.dashboard-vote-option:not(.is-winner) .dashboard-vote-bar {
-  background: var(--color-border-strong);
-  opacity: 0.45;
+/* Drop the percentage bar on winners — the green flood already
+   communicates "this won," and the bar would only cover the bottom-left
+   slice, making the flood look chipped. Non-winners keep their bar. */
+.dashboard-vote-option.is-winner .dashboard-vote-bar {
+  display: none;
 }
 
-/* --- Pre-guess prompt + verdict (post-guess) --- */
-.dashboard-vote-prompt {
-  margin: 0;
-  font-size: 10px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  font-weight: 600;
-  color: var(--color-ocean);
-}
-
-
-/* --- Twists grid ---
-   The defining premise (episode 0) spans 2 rows so it visually dominates.
-   The seven episode-specific twists fill the remaining cells around it. */
+/* ─── Twists grid — broken at one point ───────────────────── */
+/* This is THE intentional break in the grid: 3 equal columns of
+   cream tiles, except the center "Premise" tile spans 2 rows AND
+   floods burnt orange — the figure/ground rupture. */
 .dashboard-twists-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-auto-rows: minmax(150px, 1fr);
-  gap: clamp(12px, 1.6vw, 22px);
-  width: 100%;
-  max-width: 820px;
-  margin: 12px auto 0;
+  grid-auto-rows: minmax(160px, 1fr);
+  gap: var(--space-2);
 }
 
 @media (max-width: 720px) {
@@ -1096,103 +604,85 @@ html {
   }
 }
 
-@media (max-width: 460px) {
-  .dashboard-twists-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
 .dashboard-twist {
   appearance: none;
-  background: transparent;
-  border: none;
-  padding: 18px 14px 14px;
+  background: var(--color-canvas);
+  border: var(--rule);
+  padding: var(--space-2);
   margin: 0;
   font: inherit;
+  color: var(--color-ink);
   cursor: pointer;
-  color: inherit;
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  border-radius: var(--radius-lg);
-  isolation: isolate;
-  overflow: hidden;
+  gap: var(--space-1);
   transition:
-    transform 280ms var(--ease-out),
-    filter 280ms var(--ease-out);
+    background-color var(--t-fast),
+    color var(--t-fast),
+    transform var(--t-fast);
 }
 
+.dashboard-twist:hover,
 .dashboard-twist:focus-visible {
-  outline: 2px solid var(--color-torch);
-  outline-offset: 3px;
+  outline: none;
+  background: var(--color-ink);
+  color: var(--color-canvas);
 }
 
-/* Soft gradient halo backdrop — the only visual that hints at the tile. */
 .dashboard-twist-glow {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: radial-gradient(
-    circle at 50% 38%,
-    rgba(248, 208, 0, 0.22) 0%,
-    rgba(232, 122, 30, 0.1) 35%,
-    rgba(216, 185, 136, 0.16) 65%,
-    transparent 92%
-  );
-  z-index: 0;
-  pointer-events: none;
-  transition: background 320ms var(--ease-out);
+  display: none; /* no glows in Bass world */
 }
 
 .dashboard-twist-img {
-  position: relative;
-  z-index: 1;
-  width: 78%;
-  max-height: 70%;
+  width: 70%;
+  max-height: 60%;
   object-fit: contain;
+  /* Knock the SVG to a single ink silhouette so it reads as a flat
+     cut-paper mark, not an illustration. */
+  filter: grayscale(1) brightness(0) contrast(1);
+  opacity: 0.92;
   transition:
-    transform 280ms var(--ease-out),
-    filter 280ms var(--ease-out);
+    filter var(--t-fast),
+    opacity var(--t-fast);
 }
 
-/* Episode chip — top-right corner badge on satellites */
+.dashboard-twist:hover .dashboard-twist-img,
+.dashboard-twist:focus-visible .dashboard-twist-img {
+  filter: grayscale(1) brightness(0) invert(1);
+}
+
 .dashboard-twist-ep-chip {
   position: absolute;
-  top: 10px;
-  right: 12px;
-  font-size: 9px;
+  top: var(--space-1);
+  right: var(--space-1);
+  font-family: var(--font-data);
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.16em;
-  color: var(--color-night);
-  background: var(--color-torch);
-  padding: 3px 8px;
-  border-radius: var(--radius-full);
   font-variant-numeric: tabular-nums;
-  z-index: 2;
-  box-shadow: 0 2px 6px rgba(40, 28, 10, 0.22);
+  letter-spacing: 0.06em;
+  color: var(--color-canvas);
+  background: var(--color-ink);
+  padding: 2px 6px;
 }
 
-/* Title label below the SVG */
 .dashboard-twist-label {
-  position: relative;
-  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
   text-align: center;
-  margin-top: 4px;
+  margin-top: var(--space-1);
 }
 
 .dashboard-twist-label-title {
-  font-size: 12px;
+  font-family: var(--font-display);
+  font-size: 13px;
   font-weight: 700;
-  letter-spacing: -0.005em;
-  line-height: 1.22;
-  color: var(--color-night);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.1;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
@@ -1200,95 +690,330 @@ html {
   overflow: hidden;
 }
 
-/* --- Center twist: 2-row showcase --- */
+/* The grid break: the center tile is burnt orange AND spans 2 rows.
+   It anchors the composition with a single bold idea. */
 .dashboard-twist--center {
   grid-row: span 2;
-  padding: 38px 18px 22px;
-}
-
-.dashboard-twist--center .dashboard-twist-glow {
-  background:
-    radial-gradient(
-      circle at 50% 35%,
-      rgba(248, 208, 0, 0.32) 0%,
-      rgba(248, 208, 0, 0.1) 30%,
-      transparent 65%
-    ),
-    radial-gradient(
-      circle at 50% 80%,
-      rgba(17, 24, 33, 0.32) 0%,
-      rgba(17, 24, 33, 0.08) 50%,
-      transparent 80%
-    );
+  background: var(--color-orange);
+  color: var(--color-canvas);
+  border-color: var(--color-orange);
 }
 
 .dashboard-twist--center .dashboard-twist-img {
-  width: 78%;
-  max-height: 62%;
-  filter: drop-shadow(0 0 18px rgba(248, 208, 0, 0.35));
+  width: 64%;
+  max-height: 55%;
+  filter: grayscale(1) brightness(0) invert(1);
+  opacity: 1;
+}
+
+.dashboard-twist--center:hover,
+.dashboard-twist--center:focus-visible {
+  background: var(--color-ink);
+  border-color: var(--color-ink);
 }
 
 .dashboard-twist--center .dashboard-twist-label-title {
-  font-size: clamp(15px, 1.6vw, 19px);
+  font-size: clamp(18px, 1.8vw, 22px);
 }
 
-/* "The Premise" eyebrow chip on the center tile */
 .dashboard-twist-ep-chip--center {
-  top: 14px;
-  left: 16px;
+  background: var(--color-canvas);
+  color: var(--color-orange);
+  top: var(--space-2);
+  left: var(--space-2);
   right: auto;
-  font-size: 10px;
-  letter-spacing: 0.32em;
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
-  background: rgba(17, 24, 33, 0.88);
-  color: var(--color-torch);
   padding: 4px 10px;
-  border: 1px solid rgba(248, 208, 0, 0.4);
 }
 
-/* --- Hover / selected ---
-   Same idea for both tiles: gradient brightens, tile lifts slightly,
-   SVG scales up. No hard edges; the glow does the work. */
-.dashboard-twist:hover,
-.dashboard-twist.is-selected {
-  transform: translateY(-4px);
+.dashboard-twist--center:hover .dashboard-twist-ep-chip--center,
+.dashboard-twist--center:focus-visible .dashboard-twist-ep-chip--center {
+  background: var(--color-canvas);
+  color: var(--color-ink);
 }
 
-.dashboard-twist:hover .dashboard-twist-glow,
-.dashboard-twist.is-selected .dashboard-twist-glow {
-  background: radial-gradient(
-    circle at 50% 38%,
-    rgba(248, 208, 0, 0.42) 0%,
-    rgba(232, 122, 30, 0.2) 35%,
-    rgba(216, 185, 136, 0.22) 65%,
-    transparent 92%
-  );
+/* ─── Detail panels in the aside (player + twist) ─────────── */
+/* These sit inside the burnt-orange aside. To stay legible they
+   live in cream rectangles — flat cut-paper layered on the field. */
+.player-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  padding: var(--space-3) var(--space-2);
+  border: var(--rule);
 }
 
-.dashboard-twist:hover .dashboard-twist-img,
-.dashboard-twist.is-selected .dashboard-twist-img {
-  transform: scale(1.06);
-  filter: drop-shadow(0 0 14px rgba(248, 208, 0, 0.5));
+.player-detail-close {
+  appearance: none;
+  align-self: flex-start;
+  background: var(--color-ink);
+  color: var(--color-canvas);
+  border: none;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: background-color var(--t-fast);
 }
 
-.dashboard-twist--center:hover .dashboard-twist-glow,
-.dashboard-twist--center.is-selected .dashboard-twist-glow {
-  background:
-    radial-gradient(
-      circle at 50% 35%,
-      rgba(248, 208, 0, 0.5) 0%,
-      rgba(248, 208, 0, 0.16) 30%,
-      transparent 65%
-    ),
-    radial-gradient(
-      circle at 50% 80%,
-      rgba(17, 24, 33, 0.4) 0%,
-      rgba(17, 24, 33, 0.1) 50%,
-      transparent 80%
-    );
+.player-detail-close:hover,
+.player-detail-close:focus-visible {
+  background: var(--color-orange);
+  outline: none;
 }
 
-/* --- Twist detail (aside) --- */
+.player-detail-portrait {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: var(--color-canvas-2);
+  border: var(--rule);
+}
+
+.player-detail-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.player-detail-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.player-detail-name {
+  font-family: var(--font-display);
+  font-size: clamp(22px, 2.4vw, 30px);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  line-height: 0.95;
+  color: var(--color-ink);
+}
+
+.player-detail-status {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.player-detail-status-badge {
+  align-self: flex-start;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  background: var(--color-red);
+  color: var(--color-canvas);
+}
+
+.player-detail-status-badge.is-winner {
+  background: var(--color-mustard);
+  color: var(--color-ink);
+}
+
+.player-detail-status-detail {
+  font-family: var(--font-data);
+  font-size: 12px;
+  color: var(--color-ink-soft);
+}
+
+.player-detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding-top: var(--space-2);
+  border-top: var(--rule-hair);
+}
+
+.player-detail-section-title {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--color-orange);
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-1);
+}
+
+.player-detail-section-count {
+  margin-left: auto;
+  font-family: var(--font-data);
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink-soft);
+}
+
+.player-detail-empty {
+  font-family: var(--font-data);
+  font-size: 12px;
+  color: var(--color-ink-dim);
+  font-style: italic;
+}
+
+/* Tribe timeline */
+.player-detail-tribes {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.player-detail-tribe-row {
+  display: grid;
+  grid-template-columns: 12px auto 1fr;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 6px 0;
+  font-family: var(--font-data);
+  font-size: 13px;
+  color: var(--color-ink);
+  border-bottom: var(--rule-hair);
+}
+
+.player-detail-tribe-row:last-child {
+  border-bottom: none;
+}
+
+.player-detail-tribe-dot {
+  width: 12px;
+  height: 12px;
+}
+
+.player-detail-tribe-name {
+  font-weight: 600;
+}
+
+.player-detail-tribe-range {
+  margin-left: auto;
+  font-family: var(--font-data);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--color-ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Past seasons — a small table-like list */
+.player-detail-seasons {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.player-detail-season-row {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  align-items: baseline;
+  gap: var(--space-1);
+  padding: 4px 0;
+  font-family: var(--font-data);
+  font-size: 13px;
+  border-bottom: var(--rule-hair);
+}
+
+.player-detail-season-row:last-child {
+  border-bottom: none;
+}
+
+.player-detail-season-num {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-teal);
+  letter-spacing: 0.04em;
+}
+
+.player-detail-season-title {
+  color: var(--color-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Played With grid */
+.player-detail-played-with {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  gap: var(--space-1);
+}
+
+.player-detail-played-row {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: transform var(--t-fast);
+}
+
+.player-detail-played-row:hover,
+.player-detail-played-row:focus-visible {
+  outline: none;
+  transform: translateY(-2px);
+}
+
+.player-detail-played-photo {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border: var(--rule-hair);
+  background: var(--color-canvas-2);
+  transition: border-color var(--t-fast);
+}
+
+.player-detail-played-row:hover .player-detail-played-photo,
+.player-detail-played-row:focus-visible .player-detail-played-photo {
+  border-color: var(--color-orange);
+}
+
+.player-detail-played-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.player-detail-played-name {
+  font-family: var(--font-data);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-ink);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.player-detail-played-count {
+  font-family: var(--font-data);
+  font-size: 10px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  color: var(--color-orange);
+}
+
+/* ─── Twist detail (aside) ─────────────────────────────────── */
 .twist-detail-art {
   position: relative;
   width: 100%;
@@ -1296,31 +1021,27 @@ html {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-lg);
-  background: radial-gradient(
-    circle at 35% 30%,
-    rgba(248, 208, 0, 0.18),
-    rgba(28, 40, 57, 0.6) 65%,
-    var(--color-night)
-  );
-  border: 1px solid rgba(248, 208, 0, 0.32);
+  background: var(--color-orange);
+  border: var(--rule);
   overflow: hidden;
-  isolation: isolate;
 }
 
+/* Bass kinetic moment: a quietly rotating mark when nothing is happening. */
 .twist-detail-art-glow {
   position: absolute;
-  inset: -10%;
+  inset: -20%;
   background: conic-gradient(
-    from 200deg,
-    rgba(248, 208, 0, 0.22),
-    transparent 30%,
-    rgba(0, 130, 203, 0.18) 60%,
-    transparent 90%
+    from 0deg,
+    var(--color-orange) 0deg,
+    var(--color-orange) 90deg,
+    transparent 90deg,
+    transparent 180deg,
+    var(--color-orange) 180deg,
+    var(--color-orange) 270deg,
+    transparent 270deg
   );
-  filter: blur(28px);
-  animation: twist-detail-spin 26s linear infinite;
-  z-index: 0;
+  opacity: 0.08;
+  animation: twist-detail-spin 40s linear infinite;
 }
 
 @keyframes twist-detail-spin {
@@ -1338,33 +1059,30 @@ html {
 .twist-detail-art-img {
   position: relative;
   z-index: 1;
-  width: 76%;
-  height: 76%;
+  width: 64%;
+  height: 64%;
   object-fit: contain;
-  filter: drop-shadow(0 0 24px rgba(248, 208, 0, 0.4));
+  filter: grayscale(1) brightness(0) invert(1);
 }
 
 .twist-detail-ep {
   align-self: flex-start;
-  font-size: 10px;
+  font-family: var(--font-display);
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.24em;
-  color: var(--color-night);
-  background: var(--color-torch);
-  padding: 4px 9px;
-  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  color: var(--color-canvas);
+  background: var(--color-ink);
+  padding: 4px 10px;
   font-variant-numeric: tabular-nums;
 }
 
 .twist-detail-text {
-  margin: 0;
+  font-family: var(--font-data);
   font-size: 13.5px;
-  line-height: 1.6;
-  color: rgba(250, 241, 220, 0.82);
-}
-
-.twist-detail-involved--production .player-detail-played-photo {
-  border-color: var(--color-torch);
+  line-height: 1.55;
+  color: var(--color-ink);
 }
 
 .twist-detail-involved-fallback {
@@ -1373,22 +1091,44 @@ html {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-family: var(--font-display);
+  font-size: 12px;
   font-weight: 700;
-  color: var(--color-text);
-  background: linear-gradient(
-    135deg,
-    rgba(28, 40, 57, 0.5),
-    var(--color-night)
-  );
-  color: #faf1dc;
+  letter-spacing: 0.06em;
+  color: var(--color-canvas);
+  background: var(--color-ink);
 }
 
 .twist-detail-involved-tag {
-  font-size: 8px;
+  font-family: var(--font-display);
+  font-size: 9px;
   font-weight: 700;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--color-torch);
+  color: var(--color-orange);
   margin-top: 2px;
+}
+
+/* ─── Mobile ──────────────────────────────────────────────── */
+@media (max-width: 720px) {
+  .dashboard {
+    flex-direction: column;
+  }
+  .dashboard-aside {
+    position: static;
+    width: 100% !important;
+    max-width: none;
+    height: auto;
+    border-right: none;
+    border-bottom: var(--rule-bold);
+    padding: var(--space-3) var(--space-2);
+  }
+  .dashboard-aside-handle,
+  .dashboard-aside-toggle {
+    display: none;
+  }
+  .dashboard-main {
+    padding: var(--space-3) var(--space-2);
+    gap: var(--space-5);
+  }
 }

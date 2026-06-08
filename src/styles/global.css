@@ -1,148 +1,73 @@
-/* Survivor app tokens + base (decoupled from portfolio site) */
+/* ============================================================
+   Saul Bass-inspired data dashboard
+   ============================================================
+   Identity zones (sidebar, headings, icons) carry the personality:
+   bold condensed display type, burnt orange anchor, cut-paper flats.
+   Data zones (cards, tables, KPIs) stay neutral and legible: a
+   clean sans with tabular figures. The two NEVER touch — display
+   type is forbidden anywhere a number appears. */
 
-@font-face {
-  font-family: "Apfel Grotezk";
-  src:
-    url("../assets/fonts/apfel-grotezk-main/fonts/ApfelGrotezk-Brukt.woff2")
-      format("woff2"),
-    url("../assets/fonts/apfel-grotezk-main/fonts/ApfelGrotezk-Brukt.woff")
-      format("woff");
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Apfel Grotezk";
-  src:
-    url("../assets/fonts/apfel-grotezk-main/fonts/ApfelGrotezk-Regular.woff2")
-      format("woff2"),
-    url("../assets/fonts/apfel-grotezk-main/fonts/ApfelGrotezk-Regular.woff")
-      format("woff");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Apfel Grotezk";
-  src:
-    url("../assets/fonts/apfel-grotezk-main/fonts/ApfelGrotezk-Mittel.woff2")
-      format("woff2"),
-    url("../assets/fonts/apfel-grotezk-main/fonts/ApfelGrotezk-Mittel.woff")
-      format("woff");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Apfel Grotezk";
-  src:
-    url("../assets/fonts/apfel-grotezk-main/fonts/ApfelGrotezk-Satt.woff2")
-      format("woff2"),
-    url("../assets/fonts/apfel-grotezk-main/fonts/ApfelGrotezk-Satt.woff")
-      format("woff");
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Apfel Grotezk";
-  src:
-    url("../assets/fonts/apfel-grotezk-main/fonts/ApfelGrotezk-Fett.woff2")
-      format("woff2"),
-    url("../assets/fonts/apfel-grotezk-main/fonts/ApfelGrotezk-Fett.woff")
-      format("woff");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
+@import url("https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap");
 
 :root {
-  font-family:
-    "Apfel Grotezk",
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    "Helvetica Neue",
-    Arial,
-    sans-serif;
-  line-height: 1.55;
-  font-weight: 400;
+  /* === Canvas: warm cream, not stark white === */
+  --color-canvas: #f3ead2;
+  --color-canvas-2: #ead9b5; /* deeper cream for stripes / contrast */
+  --color-ink: #16140f; /* near-black */
+  --color-ink-soft: #514a3b; /* secondary text */
+  --color-ink-dim: #8c8470; /* tertiary */
 
-  /* Sun-bleached beach base */
-  --color-bg: #ecdab1;
-  --color-bg-alt: #f3e5c2;
-  --color-surface: #faf1dc;
-  --color-surface-2: #e0c697;
-  --color-border: #c9b07d;
-  --color-border-strong: #8e7344;
+  /* === Dominant accent === */
+  --color-orange: #d65a1b; /* burnt orange — the Bass color */
 
-  /* Ink / text — driftwood + deep night-water */
-  --color-text: #1a2230;
-  --color-text-muted: #5c4f36;
-  --color-text-dim: #8a7c5f;
+  /* === Categorical data palette (flats only) === */
+  --color-mustard: #e0a72e;
+  --color-teal: #2c7f7d;
+  --color-red: #a8281f;
+  /* Accessible forest green for "correct" — ~7.5:1 contrast vs cream text. */
+  --color-green: #1f7a3f;
 
-  /* Survivor brand colors (lifted from the logo) */
-  --color-night: #111821; /* deep navy */
-  --color-night-2: #1c2839; /* navy panel hover */
-  --color-ocean: #0082cb; /* logo blue */
-  --color-ocean-deep: #04527a;
-  --color-palm: #3aae2a; /* logo green */
-  --color-palm-dark: #1f6b16;
-  --color-torch: #f8d000; /* logo yellow — torch flame */
-  --color-flame: #e87a1e; /* warm fire */
-  --color-ember: #c1533c; /* sunset */
-  --color-sand-shadow: #d8b988;
+  /* === Type ===
+     Display: Oswald — condensed grotesque, used only for words.
+     Data:    Inter — clean neutral sans with tabular figures.   */
+  --font-display: "Oswald", "Druk", "Anton", sans-serif;
+  --font-data: "Inter", "IBM Plex Sans", system-ui, -apple-system,
+    "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
 
-  /* Compat aliases (old token names used across views) */
-  --color-orange: var(--color-flame);
-  --color-red: var(--color-ember);
-  --color-yellow: var(--color-torch);
-  --color-amber: var(--color-torch);
+  /* === Spacing — 8px rhythm, generous === */
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-5: 48px;
+  --space-6: 64px;
+  --space-7: 96px;
 
-  /* Tribe accents */
-  --tribe-cila: rgb(234 105 51);
-  --tribe-vatu: rgb(230 19 100);
-  --tribe-kalo: rgb(47 141 126);
-  --tribe-merge: #d4982a;
+  /* === Rules (flat lines, never shadows) === */
+  --rule: 1.5px solid var(--color-ink);
+  --rule-bold: 3px solid var(--color-ink);
+  --rule-hair: 1px solid var(--color-ink);
 
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 14px;
-  --radius-xl: 22px;
-  --radius-full: 9999px;
+  /* === Sharp corners — cut paper has edges. Only pills get rounded. === */
+  --radius-none: 0;
+  --radius-pill: 999px;
 
-  --shadow-sm: 0 1px 2px rgba(40, 28, 10, 0.18);
-  --shadow-md: 0 10px 24px -10px rgba(40, 28, 10, 0.28);
-  --shadow-lg: 0 22px 48px -18px rgba(40, 28, 10, 0.4);
-  --shadow-glow-torch: 0 0 28px -2px rgba(248, 208, 0, 0.55);
-  --shadow-glow-palm: 0 0 22px -4px rgba(58, 174, 42, 0.45);
+  /* === Motion: only on states and transitions, never live data. === */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --t-fast: 140ms var(--ease);
+  --t: 220ms var(--ease);
+  --t-slow: 520ms var(--ease);
 
-  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-  --ease-in-out: cubic-bezier(0.7, 0, 0.3, 1);
-  --transition-fast: 160ms var(--ease-out);
-  --transition-normal: 260ms var(--ease-out);
-  --transition-slow: 520ms var(--ease-out);
-
-  --container: 1180px;
-  --container-narrow: 760px;
-
-  color: var(--color-text);
-  background-color: var(--color-bg);
   color-scheme: light;
 }
 
+/* === Reset (the bare minimum) === */
 *,
 *::before,
 *::after {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
 }
 
 html {
@@ -151,37 +76,17 @@ html {
 
 body {
   min-height: 100vh;
-  margin: 0;
-  width: 100%;
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-data);
+  font-size: 15px;
+  line-height: 1.5;
+  /* Default everywhere — figures align in columns. Display type opts out. */
+  font-feature-settings: "tnum" 1, "cv11" 1;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
-  background:
-    /* faint coconut speckle */
-    radial-gradient(
-        circle at 20% 30%,
-        rgba(94, 64, 25, 0.06) 0 1px,
-        transparent 2px
-      )
-      0 0 / 80px 80px,
-    /* warm sunlight pool top-right */
-      radial-gradient(
-        900px 600px at 90% -10%,
-        rgba(248, 208, 0, 0.16),
-        transparent 70%
-      ),
-    /* shaded palm-grove cool tone top-left */
-      radial-gradient(
-        700px 500px at -5% 5%,
-        rgba(58, 174, 42, 0.1),
-        transparent 70%
-      ),
-    /* lagoon mist near footer */
-      radial-gradient(
-        1000px 600px at 50% 110%,
-        rgba(0, 130, 203, 0.08),
-        transparent 70%
-      ),
-    var(--color-bg);
-  background-attachment: fixed;
 }
 
 #root {
@@ -189,23 +94,29 @@ body {
   min-height: 100vh;
 }
 
-h1,
-h2,
-h3 {
-  line-height: 1.2;
-  color: var(--color-text);
-}
-
 button {
   font-family: inherit;
+  font-feature-settings: inherit;
+  cursor: pointer;
 }
 
-.survivor-app {
-  min-height: 100vh;
-  height: fit-content;
+img {
+  display: block;
+  max-width: 100%;
 }
 
-/* Respect the user's OS-level reduced-motion preference. */
+/* Display type rules: bold, condensed, uppercase, sparingly used.
+   Never wraps a number — that's why these classes don't appear on
+   any element that contains digits. */
+.bass-display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+/* Reduced motion respect */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
