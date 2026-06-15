@@ -354,6 +354,28 @@ function TwistDetail({ twist, onClose }: TwistDetailProps) {
  * underline that draws across) the first time the section scrolls into
  * view. Honors `prefers-reduced-motion` via the underlying hook.
  */
+/** Wraps a dashboard section to keep the JSX call sites tidy. */
+function DashboardSection({
+  id,
+  modifier,
+  title,
+  count,
+  children,
+}: {
+  id: string;
+  modifier: string;
+  title: string;
+  count: number;
+  children: React.ReactNode;
+}) {
+  return (
+    <section id={id} className={`dashboard-section ${modifier}`}>
+      <SectionHead title={title} count={count} />
+      {children}
+    </section>
+  );
+}
+
 function SectionHead({ title, count }: { title: string; count: number }) {
   const { ref, visible } = useReveal<HTMLElement>();
   return (
@@ -453,9 +475,6 @@ function VoteCard({ vote }: { vote: FanVote }) {
     >
       <header className="dashboard-vote-head">
         <span className="dashboard-vote-subject">{vote.subject}</span>
-        <span className="dashboard-vote-ep">
-          EP {vote.episodeRevealed.toString().padStart(2, "0")}
-        </span>
       </header>
 
       {!hasGuessed && (
@@ -680,15 +699,18 @@ export default function DashboardView() {
       </button>
 
       <div className="dashboard-main">
-        <section
+        <DashboardSection
           id="section-cast"
-          className="dashboard-section dashboard-section--cast"
+          modifier="dashboard-section--cast"
+          title="Cast"
+          count={castData.length}
         >
-          <SectionHead title="Cast" count={castData.length} />
           <div className="dashboard-cast-grid">
             {castData.map((player) => {
               const isSelected =
                 selection?.kind === "player" && selection.id === player.id;
+              const startingTribe = player.tribeJourney[0].tribe;
+              const tribeColor = TRIBE_COLORS[startingTribe];
               return (
                 <button
                   key={player.id}
@@ -699,6 +721,11 @@ export default function DashboardView() {
                   title={player.name}
                   aria-pressed={isSelected}
                   onClick={() => togglePlayer(player.id)}
+                  style={
+                    {
+                      "--player-tribe-color": tribeColor,
+                    } as React.CSSProperties
+                  }
                 >
                   <div className="dashboard-cast-photo">
                     <img
@@ -716,25 +743,27 @@ export default function DashboardView() {
               );
             })}
           </div>
-        </section>
+        </DashboardSection>
 
-        <section
+        <DashboardSection
           id="section-votes"
-          className="dashboard-section dashboard-section--votes"
+          modifier="dashboard-section--votes"
+          title="Audience Votes"
+          count={fanVotes.length}
         >
-          <SectionHead title="Audience Votes" count={fanVotes.length} />
           <div className="dashboard-votes-strip">
             {fanVotes.map((vote) => (
               <VoteCard key={vote.id} vote={vote} />
             ))}
           </div>
-        </section>
+        </DashboardSection>
 
-        <section
+        <DashboardSection
           id="section-twists"
-          className="dashboard-section dashboard-section--twists"
+          modifier="dashboard-section--twists"
+          title="Twists"
+          count={orderedTwists.length}
         >
-          <SectionHead title="Twists" count={orderedTwists.length} />
           <div className="dashboard-twists-grid">
             {centerTwist && (
               <button
@@ -805,7 +834,7 @@ export default function DashboardView() {
               );
             })}
           </div>
-        </section>
+        </DashboardSection>
       </div>
     </div>
   );

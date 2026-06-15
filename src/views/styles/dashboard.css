@@ -315,6 +315,9 @@
   align-items: stretch;
   gap: var(--space-1);
   transition: transform var(--t-fast);
+  padding: 3px;
+  background: white;
+  border: 1.5px black solid;
 }
 
 .dashboard-cast-tile:hover,
@@ -329,7 +332,14 @@
   border: var(--rule);
   overflow: hidden;
   background: var(--color-canvas-2);
-  transition: border-color var(--t-fast);
+  transition:
+    border-color var(--t-fast),
+    background-color var(--t-fast);
+}
+
+.dashboard-cast-tile:hover .dashboard-cast-photo,
+.dashboard-cast-tile:focus-visible .dashboard-cast-photo {
+  background: var(--player-tribe-color);
 }
 
 .dashboard-cast-photo img {
@@ -366,8 +376,12 @@
    so the strip has visual rhythm without coloring the data. */
 .dashboard-votes-strip {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  flex-wrap: wrap;
+  /* Pack as many tracks as fit at the 200px minimum, then let each track
+     stretch (1fr) so leftover space becomes column width, not gutter.
+     The cards themselves cap at 300px via `.dashboard-vote` below — so
+     in narrow rows columns shrink to 200, in wide rows they grow to
+     300 and stop. */
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: var(--space-2);
 }
 
@@ -419,20 +433,6 @@
   min-width: 0;
 }
 
-/* Episode chip — flat black rectangle, never picks up the band color. */
-.dashboard-vote-ep {
-  flex-shrink: 0;
-  font-family: var(--font-data);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  color: var(--color-canvas);
-  background: var(--color-ink);
-  padding: 4px 10px;
-  border: none;
-  font-variant-numeric: tabular-nums;
-  align-self: flex-start;
-}
 
 /* Body of card — horizontal padding lives on the buttons + prompt
    directly so options can stripe edge-to-edge with one hairline. */
@@ -640,18 +640,6 @@
   width: 70%;
   max-height: 60%;
   object-fit: contain;
-  /* Knock the SVG to a single ink silhouette so it reads as a flat
-     cut-paper mark, not an illustration. */
-  filter: grayscale(1) brightness(0) contrast(1);
-  opacity: 0.92;
-  transition:
-    filter var(--t-fast),
-    opacity var(--t-fast);
-}
-
-.dashboard-twist:hover .dashboard-twist-img,
-.dashboard-twist:focus-visible .dashboard-twist-img {
-  filter: grayscale(1) brightness(0) invert(1);
 }
 
 .dashboard-twist-ep-chip {
@@ -702,8 +690,6 @@
 .dashboard-twist--center .dashboard-twist-img {
   width: 64%;
   max-height: 55%;
-  filter: grayscale(1) brightness(0) invert(1);
-  opacity: 1;
 }
 
 .dashboard-twist--center:hover,
@@ -1062,7 +1048,6 @@
   width: 64%;
   height: 64%;
   object-fit: contain;
-  filter: grayscale(1) brightness(0) invert(1);
 }
 
 .twist-detail-ep {
