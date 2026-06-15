@@ -1,13 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
-import SeasonsView from "./views/SeasonsView";
-import ConnectionsView from "./views/ConnectionsView";
-import JourneysView from "./views/JourneysView";
-import TwistsView from "./views/TwistsView";
-import { castData } from "./data/cast";
-import { twists } from "./data/twists";
-import { eliminated } from "./data/connections";
-import logoUrl from "./img/survivor-50-logo.png";
-import castPhotoUrl from "./img/cast-photo.jpg";
+import { useEffect, useState } from "react";
 import DashboardView from "./views/DashboardView";
 
 interface Section {
@@ -22,7 +13,7 @@ const SECTIONS: Section[] = [
   { id: "journeys", label: "Journeys" },
 ];
 
-function useActiveSection(): string {
+export function useActiveSection(): string {
   const [active, setActive] = useState<string>(SECTIONS[0].id);
 
   useEffect(() => {
@@ -49,18 +40,6 @@ function useActiveSection(): string {
 }
 
 export default function SurvivorPage() {
-  const activeSection = useActiveSection();
-
-  const stats = useMemo(() => {
-    const eliminatedIds = new Set(eliminated.map((e) => e.id));
-    const winner = castData.find((p) => !eliminatedIds.has(p.id));
-    return {
-      castaways: castData.length,
-      twists: twists.length,
-      winner: winner ? winner.name.split(" ")[0] : "—",
-      prize: "$2M",
-    };
-  }, []);
 
   return (
     <div className="s50-app">
