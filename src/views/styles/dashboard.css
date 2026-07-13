@@ -563,6 +563,37 @@
    carries the question in display type; the cream body below
    carries the data. Bands cycle through the categorical palette
    so the strip has visual rhythm without coloring the data. */
+/* Section-level controls: flat ink buttons, Bass-lean. */
+.dashboard-votes-controls {
+  display: flex;
+  gap: var(--space-1);
+  margin-bottom: var(--space-2);
+}
+
+.dashboard-votes-control {
+  appearance: none;
+  font-family: var(--font-data);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-canvas);
+  background: var(--color-ink);
+  border: var(--rule);
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: background-color var(--t-fast);
+}
+
+.dashboard-votes-control:hover {
+  background: var(--color-orange);
+}
+
+.dashboard-votes-control:focus-visible {
+  outline: 3px solid var(--color-ink);
+  outline-offset: 3px;
+}
+
 .dashboard-votes-strip {
   display: grid;
   /* Pack as many tracks as fit at the 200px minimum, then let each track
@@ -571,19 +602,74 @@
      in narrow rows columns shrink to 200, in wide rows they grow to
      300 and stop. */
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: var(--space-2);
+  /* Extra row gap leaves headroom for the pushpins and the tilt. */
+  gap: var(--space-4) var(--space-2);
+  padding: var(--space-4) var(--space-3) var(--space-3);
+  /* border: var(--rule);
+  /* Cork board the notes are pinned to: warm tan + fractal grain. */
+  /* background-color: #b98f5d;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.35' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23c)' opacity='0.4'/%3E%3C/svg%3E");
+  background-blend-mode: multiply;
+  box-shadow: inset 0 0 48px rgba(60, 38, 12, 0.35); */
 }
 
 .dashboard-vote {
+  position: relative;
   display: flex;
   flex-direction: column;
   padding: 0;
-  background: var(--color-canvas);
-  border: var(--rule);
+  /* Brighter than the cream canvas so the sheet reads as paper on cork. */
+  background: #f8f2e0;
   min-width: 0;
   overflow: hidden;
   max-width: 300px;
   height: fit-content;
+  border: solid 1px black;
+  /* Lift the note off the board — no ink outline; the shadow is the edge. */
+  box-shadow:
+    0 8px 16px rgba(20, 14, 4, 0.28),
+    0 2px 5px rgba(20, 14, 4, 0.18);
+}
+
+/* Fine paper grain laid over the whole sheet, band included. */
+.dashboard-vote::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+  opacity: 0.09;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E");
+}
+
+/* Each note hangs a little crooked, pivoting from the pin at top-center.
+   Hover straightens and lifts it for a clean read. */
+.dashboard-vote-card {
+  transform-origin: top center;
+  transition:
+    transform var(--t),
+    filter var(--t);
+}
+.dashboard-votes-strip > .dashboard-vote-card:nth-child(4n + 1) {
+  transform: rotate(-1.6deg);
+}
+.dashboard-votes-strip > .dashboard-vote-card:nth-child(4n + 2) {
+  transform: rotate(1.1deg);
+}
+.dashboard-votes-strip > .dashboard-vote-card:nth-child(4n + 3) {
+  transform: rotate(-0.7deg);
+}
+.dashboard-votes-strip > .dashboard-vote-card:nth-child(4n) {
+  transform: rotate(1.5deg);
+}
+.dashboard-votes-strip > .dashboard-vote-card:hover {
+  transform: rotate(0deg) translateY(-3px);
+  z-index: 4;
+}
+.dashboard-votes-strip > .dashboard-vote-card:hover .dashboard-vote {
+  box-shadow:
+    0 14px 26px rgba(20, 14, 4, 0.34),
+    0 4px 8px rgba(20, 14, 4, 0.2);
 }
 
 /* The colored band — bleeds to the card edges. */
@@ -597,16 +683,24 @@
   color: var(--color-canvas);
 }
 
+.push-pin {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+}
+
 /* Cycle the band color through orange → mustard → teal → red.
    Mustard gets ink text because cream-on-mustard is low contrast. */
-.dashboard-votes-strip > .dashboard-vote:nth-child(4n + 2) .dashboard-vote-head {
+.dashboard-votes-strip > .dashboard-vote-card:nth-child(4n + 2) .dashboard-vote-head {
   background: var(--color-mustard);
   color: var(--color-ink);
 }
-.dashboard-votes-strip > .dashboard-vote:nth-child(4n + 3) .dashboard-vote-head {
+.dashboard-votes-strip > .dashboard-vote-card:nth-child(4n + 3) .dashboard-vote-head {
   background: var(--color-teal);
 }
-.dashboard-votes-strip > .dashboard-vote:nth-child(4n) .dashboard-vote-head {
+.dashboard-votes-strip > .dashboard-vote-card:nth-child(4n) .dashboard-vote-head {
   background: var(--color-red);
 }
 

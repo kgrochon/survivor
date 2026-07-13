@@ -13,6 +13,7 @@ import { TRIBE_COLORS } from "../data/tribes";
 import { fanVotes, type FanVote } from "../data/fanVotes";
 import { handleImageError } from "../lib/imageFallback";
 import { useReveal } from "../lib/useReveal";
+import pushPinIcon from "../img/pushpin.png"
 import logoUrl from "../img/survivor-50-logo.png";
 import "./styles/dashboard.css";
 
@@ -542,10 +543,20 @@ function MobileNav() {
  * neutral buttons until the user picks one; after that, the real results
  * (percentages, winner highlight) are revealed and the card scores the guess.
  */
-function VoteCard({ vote }: { vote: FanVote }) {
+function VoteCard({
+  vote,
+  revealSignal,
+  resetSignal,
+}: {
+  vote: FanVote;
+  revealSignal: number;
+  resetSignal: number;
+}) {
   const [guessIndex, setGuessIndex] = useState<number | null>(null);
+  /** Results are shown once the user guesses OR "Reveal all" fires. */
+  const [revealed, setRevealed] = useState(false);
   /**
-   * Three-stage flow after a guess:
+   * Three-stage flow after reveal:
    *   interactive → revealed (1s of "current UI") → collapsed (losers fade,
    *   leaving the winner slid up to the top).
    */
@@ -562,15 +573,33 @@ function VoteCard({ vote }: { vote: FanVote }) {
     return () => window.clearTimeout(id);
   }, [phase]);
 
+  // "Reveal all" — show results without recording a user pick.
+  useEffect(() => {
+    if (revealSignal === 0) return;
+    setRevealed(true);
+    setPhase((p) => (p === "interactive" ? "revealed" : p));
+  }, [revealSignal]);
+
+  // "Reset" — back to the untouched interactive state.
+  useEffect(() => {
+    if (resetSignal === 0) return;
+    setGuessIndex(null);
+    setRevealed(false);
+    setPhase("interactive");
+  }, [resetSignal]);
+
   const handleGuess = (i: number) => {
-    if (hasGuessed) return;
+    if (revealed) return;
     setGuessIndex(i);
+    setRevealed(true);
     setPhase("revealed");
   };
 
   return (
+    <div className="dashboard-vote-card" style={{position: "relative"}}>
+    <img className="push-pin" src={pushPinIcon} alt="Push pin" />
     <article
-      className={`dashboard-vote ${hasGuessed ? "is-answered" : ""} ${
+      className={`dashboard-vote ${revealed ? "is-answered" : ""} ${
         hasGuessed
           ? userPickWasRight
             ? "is-correct"
@@ -590,7 +619,7 @@ function VoteCard({ vote }: { vote: FanVote }) {
       <ul className="dashboard-vote-options">
         {vote.options.map((opt, i) => {
           const isUserPick = guessIndex === i;
-          const showResult = hasGuessed;
+          const showResult = revealed;
           const isCollapsing = phase === "collapsed" && !opt.winner;
           return (
             <li
@@ -605,7 +634,7 @@ function VoteCard({ vote }: { vote: FanVote }) {
                 type="button"
                 className="dashboard-vote-option-button"
                 onClick={() => handleGuess(i)}
-                disabled={hasGuessed}
+                disabled={revealed}
                 aria-pressed={isUserPick}
               >
                 <span className="dashboard-vote-marker" aria-hidden>
@@ -621,19 +650,13 @@ function VoteCard({ vote }: { vote: FanVote }) {
                     {opt.percentage}%
                   </span>
                 )}
-                {showResult && opt.percentage !== undefined && (
-                  <span
-                    className="dashboard-vote-bar"
-                    style={{ width: `${opt.percentage}%` }}
-                    aria-hidden
-                  />
-                )}
               </button>
             </li>
           );
         })}
       </ul>
     </article>
+    </div>
   );
 }
 
@@ -655,6 +678,8 @@ export default function DashboardView() {
   const [asideOpen, setAsideOpen] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   const [selection, setSelection] = useState<Selection>(null);
+  const [voteRevealSignal, setVoteRevealSignal] = useState(0);
+  const [voteResetSignal, setVoteResetSignal] = useState(0);
   const [castSort, setCastSort] = useState<CastSort>("default");
   const draggingRef = useRef(false);
 
@@ -954,9 +979,30 @@ export default function DashboardView() {
           title="Audience Votes"
           count={fanVotes.length}
         >
+          <div className="dashboard-votes-controls">
+            <button
+              type="button"
+              className="dashboard-votes-control"
+              onClick={() => setVoteRevealSignal((n) => n + 1)}
+            >
+              Reveal all
+            </button>
+            <button
+              type="button"
+              className="dashboard-votes-control"
+              onClick={() => setVoteResetSignal((n) => n + 1)}
+            >
+              Reset
+            </button>
+          </div>
           <div className="dashboard-votes-strip">
             {fanVotes.map((vote) => (
-              <VoteCard key={vote.id} vote={vote} />
+              <VoteCard
+                key={vote.id}
+                vote={vote}
+                revealSignal={voteRevealSignal}
+                resetSignal={voteResetSignal}
+              />
             ))}
           </div>
         </DashboardSection>
