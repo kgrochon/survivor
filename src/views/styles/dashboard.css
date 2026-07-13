@@ -1096,11 +1096,37 @@
   margin-top: 2px;
 }
 
+/* Mobile-only chrome — hidden on desktop, revealed in the query below. */
+.dashboard-mobile-nav,
+.dashboard-sheet-backdrop {
+  display: none;
+}
+
+@keyframes dashboard-sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes dashboard-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* ─── Mobile ──────────────────────────────────────────────── */
 @media (max-width: 720px) {
   .dashboard {
     flex-direction: column;
   }
+
+  /* Identity block stacks on top as a static header. */
   .dashboard-aside {
     position: static;
     width: 100% !important;
@@ -1110,12 +1136,92 @@
     border-bottom: var(--rule-bold);
     padding: var(--space-3) var(--space-2);
   }
+  /* Desktop's resize handle, collapse toggle, and the big in-aside nav
+     all give way to the fixed bottom tab bar. */
   .dashboard-aside-handle,
-  .dashboard-aside-toggle {
+  .dashboard-aside-toggle,
+  .dashboard-aside-nav {
     display: none;
   }
+
+  /* Leave room for the fixed bottom nav so the last section clears it. */
   .dashboard-main {
-    padding: var(--space-3) var(--space-2);
+    padding: var(--space-3) var(--space-2) calc(var(--space-6) + 56px);
     gap: var(--space-5);
+  }
+
+  /* ── Fixed bottom tab bar: thumb-reachable section nav ── */
+  .dashboard-mobile-nav {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 30;
+    background: var(--color-ink);
+    border-top: var(--rule-bold);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .dashboard-mobile-nav-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px 8px;
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: rgba(243, 234, 210, 0.65);
+    border-right: 1px solid rgba(243, 234, 210, 0.15);
+    transition:
+      color var(--t-fast),
+      background-color var(--t-fast);
+  }
+  .dashboard-mobile-nav-item:last-child {
+    border-right: none;
+  }
+  .dashboard-mobile-nav-item.is-active {
+    color: var(--color-canvas);
+    background: var(--color-orange);
+  }
+
+  /* ── Detail as a bottom sheet ──
+     Selecting a castaway/twist would otherwise render the panel far off
+     at the top of the page. On mobile it slides up from the bottom over
+     a tap-away backdrop, so the tap has a visible, reachable result. */
+  .dashboard.is-detail-open .dashboard-aside {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: auto;
+    width: 100% !important;
+    max-width: none;
+    height: auto;
+    max-height: 85vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border: none;
+    border-top: var(--rule-bold);
+    border-radius: 18px 18px 0 0;
+    padding: var(--space-3) var(--space-2)
+      calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+    z-index: 50;
+    box-shadow: 0 -14px 34px rgba(20, 14, 4, 0.35);
+    animation: dashboard-sheet-up var(--t) var(--ease);
+  }
+
+  .dashboard.is-detail-open .dashboard-sheet-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    background: rgba(22, 20, 15, 0.55);
+    animation: dashboard-backdrop-in var(--t) var(--ease);
   }
 }

@@ -433,6 +433,64 @@ function SectionNav() {
 }
 
 /**
+ * Fixed bottom tab bar, shown only on mobile (CSS-gated). Thumb-reachable
+ * section navigation with a scroll-spy active state — replaces the buried
+ * in-aside nav on small screens.
+ */
+function MobileNav() {
+  const [activeId, setActiveId] = useState<string>(NAV_SECTIONS[0].id);
+
+  useEffect(() => {
+    const sections = NAV_SECTIONS.map((s) =>
+      document.getElementById(s.id),
+    ).filter((el): el is HTMLElement => el !== null);
+    if (sections.length === 0) return;
+
+    // A thin band across the viewport's vertical middle; whichever section
+    // occupies it is "current".
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const inBand = entries
+          .filter((e) => e.isIntersecting)
+          .sort(
+            (a, b) => a.boundingClientRect.top - b.boundingClientRect.top,
+          );
+        if (inBand[0]) setActiveId(inBand[0].target.id);
+      },
+      { rootMargin: "-45% 0px -45% 0px", threshold: 0 },
+    );
+    sections.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
+  const handleNavigate =
+    (id: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
+      e.preventDefault();
+      document
+        .getElementById(id)
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+
+  return (
+    <nav className="dashboard-mobile-nav" aria-label="Sections">
+      {NAV_SECTIONS.map((s) => (
+        <a
+          key={s.id}
+          href={`#${s.id}`}
+          className={`dashboard-mobile-nav-item ${
+            activeId === s.id ? "is-active" : ""
+          }`}
+          aria-current={activeId === s.id ? "true" : undefined}
+          onClick={handleNavigate(s.id)}
+        >
+          {s.label}
+        </a>
+      ))}
+    </nav>
+  );
+}
+
+/**
  * Audience-vote card with a "guess first" interaction. The options render as
  * neutral buttons until the user picks one; after that, the real results
  * (percentages, winner highlight) are revealed and the card scores the guess.
@@ -625,7 +683,11 @@ export default function DashboardView() {
   );
 
   return (
-    <div className={`dashboard ${asideOpen ? "" : "is-aside-collapsed"}`}>
+    <div
+      className={`dashboard ${asideOpen ? "" : "is-aside-collapsed"} ${
+        selection !== null ? "is-detail-open" : ""
+      }`}
+    >
       <aside
         className={`dashboard-aside ${isDragging ? "is-dragging" : ""}`}
         style={{ width: effectiveAsideWidth }}
@@ -836,6 +898,17 @@ export default function DashboardView() {
           </div>
         </DashboardSection>
       </div>
+
+      {/* Mobile-only: tap-away backdrop behind the detail bottom sheet. */}
+      {selection !== null && (
+        <div
+          className="dashboard-sheet-backdrop"
+          onClick={() => setSelection(null)}
+          aria-hidden
+        />
+      )}
+
+      <MobileNav />
     </div>
   );
 }
