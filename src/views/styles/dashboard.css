@@ -294,10 +294,89 @@
   background: var(--paper-white);
 }
 
+/* ─── Cast controls: legend + order-by filter ────────────── */
+.dashboard-cast-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+/* Legend for the cross-highlight: hovering/selecting a castaway rings
+   the tiles of everyone they share a prior season with. */
+.dashboard-cast-legend {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-family: var(--font-data);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+}
+
+.dashboard-cast-legend-swatch {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  background: var(--color-canvas-2);
+  outline: 2px solid var(--color-orange);
+  outline-offset: -2px;
+}
+
+.dashboard-cast-sort {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.dashboard-cast-sort-label {
+  font-family: var(--font-data);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+}
+
+.dashboard-cast-sort-select {
+  appearance: none;
+  font-family: var(--font-data);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--color-ink);
+  background: var(--paper-white);
+  border: var(--rule);
+  padding: 6px 28px 6px 12px;
+  cursor: pointer;
+  /* Cut-paper chevron, no external asset. */
+  background-image: linear-gradient(
+      45deg,
+      transparent 50%,
+      var(--color-ink) 50%
+    ),
+    linear-gradient(135deg, var(--color-ink) 50%, transparent 50%);
+  background-position:
+    calc(100% - 15px) 50%,
+    calc(100% - 10px) 50%;
+  background-size:
+    5px 5px,
+    5px 5px;
+  background-repeat: no-repeat;
+}
+
+.dashboard-cast-sort-select:focus-visible {
+  outline: 3px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
 /* ─── Cast grid: neutral, gridded, well-spaced ────────────── */
 .dashboard-cast-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
   gap: var(--space-3) var(--space-2);
 }
 
@@ -315,7 +394,7 @@
   align-items: stretch;
   gap: var(--space-1);
   transition: transform var(--t-fast);
-  padding: 3px;
+  padding: 12px;
   background: var(--paper-white);
   border: 1.5px black solid;
 }
@@ -331,15 +410,23 @@
   aspect-ratio: 1 / 1;
   border: var(--rule);
   overflow: hidden;
-  background: var(--color-canvas-2);
+  /* Tribe color is the resting background (shows around cutout headshots). */
+  background: var(--player-tribe-color);
   transition:
     border-color var(--t-fast),
+    outline-color var(--t-fast),
     background-color var(--t-fast);
 }
 
 .dashboard-cast-tile:hover .dashboard-cast-photo,
 .dashboard-cast-tile:focus-visible .dashboard-cast-photo {
-  background: var(--player-tribe-color);
+  background: var(--color-green);
+}
+
+/* Cross-highlight: this castaway shared a prior season with the one
+   currently hovered/selected. Orange outline rings the whole tile. */
+.dashboard-cast-tile.is-played-with {
+  outline: 5px solid var(--color-orange);
 }
 
 .dashboard-cast-photo img {

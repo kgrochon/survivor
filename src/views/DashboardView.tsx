@@ -6,7 +6,7 @@ import {
   type Twist,
   type ProductionMember,
 } from "../data/twists";
-import { findEliminationRecord } from "../data/connections";
+import { eliminated, findEliminationRecord } from "../data/connections";
 import { getSeasonSubtitle } from "../data/seasons";
 import { TRIBE_COLORS } from "../data/tribes";
 import { fanVotes, type FanVote } from "../data/fanVotes";
@@ -69,6 +69,52 @@ function findSharedHistory(player: CastMember): Array<{
       b.sharedSeasons.length - a.sharedSeasons.length ||
       a.member.name.localeCompare(b.member.name),
   );
+}
+
+type CastSort = "default" | "name" | "tribe" | "seasons" | "rank";
+
+const CAST_SORT_OPTIONS: ReadonlyArray<{ value: CastSort; label: string }> = [
+  { value: "default", label: "Featured" },
+  { value: "name", label: "Name (A–Z)" },
+  { value: "tribe", label: "Tribe" },
+  { value: "seasons", label: "Seasons played" },
+  { value: "rank", label: "Season rank" },
+];
+
+/**
+ * Season-50 finish score, higher = better. The `eliminated` array is
+ * chronological, so a later index means the player lasted longer; the
+ * winner has no record and outranks everyone.
+ */
+function seasonRankScore(player: CastMember): number {
+  const idx = eliminated.findIndex((e) => e.id === player.id);
+  return idx === -1 ? eliminated.length : idx;
+}
+
+/** Return a new array of cast sorted by the chosen key (never mutates input). */
+function sortCast(cast: CastMember[], sort: CastSort): CastMember[] {
+  if (sort === "default") return cast;
+  const byName = (a: CastMember, b: CastMember) =>
+    a.name.localeCompare(b.name);
+  const copy = [...cast];
+  switch (sort) {
+    case "name":
+      return copy.sort(byName);
+    case "tribe":
+      return copy.sort(
+        (a, b) =>
+          a.tribeJourney[0].tribe.localeCompare(b.tribeJourney[0].tribe) ||
+          byName(a, b),
+      );
+    case "seasons":
+      return copy.sort(
+        (a, b) => b.seasons.length - a.seasons.length || byName(a, b),
+      );
+    case "rank":
+      return copy.sort(
+        (a, b) => seasonRankScore(b) - seasonRankScore(a) || byName(a, b),
+      );
+  }
 }
 
 function placementSummary(player: CastMember): {
@@ -207,7 +253,7 @@ function PlayerDetail({ player, onClose, onSelectPlayer }: PlayerDetailProps) {
 
       <section className="player-detail-section">
         <h3 className="player-detail-section-title">
-          Played With
+          Past Castmates
           <span className="player-detail-section-count">{shared.length}</span>
         </h3>
         {shared.length === 0 ? (
@@ -608,7 +654,27 @@ export default function DashboardView() {
   const [asideOpen, setAsideOpen] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   const [selection, setSelection] = useState<Selection>(null);
+  const [castSort, setCastSort] = useState<CastSort>("default");
   const draggingRef = useRef(false);
+
+  const sortedCast = useMemo(() => sortCast(castData, castSort), [castSort]);
+
+  /** id → set of castmate ids who share a prior season (computed once). */
+  const sharedByPlayer = useMemo(() => {
+    const map = new Map<string, Set<string>>();
+    for (const p of castData) {
+      map.set(p.id, new Set(findSharedHistory(p).map((s) => s.member.id)));
+    }
+    return map;
+  }, []);
+
+  // Played-with ring keys off selection only — hovering shouldn't
+  // ripple through the grid.
+  const activePlayerId =
+    selection?.kind === "player" ? selection.id : null;
+  const playedWithIds = activePlayerId
+    ? (sharedByPlayer.get(activePlayerId) ?? null)
+    : null;
 
   const toggleAside = useCallback(() => setAsideOpen((v) => !v), []);
 
@@ -712,22 +778,6 @@ export default function DashboardView() {
               alt="Survivor 50 — In the Hands of the Fans"
               className="dashboard-aside-logo"
             />
-            <div className="dashboard-aside-recap">
-              <span className="dashboard-aside-eyebrow">The Premise</span>
-              <p>
-                Survivor's 50th season is the first one designed in public. CBS
-                handed parts of the game to viewers — who voted on real rules
-                and production choices — and to five celebrity superfans, who
-                each pitched a signature twist.
-              </p>
-              <p>
-                Twenty-four returning legends spanning every era of the show
-                played for a record <strong>$2&nbsp;million</strong> prize.
-              </p>
-              <p className="dashboard-aside-hint">
-                Click any cast member or twist to see details.
-              </p>
-            </div>
             <SectionNav />
           </>
         )}
@@ -767,10 +817,36 @@ export default function DashboardView() {
           title="Cast"
           count={castData.length}
         >
+          <div className="dashboard-cast-controls">
+            <ul className="dashboard-cast-legend">
+              <li>
+                <span
+                  className="dashboard-cast-legend-swatch"
+                  aria-hidden
+                />
+                Past Castmate
+              </li>
+            </ul>
+            <label className="dashboard-cast-sort">
+              <span className="dashboard-cast-sort-label">Order by</span>
+              <select
+                className="dashboard-cast-sort-select"
+                value={castSort}
+                onChange={(e) => setCastSort(e.target.value as CastSort)}
+              >
+                {CAST_SORT_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
           <div className="dashboard-cast-grid">
-            {castData.map((player) => {
+            {sortedCast.map((player) => {
               const isSelected =
                 selection?.kind === "player" && selection.id === player.id;
+              const isPlayedWith = playedWithIds?.has(player.id) ?? false;
               const startingTribe = player.tribeJourney[0].tribe;
               const tribeColor = TRIBE_COLORS[startingTribe];
               return (
@@ -779,7 +855,7 @@ export default function DashboardView() {
                   type="button"
                   className={`dashboard-cast-tile ${
                     isSelected ? "is-selected" : ""
-                  }`}
+                  } ${isPlayedWith ? "is-played-with" : ""}`}
                   title={player.name}
                   aria-pressed={isSelected}
                   onClick={() => togglePlayer(player.id)}
