@@ -27,6 +27,8 @@
   /* Accessible forest green for "correct" — ~7.5:1 contrast vs cream text. */
   --color-green: #1f7a3f;
 
+  --paper-white: #ffffff;
+
   /* === Type ===
      Display: Oswald — condensed grotesque, used only for words.
      Data:    Inter — clean neutral sans with tabular figures.   */

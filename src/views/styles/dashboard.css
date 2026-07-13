@@ -291,7 +291,7 @@
   color: var(--color-ink-soft);
   padding: 4px 10px;
   border: var(--rule-hair);
-  background: var(--color-canvas);
+  background: var(--paper-white);
 }
 
 /* ─── Cast grid: neutral, gridded, well-spaced ────────────── */
@@ -316,7 +316,7 @@
   gap: var(--space-1);
   transition: transform var(--t-fast);
   padding: 3px;
-  background: white;
+  background: var(--paper-white);
   border: 1.5px black solid;
 }
 
@@ -427,7 +427,7 @@
   font-weight: 700;
   letter-spacing: 0.02em;
   text-transform: uppercase;
-  color: inherit;
+  color: var(--paper-white);
   line-height: 1.05;
   flex: 1;
   min-width: 0;
@@ -451,6 +451,7 @@
   display: flex;
   flex-direction: column;
   transition: gap 800ms var(--ease);
+  background-color: var(--paper-white);
 }
 
 .dashboard-vote.phase-collapsed .dashboard-vote-options {
@@ -606,7 +607,7 @@
 
 .dashboard-twist {
   appearance: none;
-  background: var(--color-canvas);
+  background: var(--paper-white);
   border: var(--rule);
   padding: var(--space-2);
   margin: 0;
@@ -651,7 +652,7 @@
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.06em;
-  color: var(--color-canvas);
+  color: var(--paper-white);
   background: var(--color-ink);
   padding: 2px 6px;
 }
@@ -676,6 +677,7 @@
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  color: var(--paper-white);
 }
 
 /* The grid break: the center tile is burnt orange AND spans 2 rows.
@@ -703,7 +705,7 @@
 }
 
 .dashboard-twist-ep-chip--center {
-  background: var(--color-canvas);
+  background: var(--paper-white);
   color: var(--color-orange);
   top: var(--space-2);
   left: var(--space-2);
@@ -717,7 +719,7 @@
 
 .dashboard-twist--center:hover .dashboard-twist-ep-chip--center,
 .dashboard-twist--center:focus-visible .dashboard-twist-ep-chip--center {
-  background: var(--color-canvas);
+  background: var(--paper-white);
   color: var(--color-ink);
 }
 
