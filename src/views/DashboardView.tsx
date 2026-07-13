@@ -7,6 +7,7 @@ import {
   type ProductionMember,
 } from "../data/twists";
 import { eliminated, findEliminationRecord } from "../data/connections";
+import { voteCountFromTo, didVoteOut } from "../data/voteHelpers";
 import { getSeasonSubtitle } from "../data/seasons";
 import { TRIBE_COLORS } from "../data/tribes";
 import { fanVotes, type FanVote } from "../data/fanVotes";
@@ -821,10 +822,26 @@ export default function DashboardView() {
             <ul className="dashboard-cast-legend">
               <li>
                 <span
-                  className="dashboard-cast-legend-swatch"
+                  className="dashboard-cast-legend-swatch dashboard-cast-legend-swatch--played"
                   aria-hidden
                 />
                 Past Castmate
+              </li>
+              <li>
+                <span
+                  className="dashboard-cast-legend-swatch dashboard-cast-legend-swatch--vs"
+                  aria-hidden
+                >
+                  3
+                </span>
+                Voted Against
+              </li>
+              <li>
+                <span
+                  className="dashboard-cast-legend-swatch dashboard-cast-legend-swatch--out"
+                  aria-hidden
+                />
+                Voted Out
               </li>
             </ul>
             <label className="dashboard-cast-sort">
@@ -849,6 +866,18 @@ export default function DashboardView() {
               const isPlayedWith = playedWithIds?.has(player.id) ?? false;
               const startingTribe = player.tribeJourney[0].tribe;
               const tribeColor = TRIBE_COLORS[startingTribe];
+              // Vote-lens: when a player is selected, project THEIR voting
+              // record onto every other tile — how many times they voted
+              // against this castmate, and whether that castmate is out.
+              const selectedId =
+                selection?.kind === "player" ? selection.id : null;
+              const showVoteLens = selectedId !== null && selectedId !== player.id;
+              const vsCount = showVoteLens
+                ? voteCountFromTo(selectedId, player.id)
+                : 0;
+              const isVotedOut = showVoteLens
+                ? didVoteOut(selectedId, player.id)
+                : false;
               return (
                 <button
                   key={player.id}
@@ -873,10 +902,25 @@ export default function DashboardView() {
                       decoding="async"
                       onError={handleImageError}
                     />
+                    {vsCount > 0 && (
+                      <span
+                        className="dashboard-cast-photo-vs"
+                        title={`Voted against ${player.name.split(" ")[0]} ${vsCount} ${vsCount === 1 ? "time" : "times"}`}
+                      >
+                        {vsCount}
+                      </span>
+                    )}
                   </div>
                   <span className="dashboard-cast-name">
                     {player.name.split(" ")[0]}
                   </span>
+                  {isVotedOut && (
+                    <span
+                      className="dashboard-cast-tile-out"
+                      aria-hidden
+                      title={`${player.name.split(" ")[0]} was voted out`}
+                    />
+                  )}
                 </button>
               );
             })}

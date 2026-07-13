@@ -381,6 +381,7 @@
 }
 
 .dashboard-cast-tile {
+  position: relative;
   appearance: none;
   background: none;
   border: none;
@@ -454,6 +455,96 @@
   background: var(--color-orange);
   color: var(--color-canvas);
   font-weight: 600;
+}
+
+/* Vote-lens overlays: when a player is selected, every OTHER tile marks
+   how that selected player targeted this castmate. Overlays sit on top of
+   the photo so they don't push the tile taller. */
+
+/* Container for absolutely-positioned overlays. */
+.dashboard-cast-photo {
+  position: relative;
+}
+
+/* VS n: small filled-ink stamp in the top-right corner of the photo.
+   Bass-flat, tabular figures, sharp square. */
+.dashboard-cast-photo-vs {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-ink);
+  color: var(--color-canvas);
+  font-family: var(--font-data);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* OUT: diagonal red-dash hatch overlay spanning the whole tile — caution-tape
+   feel that reads instantly as "eliminated on your ballot." */
+.dashboard-cast-tile-out {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    -45deg,
+    #a8281f42 0 6px,
+    transparent 6px 14px
+  );
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* ─── Legend variants ────────────────────────────────────── */
+.dashboard-cast-legend {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex-wrap: wrap;
+}
+
+.dashboard-cast-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-right: var(--space-3);
+}
+
+.dashboard-cast-legend li:last-child {
+  margin-right: 0;
+}
+
+/* VS mini-stamp sample (mirrors the corner stamp on tiles). */
+.dashboard-cast-legend-swatch--vs {
+  background: var(--color-ink);
+  color: var(--color-canvas);
+  outline: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-data);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+/* OUT hatch sample. */
+.dashboard-cast-legend-swatch--out {
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--color-red) 0 3px,
+    var(--color-canvas) 3px 7px
+  );
+  outline: none;
 }
 
 /* ─── Audience Votes ──────────────────────────────────────────
