@@ -239,14 +239,32 @@ export function voteCountFromTo(
 }
 
 /**
- * True if `voterId` cast at least one elimination vote against `targetId`
- * AND `targetId` has since left the game. "voted out" from `voterId`'s POV.
+ * True if `voterId` played an active role in eliminating `targetId` — i.e.
+ * cast a counted elimination vote against `targetId` AT the council where
+ * `targetId` was actually the boot. An earlier vote against someone who
+ * later got voted out by other people does NOT qualify: `voterId`'s vote
+ * has to have contributed to the tally that actually sent `targetId` home.
+ *
+ * Nullified votes (idol'd) and ineligible/blank rows are excluded — those
+ * didn't count toward the tally.
+ *
+ * Fire-lost, medevac, and jury-lost eliminations return false: no tribal
+ * council vote by `voterId` sent those players home.
  */
 export function didVoteOut(
   voterId: string,
   targetId: string,
   source: Vote[] = allVotes,
 ): boolean {
-  if (voteCountFromTo(voterId, targetId, source) === 0) return false;
-  return eliminated.some((e) => e.id === targetId);
+  if (voterId === targetId) return false;
+  if (!eliminated.some((e) => e.id === targetId)) return false;
+  for (const council of listCouncils(source)) {
+    if (council.voteType === "finale") continue;
+    if (!boot(council.key, source).includes(targetId)) continue;
+    const contributed = council.votes.some(
+      (v) => v.voter === voterId && v.target === targetId && isCounted(v),
+    );
+    if (contributed) return true;
+  }
+  return false;
 }
