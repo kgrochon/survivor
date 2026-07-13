@@ -714,6 +714,27 @@ export default function DashboardView() {
     );
   }, []);
 
+  /**
+   * Clicks that don't land on an interactive control (tile, sort select, vote
+   * option, etc.) are treated as "click the background" and deselect the
+   * currently-open detail. Tile clicks handle their own toggle via togglePlayer,
+   * so their onClick fires and stops before this bubble-phase handler runs.
+   */
+  const handleBackgroundClick = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      const target = e.target as HTMLElement;
+      if (
+        target.closest(
+          'button, a, input, select, textarea, label, [role="button"]',
+        )
+      ) {
+        return;
+      }
+      setSelection(null);
+    },
+    [],
+  );
+
   const handlePointerDown = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
       draggingRef.current = true;
@@ -811,7 +832,7 @@ export default function DashboardView() {
         <span aria-hidden>{asideOpen ? "‹" : "›"}</span>
       </button>
 
-      <div className="dashboard-main">
+      <div className="dashboard-main" onClick={handleBackgroundClick}>
         <DashboardSection
           id="section-cast"
           modifier="dashboard-section--cast"
