@@ -9,21 +9,19 @@ export function useReveal<T extends Element = HTMLDivElement>(
   rootMargin = "0px 0px -10% 0px",
 ) {
   const ref = useRef<T | null>(null);
-  const [visible, setVisible] = useState(false);
+  // Decided once, up front: with reduced motion (or no observer) there is
+  // nothing to wait for, so the node is visible from its first render.
+  const [visible, setVisible] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ||
+        !("IntersectionObserver" in window)),
+  );
 
   useEffect(() => {
     if (visible) return;
     const node = ref.current;
     if (!node) return;
-
-    const reducedMotion =
-      typeof window !== "undefined" &&
-      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-
-    if (reducedMotion || !("IntersectionObserver" in window)) {
-      setVisible(true);
-      return;
-    }
 
     const obs = new IntersectionObserver(
       (entries) => {

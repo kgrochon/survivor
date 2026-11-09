@@ -7,6 +7,49 @@ import RiceSVG from "../img/rice-side-bet.svg"
 import BewareSVG from "../img/super-beware-advantage.svg"
 import ZacSVG from "../img/zac-brown-reward.svg"
 
+/**
+ * What a twist did to the person it landed on. The card draws a mark for
+ * each, so the set stays small enough to read without a legend.
+ */
+export type TwistOutcome =
+  | "played" // used what they were given
+  | "unused" // held it and never played it
+  | "safe" // came through the twist untouched
+  | "won" // took the bet, the flip, the challenge
+  | "failed" // tried and it did not work
+  | "out"; // the twist ended their game
+
+/**
+ * One line of a twist's diagram: something happened to `to`, optionally
+ * because `from` handed it to them.
+ */
+export interface TwistStep {
+  /** Omit when nobody passed anything — then the row is just an outcome. */
+  from?: string;
+  to: string;
+  /**
+   * Omit where the handoff is the whole story. The boomerang does this:
+   * marking who played theirs turned a diagram of three arrows into a
+   * verdict on each recipient, which is more than the row needs to say.
+   */
+  outcome?: TwistOutcome;
+  /** Three or four words. Any longer and the diagram is prose again. */
+  note?: string;
+}
+
+/**
+ * Replaces the `howItPlayedOut` paragraph on twists whose events are
+ * relational — who gave what to whom, and who walked away. Narrative
+ * twists (the season premise, a celebrity reward) have no such shape and
+ * keep their prose.
+ */
+export interface TwistDiagram {
+  /** Column heading over the sources. Omit when no step has a `from`. */
+  fromLabel?: string;
+  toLabel: string;
+  steps: TwistStep[];
+}
+
 export interface Twist {
   id: string;
   title: string;
@@ -15,6 +58,8 @@ export interface Twist {
   howItPlayedOut: string;
   involvedCast: string[];
   svgImage: string;
+  /** When present, the card draws this instead of `howItPlayedOut`. */
+  diagram?: TwistDiagram;
 }
 
 /** Celebrities, hosts, and other non-cast participants referenced by twists. */
@@ -75,7 +120,7 @@ export const twists: Twist[] = [
     title: "The Billie Eilish Boomerang Idol",
     episode: 1,
     mechanic:
-      "A hidden immunity idol the finder cannot keep. Whoever discovers it must send it to another player, and it only 'boomerangs' back to the original finder if that recipient gets voted out with the idol still in their pocket. The finder can never play it for themselves directly.",
+      "The finder can’t play this idol right away. They must give it to another player. If that player is voted out while still holding it, the idol boomerangs back to the finder for good.",
     howItPlayedOut:
       "Genevieve Mushaluk found two and sent them to Ozzy Lusth and Rizo Velovic. Christian Hubicki found a third and sent it to Aubry Bracco. Of the three recipients, Aubry was the only one who actually played her idol.",
     involvedCast: [
@@ -87,6 +132,17 @@ export const twists: Twist[] = [
       "aubry-bracco",
     ],
     svgImage: BoomerangSVG,
+    // Genevieve appears twice because she found two idols; two finds,
+    // two handoffs, two separate fates.
+    diagram: {
+      fromLabel: "Found",
+      toLabel: "Gave it to",
+      steps: [
+        { from: "genevieve-mushaluk", to: "ozzy-lusth" },
+        { from: "genevieve-mushaluk", to: "rizo-velovic" },
+        { from: "christian-hubicki", to: "aubry-bracco" },
+      ],
+    },
   },
   {
     id: "zac-brown-reward",
@@ -98,6 +154,21 @@ export const twists: Twist[] = [
       "In episode 4, country star and Survivor superfan Zac Brown speared fish for the winning tribe and joined them for a feast of plantains, beans, and rice, capped by a private acoustic concert. It was the season's first on-island celebrity cameo, and players called it one of the best rewards in show history.",
     involvedCast: ["zac-brown"],
     svgImage: ZacSVG,
+    // No outcomes here: everyone named simply went. With nothing to mark
+    // and nothing to note, the card lays this out as a wrapped roster
+    // rather than seven one-line rows.
+    diagram: {
+      toLabel: "Won the reward",
+      steps: [
+        { to: "colby-donaldson" },
+        { to: "coach-wade" },
+        { to: "aubry-bracco" },
+        { to: "genevieve-mushaluk" },
+        { to: "joe-hunter" },
+        { to: "tiffany-ervin" },
+        { to: "chrissy-hofbeck" },
+      ],
+    },
   },
   {
     id: "blood-moon",
@@ -115,6 +186,20 @@ export const twists: Twist[] = [
       "colby-donaldson",
     ],
     svgImage: BloodMoonSVG,
+    diagram: {
+      toLabel: "Three Tribals, one night",
+      steps: [
+        { to: "ozzy-lusth", outcome: "safe", note: "Exile" },
+        { to: "rizo-velovic", outcome: "safe", note: "Exile" },
+        { to: "kamilla-karthigesu", outcome: "out", note: "Blindsided" },
+        {
+          to: "genevieve-mushaluk",
+          outcome: "out",
+          note: "Shot in the Dark failed",
+        },
+        { to: "colby-donaldson", outcome: "out", note: "Unanimous" },
+      ],
+    },
   },
   {
     id: "double-duo",
@@ -132,6 +217,20 @@ export const twists: Twist[] = [
       "chrissy-hofbeck",
     ],
     svgImage: DuoSVG,
+    diagram: {
+      toLabel: "Linked fates",
+      steps: [
+        {
+          to: "cirie-fields",
+          outcome: "safe",
+          note: "Exile, found the coconut",
+        },
+        { to: "rick-devens", outcome: "safe", note: "Fake idol bluff" },
+        { to: "aubry-bracco", outcome: "safe", note: "Covered by the bluff" },
+        { to: "coach-wade", outcome: "out", note: "Voted out as a pair" },
+        { to: "chrissy-hofbeck", outcome: "out", note: "Voted out as a pair" },
+      ],
+    },
   },
   {
     id: "probst-rice-side-bet",
@@ -150,6 +249,16 @@ export const twists: Twist[] = [
       "tiffany-ervin",
     ],
     svgImage: RiceSVG,
+    diagram: {
+      toLabel: "The side bet",
+      steps: [
+        { to: "jonathan-young", outcome: "won", note: "Outlasted" },
+        { to: "joe-hunter", outcome: "won", note: "Outlasted" },
+        { to: "ozzy-lusth", outcome: "won", note: "Outlasted" },
+        { to: "tiffany-ervin", outcome: "won", note: "Outlasted" },
+        { to: "jeff-probst", outcome: "failed", note: "Dropped at 7:30" },
+      ],
+    },
   },
   {
     id: "jimmy-fallon-one-in-the-urn",
@@ -161,6 +270,18 @@ export const twists: Twist[] = [
       "Joe Hunter sent Christian Hubicki on the journey via a rock-paper-scissors tournament. Christian failed the puzzle, triggering the worst-case penalty: for the first time in Survivor history, a player was forced to write down their own name at Tribal Council. He was eliminated in a 6-3-2 vote.",
     involvedCast: ["jimmy-fallon", "joe-hunter", "christian-hubicki"],
     svgImage: UrnSVG,
+    diagram: {
+      fromLabel: "Sent by",
+      toLabel: "Went on the journey",
+      steps: [
+        {
+          from: "joe-hunter",
+          to: "christian-hubicki",
+          outcome: "out",
+          note: "Failed, forced to write his own name",
+        },
+      ],
+    },
   },
   {
     id: "The MrBeast Super Beware Advantage",
@@ -172,6 +293,17 @@ export const twists: Twist[] = [
       "MrBeast revealed the coin at Tribal after arriving at the auction with a mystery briefcase. Rick Devens immediately volunteered, called heads, and won — granting himself safety and pushing the prize pot to a record $2 million. The chaotic live Tribal that followed sent Stephenie LaGrossa Kendrick home.",
     involvedCast: ["mrbeast", "rick-devens", "stephenie-lagrossa-kendrick"],
     svgImage: BewareSVG,
+    diagram: {
+      toLabel: "The coin flip",
+      steps: [
+        { to: "rick-devens", outcome: "won", note: "Called heads, idol + $2M" },
+        {
+          to: "stephenie-lagrossa-kendrick",
+          outcome: "out",
+          note: "Voted out at the Tribal that followed",
+        },
+      ],
+    },
   },
 ];
 

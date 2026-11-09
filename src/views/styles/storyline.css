@@ -1,0 +1,446 @@
+/* Storyline — every castaway's thread through the season. */
+
+.storyline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* ----- takeaway ---------------------------------------------------------- */
+
+.storyline-takeaway {
+  margin: 0;
+  max-width: 72ch;
+  font-family: var(--font-data);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--color-ink);
+}
+
+/* ----- legend ------------------------------------------------------------ */
+
+.storyline-legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px var(--space-3);
+  /* One line tall either way, so swapping hint ↔ key doesn't shift the chart. */
+  min-height: 22px;
+  font-family: var(--font-data);
+  font-size: 12px;
+  color: var(--color-ink-soft);
+}
+
+.storyline-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.storyline-legend-head {
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--color-ink);
+}
+
+.storyline-legend-line {
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.storyline-legend-hint {
+  font-style: italic;
+  color: var(--color-ink-dim);
+}
+
+/* ----- frame ------------------------------------------------------------- */
+
+.storyline-scroll {
+  position: relative;
+  overflow-x: auto;
+  background: var(--paper-white);
+  border: var(--rule);
+}
+
+.storyline-svg {
+  display: block;
+  font-family: var(--font-data);
+}
+
+/* ----- header ------------------------------------------------------------ */
+
+.storyline-phase-label {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  fill: var(--color-ink);
+}
+
+.storyline-phase-rule {
+  stroke: var(--color-ink);
+  stroke-width: 1.5;
+}
+
+.storyline-phase-divider {
+  stroke: var(--color-ink-dim);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+  opacity: 0.6;
+}
+
+.storyline-col-label,
+.storyline-col-sublabel {
+  text-anchor: middle;
+}
+
+.storyline-col-label {
+  font-size: 11px;
+  font-weight: 700;
+  fill: var(--color-ink);
+}
+
+.storyline-col-sublabel {
+  font-size: 9.5px;
+  fill: var(--color-ink-soft);
+}
+
+.storyline-col-head.is-hover .storyline-col-label,
+.storyline-col-head.is-hover .storyline-col-sublabel {
+  fill: var(--color-blue);
+}
+
+/* ----- bands ------------------------------------------------------------- */
+
+.storyline-band path {
+  fill-opacity: 0.14;
+  stroke: none;
+}
+
+/* Merge-era groups belong to no tribe: an outline on the bare surface,
+   never a tint that could read as Kalo. */
+.storyline-band.is-merge path,
+.storyline-band.is-team path {
+  fill: var(--color-canvas);
+  fill-opacity: 0.7;
+  stroke: var(--color-ink-dim);
+  stroke-opacity: 0.35;
+  stroke-width: 1;
+}
+
+.storyline-band.is-tribe path {
+  stroke: none;
+}
+
+.storyline-band.is-exile path {
+  fill: url(#storyline-hatch);
+  fill-opacity: 1;
+}
+
+.storyline-band.is-immune path {
+  fill: var(--color-canvas-2);
+  fill-opacity: 1;
+}
+
+.storyline-hatch-bg {
+  fill: var(--color-canvas);
+}
+
+.storyline-hatch-line {
+  stroke: var(--color-ink-dim);
+  stroke-width: 1;
+  opacity: 0.35;
+}
+
+.storyline-band-label {
+  paint-order: stroke;
+  stroke: var(--paper-white);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+  pointer-events: none;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  fill: var(--color-ink-soft);
+}
+
+/* Who was at tribal. */
+.storyline-pill {
+  fill: var(--paper-white);
+  fill-opacity: 0.65;
+  stroke: var(--color-ink);
+  stroke-opacity: 0.9;
+  stroke-width: 1;
+}
+
+/* ----- threads ----------------------------------------------------------- */
+
+.storyline-thread path {
+  fill: none;
+}
+
+.storyline-thread-line {
+  stroke: var(--thread);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+/* A surface ring, so a thread reads on top of the one it crosses. */
+.storyline-thread-casing {
+  stroke: var(--paper-white);
+  stroke-width: 4;
+}
+
+.storyline-thread-jury {
+  stroke: var(--thread);
+  stroke-width: 1.5;
+  stroke-dasharray: 0.5 3.5;
+  stroke-linecap: round;
+}
+
+.storyline-thread-hit {
+  stroke: transparent;
+  stroke-width: 10;
+  pointer-events: stroke;
+  cursor: pointer;
+}
+
+.storyline-thread,
+.storyline-stops {
+  transition: opacity var(--t-fast);
+}
+
+.storyline-thread.is-dimmed,
+.storyline-stops.is-dimmed {
+  opacity: 0.14;
+}
+
+.storyline-thread.is-focused .storyline-thread-line {
+  stroke-width: 3.5;
+}
+
+.storyline-thread.is-focused .storyline-thread-casing {
+  stroke-width: 6;
+}
+
+.storyline-thread.is-focused .storyline-thread-jury {
+  stroke-width: 2.5;
+}
+
+.storyline-face {
+  cursor: pointer;
+  outline: none;
+}
+
+.storyline-face-name {
+  font-size: 11px;
+  font-weight: 600;
+  text-anchor: end;
+  fill: var(--color-ink);
+}
+
+.storyline-face-ring {
+  fill: var(--paper-white);
+  stroke: var(--thread);
+  stroke-width: 2;
+}
+
+.storyline-face:focus-visible .storyline-face-ring {
+  stroke: var(--color-green);
+  stroke-width: 3;
+}
+
+/* ----- nodes & exits ----------------------------------------------------- */
+
+.storyline-node circle {
+  fill: var(--paper-white);
+  stroke: var(--color-ink);
+  stroke-width: 1.5;
+}
+
+.storyline-node.is-boot circle {
+  fill: var(--color-ink);
+}
+
+.storyline-node line {
+  stroke: var(--color-ink);
+  stroke-width: 1.3;
+}
+
+.storyline-exit circle {
+  fill: var(--paper-white);
+  stroke: var(--color-ink);
+  stroke-width: 1.5;
+}
+
+.storyline-exit path {
+  fill: var(--color-ink);
+}
+
+.storyline-exit.is-winner circle {
+  fill: var(--color-yellow);
+}
+
+.storyline-exit.is-finalist circle {
+  stroke-width: 2.5;
+}
+
+.storyline-exit.is-winner circle {
+  stroke-width: 2;
+}
+
+.storyline-exit-label {
+  paint-order: stroke;
+  stroke: var(--paper-white);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.storyline-exit-label {
+  font-size: 10px;
+  font-weight: 600;
+  fill: var(--color-ink);
+}
+
+.storyline-exit-label.is-final {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.storyline-hit {
+  fill: transparent;
+  cursor: pointer;
+}
+
+/* ----- vote arcs --------------------------------------------------------- */
+
+.storyline-arcs {
+  pointer-events: none;
+}
+
+.storyline-arc {
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: 1.25;
+  opacity: 0.7;
+}
+
+.storyline-arc.is-nullified {
+  stroke-dasharray: 3 2;
+  opacity: 0.45;
+}
+
+.storyline-arrowhead {
+  fill: var(--color-ink);
+}
+
+/* ----- tooltip ----------------------------------------------------------- */
+
+.storyline-tooltip {
+  position: absolute;
+  z-index: 2;
+  max-width: 240px;
+  padding: 8px 10px;
+  background: var(--paper-white);
+  border: var(--rule);
+  box-shadow: 4px 4px 0 var(--color-ink);
+  font-family: var(--font-data);
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--color-ink);
+  pointer-events: none;
+}
+
+.storyline-tooltip p {
+  margin: 0;
+}
+
+.storyline-tip-title {
+  font-weight: 700;
+}
+
+.storyline-tip-sub {
+  color: var(--color-ink-soft);
+  margin-bottom: 4px !important;
+}
+
+.storyline-tip-count {
+  margin-top: 4px !important;
+}
+
+.storyline-tip-exit {
+  margin-top: 4px !important;
+  font-weight: 700;
+}
+
+.storyline-tip-tally {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  min-width: 140px;
+}
+
+.storyline-tip-tally li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.storyline-tip-tally li.is-out {
+  font-weight: 700;
+}
+
+.storyline-tip-tally li.is-out span:first-child::after {
+  content: " · out";
+  font-weight: 400;
+  color: var(--color-ink-soft);
+}
+
+/* ----- table ------------------------------------------------------------- */
+
+.storyline-table {
+  font-family: var(--font-data);
+  font-size: 12px;
+  color: var(--color-ink);
+}
+
+.storyline-table summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--color-ink-soft);
+}
+
+.storyline-table table {
+  margin-top: var(--space-1);
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.storyline-table th,
+.storyline-table td {
+  text-align: left;
+  vertical-align: top;
+  padding: 4px 8px;
+  border-bottom: var(--rule-hair);
+}
+
+.storyline-table thead th {
+  border-bottom: var(--rule);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .storyline-thread,
+  .storyline-stops {
+    transition: none;
+  }
+}

@@ -1,254 +1,103 @@
 /* ============================================================
    Dashboard surface
-   Two zones: the IDENTITY (left aside, burnt orange) carries the
-   Bass personality. The DATA pane (right) stays neutral, gridded,
-   tabular. They meet at a single bold vertical rule. */
+   One column: a blue masthead carrying the identity, then the
+   sections. The aside that used to hold a full navigation tree is
+   gone — the sections are the app, so the only global chrome is the
+   logo and a way to reach each one. */
 
 /* ─── Page shell ──────────────────────────────────────────── */
 .dashboard {
+  /* Sticky offset and the matching scroll-margin both read this, so
+     the two can never drift apart. */
+  --header-h: 74px;
   display: flex;
-  flex-direction: row;
-  align-items: flex-start;
+  flex-direction: column;
   width: 100%;
   min-height: 100vh;
   background: var(--color-canvas);
   color: var(--color-ink);
 }
 
-/* ─── Aside: identity zone, full-height title card ────────── */
-.dashboard-aside {
+/* ─── Masthead: the identity zone, now a bar ──────────────── */
+.dashboard-header {
   position: sticky;
   top: 0;
-  align-self: flex-start;
-  flex-shrink: 0;
-  height: 100vh;
-  min-width: 0;
-  max-width: 560px;
-  overflow: hidden;
-  overscroll-behavior: contain;
+  z-index: 40;
   display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  padding: var(--space-4) var(--space-3);
-  background: var(--color-orange);
+  align-items: center;
+  gap: var(--space-5);
+  height: var(--header-h);
+  padding: 0 var(--space-5);
+  background: var(--color-blue);
   color: var(--color-canvas);
-  border-right: var(--rule-bold);
-  transition:
-    width 320ms var(--ease),
-    padding 320ms var(--ease);
-  z-index: 5;
+  border-bottom: var(--rule-bold);
 }
 
-.dashboard:not(.is-aside-collapsed) .dashboard-aside {
-  overflow-y: auto;
-  overflow-x: hidden;
+.dashboard-header-brand {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  text-decoration: none;
 }
 
-.dashboard-aside::-webkit-scrollbar {
+.dashboard-header-logo {
+  height: 52px;
+  width: auto;
+}
+
+.dashboard-header-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+  /* Narrow windows scroll the section names rather than wrapping them
+     and breaking the bar's fixed height. */
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.dashboard-header-nav::-webkit-scrollbar {
   width: 0;
   height: 0;
 }
 
-.dashboard.is-aside-collapsed .dashboard-aside {
-  padding-left: 0;
-  padding-right: 0;
-}
-
-.dashboard-aside.is-dragging {
-  transition: none;
-}
-
-/* Logo sits in a cream cut-paper rectangle inside the orange field.
-   Pure cut-paper — flat shapes layered, no shadows. */
-.dashboard-aside-logo {
-  display: block;
-  width: 100%;
-  max-width: 240px;
-  margin: 0 auto;
-  padding: var(--space-2);
-}
-
-/* Default-state recap (when no player/twist is selected) */
-.dashboard-aside-recap {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  border-top: 2px solid var(--color-canvas);
-  border-bottom: 2px solid var(--color-canvas);
-  padding: var(--space-2) 0;
-}
-
-.dashboard-aside-eyebrow {
+.dashboard-header-link {
+  flex-shrink: 0;
+  padding: 7px 12px;
   font-family: var(--font-display);
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.24em;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--color-canvas);
-  line-height: 1;
-  margin-bottom: var(--space-1);
-}
-
-.dashboard-aside-recap p {
-  font-family: var(--font-data);
-  font-size: 13.5px;
-  line-height: 1.55;
-  color: var(--color-canvas);
-}
-
-.dashboard-aside-recap strong {
-  color: var(--color-canvas);
-  font-weight: 700;
-}
-
-.dashboard-aside-hint {
-  font-family: var(--font-data);
-  font-size: 12px;
-  font-style: italic;
-  color: rgba(243, 234, 210, 0.78);
-}
-
-/* Section nav — big typographic blocks, the personality moment */
-.dashboard-aside-nav {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.dashboard-aside-nav ul {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-}
-
-.dashboard-aside-nav a {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: baseline;
-  gap: var(--space-2);
-  padding: var(--space-2) 0;
-  border-top: 1px solid rgba(243, 234, 210, 0.32);
-  color: var(--color-canvas);
   text-decoration: none;
-  font-family: var(--font-display);
-  font-size: 26px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  line-height: 1;
-  transition:
-    color var(--t),
-    background-color var(--t),
-    padding var(--t);
-}
-
-.dashboard-aside-nav a:last-child {
-  border-bottom: 1px solid rgba(243, 234, 210, 0.32);
-}
-
-.dashboard-aside-nav a:hover,
-.dashboard-aside-nav a:focus-visible {
-  outline: none;
-  background: var(--color-canvas);
-  color: var(--color-orange);
-  padding-left: var(--space-2);
-  padding-right: var(--space-2);
-  margin-left: calc(-1 * var(--space-2));
-  margin-right: calc(-1 * var(--space-2));
-}
-
-.dashboard-aside-nav-num {
-  font-family: var(--font-data);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  color: rgba(243, 234, 210, 0.6);
-  font-variant-numeric: tabular-nums;
-  align-self: center;
-}
-
-.dashboard-aside-nav a:hover .dashboard-aside-nav-num,
-.dashboard-aside-nav a:focus-visible .dashboard-aside-nav-num {
-  color: var(--color-orange);
-}
-
-.dashboard-aside-nav-arrow {
-  display: none; /* Bass keeps it lean. The hover swap IS the affordance. */
-}
-
-/* ─── Aside resize handle ─────────────────────────────────── */
-.dashboard-aside-handle {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: -4px;
-  width: 10px;
-  cursor: ew-resize;
-  touch-action: none;
-  z-index: 5;
-  user-select: none;
-}
-
-.dashboard-aside-handle::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  width: 2px;
-  margin-left: -1px;
-  background: var(--color-ink);
-  opacity: 0;
-  transition: opacity var(--t-fast);
-}
-
-.dashboard-aside-handle:hover::before,
-.dashboard-aside-handle:active::before {
-  opacity: 0.5;
-}
-
-/* ─── Aside collapse toggle: a flat black square ──────────── */
-.dashboard-aside-toggle {
-  position: fixed;
-  top: var(--space-2);
-  transform: translateX(-50%);
-  z-index: 10;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--color-ink);
   color: var(--color-canvas);
-  border: none;
-  font-family: var(--font-data);
-  font-size: 18px;
-  font-weight: 600;
-  line-height: 1;
-  cursor: pointer;
+  border: 1.5px solid transparent;
+  /* The house hover language: the label underlines, nothing moves. */
   transition:
-    left 320ms var(--ease),
-    background-color var(--t-fast);
+    background-color var(--t-fast),
+    color var(--t-fast);
 }
 
-.dashboard-aside.is-dragging ~ .dashboard-aside-toggle {
-  transition: none;
+.dashboard-header-link:hover,
+.dashboard-header-link:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  outline: none;
 }
 
-.dashboard-aside-toggle:hover {
-  background: var(--color-orange);
+.dashboard-header-link:focus-visible {
+  border-color: var(--color-canvas);
 }
 
-.dashboard-aside-toggle:focus-visible {
-  outline: 3px solid var(--color-ink);
-  outline-offset: 3px;
+/* Current section: a cut-paper flip — the chip takes the canvas and the
+   label takes the blue. */
+.dashboard-header-link.is-active {
+  background: var(--color-canvas);
+  color: var(--color-blue);
+  text-decoration: none;
 }
 
-.dashboard-aside-toggle.is-closed {
-  transform: translateX(0);
-}
-
-/* ─── Main pane: the data zone ────────────────────────────── */
+/* ─── Main pane and sections ─────────────────────────────── */
 .dashboard-main {
   flex: 1;
   min-width: 0;
@@ -263,6 +112,9 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+  /* Clears the sticky masthead when a nav link jumps here, so the
+     section title lands below the bar instead of under it. */
+  scroll-margin-top: calc(var(--header-h) + var(--space-2));
 }
 
 .dashboard-section-head {
@@ -278,7 +130,6 @@
   font-size: clamp(36px, 5vw, 56px);
   font-weight: 700;
   letter-spacing: 0.02em;
-  text-transform: uppercase;
   line-height: 0.95;
   color: var(--color-ink);
 }
@@ -289,9 +140,6 @@
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: var(--color-ink-soft);
-  padding: 4px 10px;
-  border: var(--rule-hair);
-  background: var(--paper-white);
 }
 
 /* ─── Cast controls: legend + order-by filter ────────────── */
@@ -310,20 +158,10 @@
   align-items: center;
   gap: var(--space-1);
   font-family: var(--font-data);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.16em;
-  text-transform: uppercase;
   color: var(--color-ink-soft);
-}
-
-.dashboard-cast-legend-swatch {
-  width: 14px;
-  height: 14px;
-  flex-shrink: 0;
-  background: var(--color-canvas-2);
-  outline: 2px solid var(--color-orange);
-  outline-offset: -2px;
 }
 
 .dashboard-cast-sort {
@@ -334,10 +172,9 @@
 
 .dashboard-cast-sort-label {
   font-family: var(--font-data);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.16em;
-  text-transform: uppercase;
   color: var(--color-ink-soft);
 }
 
@@ -368,9 +205,24 @@
   background-repeat: no-repeat;
 }
 
+.dashboard-cast-sort-select:hover {
+  background-color: var(--color-ink);
+  color: var(--color-canvas);
+  /* Re-cut the chevron in cream so it survives the flood. */
+  background-image: linear-gradient(
+      45deg,
+      transparent 50%,
+      var(--color-canvas) 50%
+    ),
+    linear-gradient(135deg, var(--color-canvas) 50%, transparent 50%);
+}
+
+/* The ring sits 3px off the box, so when hover floods the box ink the
+   canvas gap keeps ring and fill apart — the same offset the other
+   controls use. */
 .dashboard-cast-sort-select:focus-visible {
   outline: 3px solid var(--color-ink);
-  outline-offset: 2px;
+  outline-offset: 3px;
 }
 
 /* ─── Cast grid: neutral, gridded, well-spaced ────────────── */
@@ -394,25 +246,38 @@
   flex-direction: column;
   align-items: stretch;
   gap: var(--space-1);
-  transition: transform var(--t-fast);
   padding: 12px;
   background: var(--paper-white);
   border: 1.5px black solid;
 }
 
-.dashboard-cast-tile:hover,
-.dashboard-cast-tile:focus-visible {
+/* ─── One hover language ───────────────────────────────────────
+   Hovering swaps flats and never moves anything: a cream surface
+   floods ink, an ink surface floods orange, and the cast photo takes
+   the green it already uses for selection. Movement is reserved for
+   state — a selected tile lifts, hover does not. The only exception
+   is the aside's drag handle, which shows its grip. */
+.dashboard-cast-tile:hover {
   outline: none;
-  transform: translateY(-2px);
+}
+
+/* Keyboard focus is its own state, not a copy of selection: the ring sits
+   outside the tile so it shows on a selected tile too, over its lift and
+   shadow. Ink on canvas is 15:1; the 3:1 a ring needs is not in doubt. */
+.dashboard-cast-tile:focus-visible {
+  outline: 3px solid var(--color-ink);
+  outline-offset: 3px;
 }
 
 .dashboard-cast-photo {
   width: 100%;
   aspect-ratio: 1 / 1;
-  border: var(--rule);
   overflow: hidden;
-  /* Tribe color is the resting background (shows around cutout headshots). */
-  background: var(--player-tribe-color);
+  /* One field for every castaway. Tribe colour used to live here, but it
+     was frozen at episode 1 and said nothing about a player who had already
+     swapped twice; the blue is identity, not data. It clears 3:1 against
+     the white padding so the field still reads as a field. */
+  background: var(--color-blue-bright);
   transition:
     border-color var(--t-fast),
     outline-color var(--t-fast),
@@ -420,17 +285,82 @@
 }
 
 .dashboard-cast-tile:hover .dashboard-cast-photo,
-.dashboard-cast-tile:focus-visible .dashboard-cast-photo {
+.dashboard-cast-tile:focus-visible .dashboard-cast-photo,
+.dashboard-cast-tile.is-selected .dashboard-cast-photo {
   background: var(--color-green);
 }
 
-/* Cross-highlight: this castaway shared a prior season with the one
-   currently hovered/selected. Orange outline rings the whole tile. */
-.dashboard-cast-tile.is-played-with {
-  outline: 5px solid var(--color-orange);
+/* Cross-highlight: this castaway shared a prior season with the selected
+   one. The tribe backdrop washes out to a low-opacity orange, so the whole
+   photo reads as "past castmate" behind the cutout headshot. Scoped away
+   from hover/focus so the green affordance stays pure green. */
+/* Past castmate: a marker stroke behind the name. Behind the photo this
+   wash was hopeless — over a tribe flat it never cleared 1.5:1 at any
+   opacity. On the white tile the logo blue at 0.58 flattens to #6bb8e4,
+   which carries ink at 8.1:1 and reads as a filled shape at 2.2:1, so the
+   cue survives without color vision and needs no underline. The name stays
+   ink: the accent blue on this highlight is only 2.9:1.
+
+   The stroke is drawn by hand rather than set as a box: uneven elliptical
+   corners, a slight tilt, ink pooling along the bottom edge where a felt
+   tip would drag, and a lighter start and finish where the pen touches
+   down and lifts. It sweeps in from the left with a small per-tile delay,
+   so a row of past castmates gets struck one after another instead of all
+   at once. */
+.dashboard-cast-name::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 0.6em 0.9em 0.7em 1em / 1.1em 0.8em 1.2em 0.9em;
+  transform: rotate(-0.8deg);
+  background-image:
+    /* pooled edge */
+    linear-gradient(to top, #0084d138, transparent 55%),
+    /* the stroke itself, lighter at both ends */
+    linear-gradient(
+      100deg,
+      #0084d130 0%,
+      #0084d199 7%,
+      #0084d194 93%,
+      #0084d12a 100%
+    );
+  /* Clipped to nothing until the cue turns on. */
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 420ms var(--ease);
+  transition-delay: calc(var(--tile-i, 0) * 9ms);
 }
 
+/* No two strokes lean the same way. */
+.dashboard-cast-tile:nth-child(even) .dashboard-cast-name::before {
+  border-radius: 0.9em 0.6em 1em 0.7em / 0.8em 1.2em 0.9em 1.1em;
+  transform: rotate(0.7deg);
+}
+
+.dashboard-cast-tile:nth-child(3n) .dashboard-cast-name::before {
+  transform: rotate(-0.3deg) translateY(0.5px);
+}
+
+.dashboard-cast-tile.is-played-with .dashboard-cast-name {
+  color: var(--color-ink);
+}
+
+/* Drawn a hair past the end of the word, the way a pen overshoots. */
+.dashboard-cast-tile.is-played-with .dashboard-cast-name::before {
+  clip-path: inset(0 -3% 0 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-cast-name::before {
+    transition: none;
+    transition-delay: 0s;
+  }
+}
+
+/* Headshots are transparent cutouts, so they sit above the tribe flat. */
 .dashboard-cast-photo img {
+  position: relative;
+  z-index: 1;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -445,11 +375,20 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  /* Shrink-wrap the text so a highlight hugs the name rather than filling
+     the tile. The padding is always here so the name doesn't shift when
+     the highlight comes and goes. */
+  align-self: center;
+  max-width: 100%;
+  padding: 2px 5px;
+  /* Holds the marker stroke behind the glyphs. */
+  position: relative;
+  isolation: isolate;
 }
 
 /* Selected: hard black shadow offset down-right (no blur) — the tile
    literally lifts off the grid, cut-paper style. Border stays neutral so
-   the OUT hatch and VS stamp keep their own weight. */
+   the corner mark keeps its own weight. */
 .dashboard-cast-tile.is-selected {
   transform: translate(-3px, -3px);
   box-shadow: 6px 6px 0 var(--color-ink);
@@ -458,60 +397,186 @@
     box-shadow var(--t-fast);
 }
 
-.dashboard-cast-tile.is-selected:hover,
-.dashboard-cast-tile.is-selected:focus-visible {
-  /* Prevent the base hover from stacking a second translate on top. */
-  transform: translate(-3px, -3px);
-}
-
 .dashboard-cast-tile.is-selected .dashboard-cast-name {
   font-weight: 700;
 }
 
-/* Vote-lens overlays: when a player is selected, every OTHER tile marks
-   how that selected player targeted this castmate. Overlays sit on top of
-   the photo so they don't push the tile taller. */
+/* Vote-lens: when a player is selected, every OTHER tile marks how that
+   selected player targeted this castmate. The mark is pinned to the tile
+   rather than stacked in the layout, so it never pushes the tile taller. */
 
-/* Container for absolutely-positioned overlays. */
-.dashboard-cast-photo {
-  position: relative;
-}
+/* One mark per tile, in two states. The numeral used to ride every tile
+   that took a vote, but 91% of those read "1" and four in five of them
+   also earned a skull — so the count only appears when it outranks the
+   skull, at two votes or more.
 
-/* VS n: small filled-ink stamp in the top-right corner of the photo.
-   Bass-flat, tabular figures, sharp square. */
-.dashboard-cast-photo-vs {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
+   Solid chip, skull: you ended them. Hollow chip, crosshair: you put their
+   name down. They are separate facts and get separate badges, so a tile
+   can carry both. A hollow skull was the first try at the second state and
+   it lied, since nobody died; the crosshair claims an aim and no result.
+   The shared chip shape and the shared motion hold the pair together.
+
+   The row is pinned to the tile rather than the photo: the photo clips its
+   overflow, and the strike ring needs room to leave the frame. */
+.dashboard-cast-mark {
   display: inline-flex;
+  position: relative;
+  /* Holds the strike ring. */
+  isolation: isolate;
   align-items: center;
   justify-content: center;
-  background: var(--color-ink);
-  color: var(--color-canvas);
+  gap: 2px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 3px;
+  pointer-events: none;
+  /* Both the glyph and the numeral take the chip's color. */
   font-family: var(--font-data);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   line-height: 1;
+  letter-spacing: 0;
   font-variant-numeric: tabular-nums;
-  z-index: 2;
-  pointer-events: none;
 }
 
-/* OUT: diagonal red-dash hatch overlay spanning the whole tile — caution-tape
-   feel that reads instantly as "eliminated on your ballot." */
-.dashboard-cast-tile-out {
+/* The badges live in a row so a tile can carry both without either one
+   moving. Row-reverse keeps the skull pinned in the corner where it has
+   always sat while the aim badge grows inward beside it, so adding the
+   second badge never shifts the first. */
+.dashboard-cast-marks {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.dashboard-cast-tile > .dashboard-cast-marks {
   position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(
-    -45deg,
-    #a8281f42 0 6px,
-    transparent 6px 14px
-  );
-  pointer-events: none;
+  top: 6px;
+  right: 6px;
   z-index: 3;
+  flex-direction: row-reverse;
+}
+
+.dashboard-cast-mark.is-out {
+  background: var(--color-ink);
+  color: var(--color-canvas);
+}
+
+/* Hollow: the chip takes the tile's own paper so it reads as an outline,
+   and the 1.5px rule matches every other edge on the page. */
+.dashboard-cast-mark.is-missed {
+  background: var(--paper-white);
+  color: var(--color-ink);
+  box-shadow: inset 0 0 0 1.5px var(--color-ink);
+}
+
+.dashboard-cast-skull,
+.dashboard-cast-crosshair {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  fill: currentColor;
+}
+
+.dashboard-cast-mark-count {
+  /* Optical: the glyph has more mass than the digits, so the numeral
+     needs a hair of lead to sit on the same baseline. */
+  padding-top: 1px;
+}
+
+/* Halfway between the punch and the plain shake.
+
+   The entrance pop is back but held down: in at 0.72 and over to 1.09,
+   where it used to come in at 0.4 and overshoot to 1.18. The bump at the
+   end is gone for good — scale is pinned at 1 from 46% on, so the tail is
+   pure rotation and nothing swells a second time on the way out. Swings
+   decay off ±6°, between the old ±7° and the ±5° of the quiet version.
+
+   Two easings, because the two halves want opposite things: a snappy
+   overshoot curve carries the punch, then ease-in-out takes over for the
+   swings, which an ease-out would crush into the first instant. The fade
+   finishes at 28% so the largest swing is never spent behind a
+   translucent chip. */
+@keyframes cast-mark-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.72) rotate(-6deg);
+    animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1.4);
+  }
+  28% {
+    opacity: 1;
+    transform: scale(1.09) rotate(4.5deg);
+    animation-timing-function: ease-in-out;
+  }
+  46% {
+    transform: scale(1) rotate(-3.2deg);
+  }
+  62% {
+    transform: scale(1) rotate(2.2deg);
+  }
+  78% {
+    transform: scale(1) rotate(-1.3deg);
+  }
+  90% {
+    transform: scale(1) rotate(0.6deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* The ring, at roughly half its old presence: a hairline instead of
+   1.5px, peaking at 0.45 opacity instead of 0.85, and dying at 1.55x
+   instead of 1.95x. It still waits for the chip to land before it shows,
+   so it marks the hit rather than riding in with it. */
+@keyframes cast-mark-ring {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  26% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  40% {
+    opacity: 0.45;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.55);
+  }
+}
+
+.dashboard-cast-tile .dashboard-cast-mark {
+  /* Every badge on the grid fires at the same instant — no per-tile
+     ripple, no second beat for the aim badge. The one shared delay is
+     short enough to feel like a response to the click and long enough to
+     sit behind the name's marker stroke rather than on top of it.
+     Timing functions live in the keyframes, so none is set here. */
+  animation: cast-mark-in 480ms both;
+  animation-delay: 180ms;
+}
+
+.dashboard-cast-tile .dashboard-cast-mark::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  z-index: -1;
+  border: 1px solid var(--color-ink);
+  animation: cast-mark-ring 480ms linear both;
+  animation-delay: 180ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-cast-tile .dashboard-cast-mark {
+    animation: none;
+  }
+  /* No ring at all — it exists only as motion. */
+  .dashboard-cast-tile .dashboard-cast-mark::after {
+    display: none;
+  }
 }
 
 /* ─── Legend variants ────────────────────────────────────── */
@@ -529,33 +594,37 @@
   margin-right: var(--space-3);
 }
 
+/* Past castmate needs no swatch: the wash goes behind the words, and the
+   words take ink so they stay at 8:1 on it. */
+.dashboard-cast-legend li.is-played {
+  background: #0084d194;
+  color: var(--color-ink);
+  padding: 2px 6px;
+}
+
 .dashboard-cast-legend li:last-child {
   margin-right: 0;
 }
 
-/* VS mini-stamp sample (mirrors the corner stamp on tiles). */
-.dashboard-cast-legend-swatch--vs {
-  background: var(--color-ink);
-  color: var(--color-canvas);
-  outline: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-data);
-  font-size: 10px;
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: 0;
+/* The legend shows the mark itself rather than a swatch standing in for
+   it, so the two can never drift apart. Static, and sized down to sit on
+   a line of 11px caps. */
+.dashboard-cast-legend .dashboard-cast-mark {
+  min-width: 16px;
+  height: 16px;
 }
 
-/* OUT hatch sample. */
-.dashboard-cast-legend-swatch--out {
-  background: repeating-linear-gradient(
-    -45deg,
-    var(--color-red) 0 3px,
-    var(--color-canvas) 3px 7px
-  );
-  outline: none;
+.dashboard-cast-legend .dashboard-cast-skull,
+.dashboard-cast-legend .dashboard-cast-crosshair {
+  width: 10px;
+  height: 10px;
+}
+
+/* On a tile the hollow chip needs its own paper so the glyph has a clean
+   field over the photo; on the cream legend strip it should read as a
+   plain outline instead of a white square. */
+.dashboard-cast-legend .dashboard-cast-mark.is-missed {
+  background: transparent;
 }
 
 /* ─── Audience Votes ──────────────────────────────────────────
@@ -576,7 +645,6 @@
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.08em;
-  text-transform: uppercase;
   color: var(--color-canvas);
   background: var(--color-ink);
   border: var(--rule);
@@ -586,7 +654,7 @@
 }
 
 .dashboard-votes-control:hover {
-  background: var(--color-orange);
+  background: var(--color-blue);
 }
 
 .dashboard-votes-control:focus-visible {
@@ -618,28 +686,16 @@
   display: flex;
   flex-direction: column;
   padding: 0;
-  /* Brighter than the cream canvas so the sheet reads as paper on cork. */
-  background: #f8f2e0;
+  /* The same white as the cast tiles: one card surface across the page. */
+  background: var(--paper-white);
   min-width: 0;
   overflow: hidden;
   max-width: 300px;
   height: fit-content;
-  border: solid 1px black;
-  /* Lift the note off the board — no ink outline; the shadow is the edge. */
-  box-shadow:
-    0 8px 16px rgba(20, 14, 4, 0.28),
-    0 2px 5px rgba(20, 14, 4, 0.18);
-}
-
-/* Fine paper grain laid over the whole sheet, band included. */
-.dashboard-vote::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  mix-blend-mode: multiply;
-  opacity: 0.09;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E");
+  /* One depth metaphor: cut-paper flats with ink edges. The soft drop
+     shadow and the fractal grain are gone — depth on this page comes
+     from the hard offset a selected tile carries, nothing else. */
+  border: var(--rule);
 }
 
 /* Each note hangs a little crooked, pivoting from the pin at top-center.
@@ -663,24 +719,23 @@
   transform: rotate(1.5deg);
 }
 .dashboard-votes-strip > .dashboard-vote-card:hover {
-  transform: rotate(0deg) translateY(-3px);
   z-index: 4;
-}
-.dashboard-votes-strip > .dashboard-vote-card:hover .dashboard-vote {
-  box-shadow:
-    0 14px 26px rgba(20, 14, 4, 0.34),
-    0 4px 8px rgba(20, 14, 4, 0.2);
 }
 
 /* The colored band — bleeds to the card edges. */
+/* Every band is the logo yellow. It is the one logo colour with no other
+   job — blue is the chrome and the cast field, green is selection — so the
+   votes read as their own territory without a four-card colour cycle doing
+   it for them. Ink text, never light: the yellow is 1.5:1 on white, so a
+   light label on it would be unreadable (ink is 11.9:1). */
 .dashboard-vote-head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-2);
   padding: var(--space-2);
-  background: var(--color-orange);
-  color: var(--color-canvas);
+  background: var(--color-yellow);
+  color: var(--color-ink);
 }
 
 .push-pin {
@@ -691,42 +746,17 @@
   z-index: 5;
 }
 
-/* Cycle the band color through orange → mustard → teal → red.
-   Mustard gets ink text because cream-on-mustard is low contrast. */
-.dashboard-votes-strip > .dashboard-vote-card:nth-child(4n + 2) .dashboard-vote-head {
-  background: var(--color-mustard);
-  color: var(--color-ink);
-}
-.dashboard-votes-strip > .dashboard-vote-card:nth-child(4n + 3) .dashboard-vote-head {
-  background: var(--color-teal);
-}
-.dashboard-votes-strip > .dashboard-vote-card:nth-child(4n) .dashboard-vote-head {
-  background: var(--color-red);
-}
-
 .dashboard-vote-subject {
   font-family: var(--font-display);
   font-size: 22px;
   font-weight: 700;
   letter-spacing: 0.02em;
-  text-transform: uppercase;
-  color: var(--paper-white);
+  /* Inherits the band's ink. It was pinned to white for the old blue and
+     navy bands, which on the yellow is 1.5:1 — invisible. */
+  color: inherit;
   line-height: 1.05;
   flex: 1;
   min-width: 0;
-}
-
-
-/* Body of card — horizontal padding lives on the buttons + prompt
-   directly so options can stripe edge-to-edge with one hairline. */
-.dashboard-vote-prompt {
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--color-ink-soft);
-  padding: var(--space-2) var(--space-2) 0;
 }
 
 .dashboard-vote-options {
@@ -789,7 +819,7 @@
   border-top: none;
 }
 
-.dashboard-vote-option-button:disabled {
+.dashboard-vote-option-button[aria-disabled="true"] {
   cursor: default;
 }
 
@@ -855,15 +885,6 @@
   letter-spacing: 0.02em;
 }
 
-.dashboard-vote-bar {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  height: 4px;
-  background: var(--color-ink);
-  pointer-events: none;
-}
-
 /* Drop the percentage bar on winners — the green flood already
    communicates "this won," and the bar would only cover the bottom-left
    slice, making the flood look chipped. Non-winners keep their bar. */
@@ -871,640 +892,518 @@
   display: none;
 }
 
-/* ─── Twists grid — broken at one point ───────────────────── */
-/* This is THE intentional break in the grid: 3 equal columns of
-   cream tiles, except the center "Premise" tile spans 2 rows AND
-   floods burnt orange — the figure/ground rupture. */
+/* ─── Twists: cards that turn over ────────────────────────────
+   The old layout gave each twist a 457x361 tile to hold a ~150px
+   drawing, and opening one pushed a detail panel into the page that
+   ran the section past 3000px. Now every twist is the same card, the
+   art is sized to the card instead of floating in it, and the whole
+   record lives on the back — so reading one costs a turn, not a
+   scroll, and nothing below it moves. */
 .dashboard-twists-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-auto-rows: minmax(160px, 1fr);
+  /* 300px is not arbitrary: it is the narrowest column where the
+     longest twist in the season (608 characters) still sets without
+     scrolling the back face. */
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: var(--space-2);
 }
 
-@media (max-width: 720px) {
-  .dashboard-twists-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+.twist-card {
+  perspective: 1400px;
+  /* Both faces are absolutely positioned, so the card cannot take its
+     height from content. Measured in the browser against the real data at
+     this column width, with the 12px text floor: the worst back is Jeff
+     Probst joining the challenge (a paragraph of mechanic plus five
+     diagram rows) at 544px, so this clears every card in the season with
+     a line to spare. */
+  height: 552px;
 }
 
-.dashboard-twist {
-  appearance: none;
-  background: var(--paper-white);
-  border: var(--rule);
-  padding: var(--space-2);
-  margin: 0;
-  font: inherit;
-  color: var(--color-ink);
-  cursor: pointer;
+.twist-card-inner {
   position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 560ms var(--ease);
+}
+
+.twist-card.is-flipped .twist-card-inner {
+  transform: rotateY(180deg);
+}
+
+.twist-face {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-1);
-  transition:
-    background-color var(--t-fast),
-    color var(--t-fast),
-    transform var(--t-fast);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border: 1.5px solid var(--color-ink);
+  background: var(--paper-white);
+  overflow: hidden;
 }
 
-.dashboard-twist:hover,
-.dashboard-twist:focus-visible {
-  outline: none;
-  background: var(--color-ink);
-  color: var(--color-canvas);
+.twist-back {
+  transform: rotateY(180deg);
 }
 
-.dashboard-twist-glow {
-  display: none; /* no glows in Bass world */
+/* ── Front ── */
+.twist-front {
+  padding: 14px;
+  gap: 10px;
 }
 
-.dashboard-twist-img {
-  width: 70%;
-  max-height: 60%;
+.twist-art {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  /* contain, not cover: these are drawings, and cropping one loses the
+     thing it is a drawing of. */
   object-fit: contain;
 }
 
-.dashboard-twist-ep-chip {
-  position: absolute;
-  top: var(--space-1);
-  right: var(--space-1);
-  font-family: var(--font-data);
-  font-size: 10px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.06em;
-  color: var(--paper-white);
-  background: var(--color-ink);
-  padding: 2px 6px;
-}
-
-.dashboard-twist-label {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.twist-title {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: 0.01em;
   text-align: center;
-  margin-top: var(--space-1);
-}
-
-.dashboard-twist-label-title {
-  font-family: var(--font-display);
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  line-height: 1.1;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  color: var(--paper-white);
-}
-
-/* The grid break: the center tile is burnt orange AND spans 2 rows.
-   It anchors the composition with a single bold idea. */
-.dashboard-twist--center {
-  grid-row: span 2;
-  background: var(--color-orange);
-  color: var(--color-canvas);
-  border-color: var(--color-orange);
-}
-
-.dashboard-twist--center .dashboard-twist-img {
-  width: 64%;
-  max-height: 55%;
-}
-
-.dashboard-twist--center:hover,
-.dashboard-twist--center:focus-visible {
-  background: var(--color-ink);
-  border-color: var(--color-ink);
-}
-
-.dashboard-twist--center .dashboard-twist-label-title {
-  font-size: clamp(18px, 1.8vw, 22px);
-}
-
-.dashboard-twist-ep-chip--center {
-  background: var(--paper-white);
-  color: var(--color-orange);
-  top: var(--space-2);
-  left: var(--space-2);
-  right: auto;
-  font-family: var(--font-display);
-  font-size: 11px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  padding: 4px 10px;
-}
-
-.dashboard-twist--center:hover .dashboard-twist-ep-chip--center,
-.dashboard-twist--center:focus-visible .dashboard-twist-ep-chip--center {
-  background: var(--paper-white);
+  text-wrap: balance;
   color: var(--color-ink);
 }
 
-/* ─── Detail panels in the aside (player + twist) ─────────── */
-/* These sit inside the burnt-orange aside. To stay legible they
-   live in cream rectangles — flat cut-paper layered on the field. */
-.player-detail {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  background: var(--color-canvas);
-  color: var(--color-ink);
-  padding: var(--space-3) var(--space-2);
-  border: var(--rule);
-}
-
-.player-detail-close {
-  appearance: none;
-  align-self: flex-start;
+.twist-ep {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 2;
+  padding: 5px 9px;
   background: var(--color-ink);
   color: var(--color-canvas);
-  border: none;
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  padding: 6px 12px;
-  cursor: pointer;
-  transition: background-color var(--t-fast);
-}
-
-.player-detail-close:hover,
-.player-detail-close:focus-visible {
-  background: var(--color-orange);
-  outline: none;
-}
-
-.player-detail-portrait {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  overflow: hidden;
-  background: var(--color-canvas-2);
-  border: var(--rule);
-}
-
-.player-detail-portrait img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.player-detail-head {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.player-detail-name {
-  font-family: var(--font-display);
-  font-size: clamp(22px, 2.4vw, 30px);
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  line-height: 0.95;
-  color: var(--color-ink);
-}
-
-.player-detail-status {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.player-detail-status-badge {
-  align-self: flex-start;
-  font-family: var(--font-display);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  padding: 4px 8px;
-  background: var(--color-red);
-  color: var(--color-canvas);
-}
-
-.player-detail-status-badge.is-winner {
-  background: var(--color-mustard);
-  color: var(--color-ink);
-}
-
-.player-detail-status-detail {
   font-family: var(--font-data);
   font-size: 12px;
-  color: var(--color-ink-soft);
-}
-
-.player-detail-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  padding-top: var(--space-2);
-  border-top: var(--rule-hair);
-}
-
-.player-detail-section-title {
-  font-family: var(--font-display);
-  font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.24em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--color-orange);
+}
+
+/* The whole face is the control; the chip is only the visible promise
+   of it. */
+.twist-flip {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
   display: flex;
-  align-items: baseline;
-  gap: var(--space-1);
-}
-
-.player-detail-section-count {
-  margin-left: auto;
-  font-family: var(--font-data);
-  font-size: 11px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  color: var(--color-ink-soft);
-}
-
-.player-detail-empty {
-  font-family: var(--font-data);
-  font-size: 12px;
-  color: var(--color-ink-dim);
-  font-style: italic;
-}
-
-/* Tribe timeline */
-.player-detail-tribes {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-}
-
-.player-detail-tribe-row {
-  display: grid;
-  grid-template-columns: 12px auto 1fr;
-  align-items: center;
-  gap: var(--space-1);
-  padding: 6px 0;
-  font-family: var(--font-data);
-  font-size: 13px;
-  color: var(--color-ink);
-  border-bottom: var(--rule-hair);
-}
-
-.player-detail-tribe-row:last-child {
-  border-bottom: none;
-}
-
-.player-detail-tribe-dot {
-  width: 12px;
-  height: 12px;
-}
-
-.player-detail-tribe-name {
-  font-weight: 600;
-}
-
-.player-detail-tribe-range {
-  margin-left: auto;
-  font-family: var(--font-data);
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  color: var(--color-ink-soft);
-  font-variant-numeric: tabular-nums;
-}
-
-/* Past seasons — a small table-like list */
-.player-detail-seasons {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-}
-
-.player-detail-season-row {
-  display: grid;
-  grid-template-columns: 40px 1fr;
-  align-items: baseline;
-  gap: var(--space-1);
-  padding: 4px 0;
-  font-family: var(--font-data);
-  font-size: 13px;
-  border-bottom: var(--rule-hair);
-}
-
-.player-detail-season-row:last-child {
-  border-bottom: none;
-}
-
-.player-detail-season-num {
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  color: var(--color-teal);
-  letter-spacing: 0.04em;
-}
-
-.player-detail-season-title {
-  color: var(--color-ink);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Played With grid */
-.player-detail-played-with {
-  list-style: none;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
-  gap: var(--space-1);
-}
-
-.player-detail-played-row {
+  align-items: flex-end;
+  justify-content: flex-start;
+  padding: 14px;
   appearance: none;
   background: none;
   border: none;
-  padding: 0;
-  margin: 0;
-  font: inherit;
-  color: inherit;
   cursor: pointer;
+}
+
+.twist-flip-chip {
+  padding: 4px 9px;
+  background: var(--color-canvas);
+  border: 1.5px solid var(--color-ink);
+  font-family: var(--font-data);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-ink);
+  opacity: 0;
+  transition: opacity var(--t-fast);
+}
+
+.twist-flip:hover .twist-flip-chip,
+.twist-flip:focus-visible .twist-flip-chip {
+  opacity: 1;
+}
+
+.twist-flip:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: -4px;
+}
+
+/* ── The premise leads the grid, so it floods ── */
+.twist-card.is-premise .twist-front {
+  background: var(--color-blue);
+}
+
+.twist-card.is-premise .twist-title {
+  color: var(--color-canvas);
+}
+
+.twist-card.is-premise .twist-ep {
+  background: var(--color-canvas);
+  color: var(--color-blue);
+}
+
+/* ── Back ── */
+.twist-back {
+  padding: 14px;
+  gap: 6px;
+}
+
+.twist-back-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-1);
+}
+
+.twist-ep--back {
+  position: static;
+}
+
+.twist-close {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  appearance: none;
+  background: none;
+  border: 1.5px solid var(--color-ink);
+  color: var(--color-ink);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background-color var(--t-fast),
+    color var(--t-fast);
+}
+
+.twist-close:hover,
+.twist-close:focus-visible {
+  background: var(--color-ink);
+  color: var(--color-canvas);
+  outline: none;
+}
+
+.twist-back-title {
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: 0.01em;
+  text-wrap: balance;
+  color: var(--color-ink);
+}
+
+.twist-back-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.twist-back-label {
+  margin-top: 9px;
+  font-family: var(--font-data);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-blue);
+}
+
+.twist-back-label:first-child {
+  margin-top: 0;
+}
+
+.twist-back-text {
+  margin-top: 3px;
+  font-family: var(--font-data);
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--color-ink-soft);
+}
+
+/* ── The diagram ──
+   Rows of faces with the outcome stamped on the corner, the way a cast
+   tile carries its vote-lens mark. Each row reads left to right: who had
+   it, an arrow, who got it, what became of it. Twists with no such shape
+   (the premise, the Zac Brown reward) keep their paragraph. */
+.twist-diagram {
+  margin-top: 8px;
+}
+
+.twist-diagram-heads {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+  font-family: var(--font-data);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-blue);
+}
+
+/* Matches the row grid below so each heading sits over its column. */
+.twist-diagram-heads.has-source {
+  grid-template-columns: 54px 22px 1fr;
+}
+
+.twist-diagram-heads.has-source > span:last-child {
+  grid-column: 3;
+}
+
+.twist-diagram-rows {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 6px;
+}
+
+.twist-diagram-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+/* A plain cast list wraps instead of stacking, so seven faces take two
+   lines rather than seven. */
+.twist-diagram-rows.is-roster {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8px 6px;
+}
+
+.twist-actor {
+  flex: 0 0 auto;
+  /* Wide enough for the longest first name in the cast (Genevieve, 61px
+     at 12px) so no name needs the ellipsis. */
+  width: 64px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  transition: transform var(--t-fast);
+  gap: 2px;
 }
 
-.player-detail-played-row:hover,
-.player-detail-played-row:focus-visible {
-  outline: none;
-  transform: translateY(-2px);
-}
-
-.player-detail-played-photo {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  overflow: hidden;
+.twist-actor-photo {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  overflow: visible;
+  display: grid;
+  place-items: center;
   border: var(--rule-hair);
-  background: var(--color-canvas-2);
-  transition: border-color var(--t-fast);
+  background: var(--color-blue-bright);
 }
 
-.player-detail-played-row:hover .player-detail-played-photo,
-.player-detail-played-row:focus-visible .player-detail-played-photo {
-  border-color: var(--color-orange);
-}
-
-.player-detail-played-photo img {
+.twist-actor-photo img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.player-detail-played-name {
+.twist-actor-initials {
   font-family: var(--font-data);
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--color-ink);
-  text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
-}
-
-.player-detail-played-count {
-  font-family: var(--font-data);
-  font-size: 10px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.04em;
-  color: var(--color-orange);
-}
-
-/* ─── Twist detail (aside) ─────────────────────────────────── */
-.twist-detail-art {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--color-orange);
-  border: var(--rule);
-  overflow: hidden;
-}
-
-/* Bass kinetic moment: a quietly rotating mark when nothing is happening. */
-.twist-detail-art-glow {
-  position: absolute;
-  inset: -20%;
-  background: conic-gradient(
-    from 0deg,
-    var(--color-orange) 0deg,
-    var(--color-orange) 90deg,
-    transparent 90deg,
-    transparent 180deg,
-    var(--color-orange) 180deg,
-    var(--color-orange) 270deg,
-    transparent 270deg
-  );
-  opacity: 0.08;
-  animation: twist-detail-spin 40s linear infinite;
-}
-
-@keyframes twist-detail-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .twist-detail-art-glow {
-    animation: none;
-  }
-}
-
-.twist-detail-art-img {
-  position: relative;
-  z-index: 1;
-  width: 64%;
-  height: 64%;
-  object-fit: contain;
-}
-
-.twist-detail-ep {
-  align-self: flex-start;
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: var(--color-canvas);
-  background: var(--color-ink);
-  padding: 4px 10px;
-  font-variant-numeric: tabular-nums;
-}
-
-.twist-detail-text {
-  font-family: var(--font-data);
-  font-size: 13.5px;
-  line-height: 1.55;
-  color: var(--color-ink);
-}
-
-.twist-detail-involved-fallback {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-display);
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  color: var(--paper-white);
+}
+
+/* Corner stamp, same idea and nearly the same size as the cast grid's. */
+.twist-actor-mark {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 17px;
+  height: 17px;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid var(--color-ink);
+}
+
+.twist-actor-mark svg {
+  width: 10px;
+  height: 10px;
+  fill: currentColor;
+}
+
+.twist-actor-mark.is-ok {
+  background: var(--color-green);
+  color: var(--paper-white);
+}
+
+/* Hollow: it was in their hands and stayed there. */
+.twist-actor-mark.is-none {
+  background: var(--paper-white);
+  color: var(--color-ink);
+}
+
+.twist-actor-mark.is-fail {
+  background: var(--color-red);
+  color: var(--paper-white);
+}
+
+.twist-actor-mark.is-out {
+  background: var(--color-ink);
   color: var(--color-canvas);
+}
+
+.twist-actor-name {
+  font-family: var(--font-data);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.1;
+  text-align: center;
+  color: var(--color-ink-dim);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A flat arrow, drawn rather than typed, so it lines up with the faces
+   instead of sitting on a text baseline. */
+.twist-arrow {
+  flex: 0 0 auto;
+  position: relative;
+  width: 22px;
+  height: 36px;
+}
+
+.twist-arrow::before {
+  content: "";
+  position: absolute;
+  top: 17px;
+  left: 0;
+  width: 16px;
+  height: 2px;
   background: var(--color-ink);
 }
 
-.twist-detail-involved-tag {
-  font-family: var(--font-display);
-  font-size: 9px;
+.twist-arrow::after {
+  content: "";
+  position: absolute;
+  top: 12px;
+  right: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 7px solid var(--color-ink);
+}
+
+.twist-diagram-note {
+  flex: 1;
+  min-width: 0;
+  padding-top: 9px;
+  font-family: var(--font-data);
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--color-ink-soft);
+}
+
+.twist-back-cast {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.twist-back-cast-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 38px;
+}
+
+.twist-back-cast-photo {
+  width: 32px;
+  height: 32px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  border: var(--rule-hair);
+  background: var(--color-blue-bright);
+}
+
+.twist-back-cast-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.twist-back-cast-initials {
+  font-family: var(--font-data);
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--color-orange);
-  margin-top: 2px;
+  color: var(--paper-white);
 }
 
-/* Mobile-only chrome — hidden on desktop, revealed in the query below. */
-.dashboard-mobile-nav,
-.dashboard-sheet-backdrop {
-  display: none;
+.twist-back-cast-name {
+  font-family: var(--font-data);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-ink-dim);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-@keyframes dashboard-sheet-up {
-  from {
-    transform: translateY(100%);
+/* With no rotation there is nothing to hide a backface, so the faces
+   cross-fade and take turns on top instead. */
+@media (prefers-reduced-motion: reduce) {
+  .twist-card-inner,
+  .twist-card.is-flipped .twist-card-inner {
+    transition: none;
+    transform: none;
   }
-  to {
-    transform: translateY(0);
-  }
-}
 
-@keyframes dashboard-backdrop-in {
-  from {
+  .twist-face {
+    backface-visibility: visible;
+    -webkit-backface-visibility: visible;
+    transform: none;
+  }
+
+  .twist-back {
     opacity: 0;
+    z-index: -1;
   }
-  to {
+
+  .twist-card.is-flipped .twist-front {
+    opacity: 0;
+    z-index: -1;
+  }
+
+  .twist-card.is-flipped .twist-back {
     opacity: 1;
+    z-index: 1;
   }
 }
 
 /* ─── Mobile ──────────────────────────────────────────────── */
 @media (max-width: 720px) {
   .dashboard {
-    flex-direction: column;
+    --header-h: 60px;
   }
 
-  /* Identity block stacks on top as a static header. */
-  .dashboard-aside {
-    position: static;
-    width: 100% !important;
-    max-width: none;
-    height: auto;
-    border-right: none;
-    border-bottom: var(--rule-bold);
-    padding: var(--space-3) var(--space-2);
-  }
-  /* Desktop's resize handle, collapse toggle, and the big in-aside nav
-     all give way to the fixed bottom tab bar. */
-  .dashboard-aside-handle,
-  .dashboard-aside-toggle,
-  .dashboard-aside-nav {
-    display: none;
+  .dashboard-header {
+    gap: var(--space-2);
+    padding: 0 var(--space-2);
   }
 
-  /* Leave room for the fixed bottom nav so the last section clears it. */
-  .dashboard-main {
-    padding: var(--space-3) var(--space-2) calc(var(--space-6) + 56px);
-    gap: var(--space-5);
+  .dashboard-header-logo {
+    height: 40px;
   }
 
-  /* ── Fixed bottom tab bar: thumb-reachable section nav ── */
-  .dashboard-mobile-nav {
-    display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: 1fr;
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 30;
-    background: var(--color-ink);
-    border-top: var(--rule-bold);
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-  }
-
-  .dashboard-mobile-nav-item {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 15px 8px;
-    font-family: var(--font-display);
+  .dashboard-header-link {
+    padding: 6px 9px;
     font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    text-decoration: none;
-    color: rgba(243, 234, 210, 0.65);
-    border-right: 1px solid rgba(243, 234, 210, 0.15);
-    transition:
-      color var(--t-fast),
-      background-color var(--t-fast);
-  }
-  .dashboard-mobile-nav-item:last-child {
-    border-right: none;
-  }
-  .dashboard-mobile-nav-item.is-active {
-    color: var(--color-canvas);
-    background: var(--color-orange);
   }
 
-  /* ── Detail as a bottom sheet ──
-     Selecting a castaway/twist would otherwise render the panel far off
-     at the top of the page. On mobile it slides up from the bottom over
-     a tap-away backdrop, so the tap has a visible, reachable result. */
-  .dashboard.is-detail-open .dashboard-aside {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    top: auto;
-    width: 100% !important;
-    max-width: none;
-    height: auto;
-    max-height: 85vh;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    border: none;
-    border-top: var(--rule-bold);
-    border-radius: 18px 18px 0 0;
-    padding: var(--space-3) var(--space-2)
-      calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
-    z-index: 50;
-    box-shadow: 0 -14px 34px rgba(20, 14, 4, 0.35);
-    animation: dashboard-sheet-up var(--t) var(--ease);
-  }
-
-  .dashboard.is-detail-open .dashboard-sheet-backdrop {
-    display: block;
-    position: fixed;
-    inset: 0;
-    z-index: 40;
-    background: rgba(22, 20, 15, 0.55);
-    animation: dashboard-backdrop-in var(--t) var(--ease);
+  .dashboard-main {
+    padding: var(--space-3) var(--space-2) var(--space-5);
+    gap: var(--space-5);
   }
 }

@@ -1,5 +1,5 @@
-import SurvivorPage from "./SurvivorPage";
+import DashboardView from "./views/DashboardView";
 
 export default function App() {
-  return <SurvivorPage />;
+  return <DashboardView />;
 }

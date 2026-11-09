@@ -2,7 +2,7 @@
    Saul Bass-inspired data dashboard
    ============================================================
    Identity zones (sidebar, headings, icons) carry the personality:
-   bold condensed display type, burnt orange anchor, cut-paper flats.
+   bold condensed display type, logo-blue anchor, cut-paper flats.
    Data zones (cards, tables, KPIs) stay neutral and legible: a
    clean sans with tabular figures. The two NEVER touch — display
    type is forbidden anywhere a number appears. */
@@ -10,22 +10,36 @@
 @import url("https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap");
 
 :root {
-  /* === Canvas: warm cream, not stark white === */
-  --color-canvas: #f3ead2;
-  --color-canvas-2: #ead9b5; /* deeper cream for stripes / contrast */
-  --color-ink: #16140f; /* near-black */
-  --color-ink-soft: #514a3b; /* secondary text */
-  --color-ink-dim: #8c8470; /* tertiary */
+  /* === Canvas: cool near-white, biased toward the logo blue ===
+     The show's logo is blue, yellow, green and white. White is the
+     surface; the neutrals lean blue rather than grey so the accent reads
+     as intended instead of as a stray hue. */
+  --color-canvas: #eef3f8;
+  --color-canvas-2: #dbe6f0; /* deeper surface for stripes / contrast */
+  --color-ink: #0a1a24; /* blue-black, not warm black */
+  --color-ink-soft: #395062; /* secondary text */
+  --color-ink-dim: #4e677a; /* tertiary — 4.5:1 on both surfaces */
 
-  /* === Dominant accent === */
-  --color-orange: #d65a1b; /* burnt orange — the Bass color */
+  /* === Dominant accent: the logo blue ===
+     The logo's #0084d1 is only 4.02:1 on white, so it cannot carry body
+     text or take light labels. This is that blue darkened until one token
+     works both ways: blue labels on the surface (5.7:1), and canvas or
+     white labels on a blue flat (5.7:1 / 6.3:1). The bright original
+     survives as --color-blue-bright, which is a graphic and never takes
+     text: the cast photo field, and the marker-stroke wash. At 4.02:1 on
+     white it clears the 3:1 a graphic needs and fails the 4.5:1 a label
+     would. */
+  --color-blue: #00649f;
+  --color-blue-bright: #0084d1; /* the logo blue, untouched */
 
-  /* === Categorical data palette (flats only) === */
-  --color-mustard: #e0a72e;
-  --color-teal: #2c7f7d;
-  --color-red: #a8281f;
-  /* Accessible forest green for "correct" — ~7.5:1 contrast vs cream text. */
-  --color-green: #1f7a3f;
+  /* === Categorical data palette (flats only) ===
+     Each flat is dark enough to carry canvas text at 4.5:1, so the same
+     value can be a fill or a label. Yellow is the exception: it is the
+     logo's #ffcf00 untouched, which means it takes ink text and never
+     light text, and it only ever appears under a label. */
+  --color-yellow: #ffcf00;
+  --color-red: #b3261e; /* semantic only — the wrong answer */
+  --color-green: #007a26; /* semantic — selected, and the right answer */
 
   --paper-white: #ffffff;
 
@@ -107,15 +121,30 @@ img {
   max-width: 100%;
 }
 
-/* Display type rules: bold, condensed, uppercase, sparingly used.
+/* Display type rules: bold, condensed, sparingly used.
    Never wraps a number — that's why these classes don't appear on
    any element that contains digits. */
 .bass-display {
   font-family: var(--font-display);
   font-weight: 700;
   letter-spacing: 0.02em;
-  text-transform: uppercase;
   line-height: 1;
+}
+
+/* Text for assistive tech only: in the accessibility tree, off the screen.
+   Used for live-region announcements and for the meaning a glyph or color
+   carries visually. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* Reduced motion respect */

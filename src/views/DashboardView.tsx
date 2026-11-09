@@ -5,16 +5,23 @@ import {
   productionMembers,
   type Twist,
   type ProductionMember,
+  type TwistOutcome,
+  type TwistStep,
 } from "../data/twists";
-import { eliminated, findEliminationRecord } from "../data/connections";
-import { voteCountFromTo, didVoteOut } from "../data/voteHelpers";
-import { getSeasonSubtitle } from "../data/seasons";
-import { TRIBE_COLORS } from "../data/tribes";
+import { eliminated } from "../data/connections";
 import { fanVotes, type FanVote } from "../data/fanVotes";
 import { handleImageError } from "../lib/imageFallback";
 import { useReveal } from "../lib/useReveal";
-import pushPinIcon from "../img/pushpin.png"
+import pushPinIcon from "../img/pushpin.png";
 import logoUrl from "../img/survivor-50-logo.png";
+import {
+  buildPlayerRecords,
+  castTileId,
+  voteCardId,
+  type PlayerRecord,
+  type VoteLensEntry,
+} from "./playerRecords";
+import { SKULL_PATH } from "./glyphs";
 import "./styles/dashboard.css";
 
 const CENTER_TWIST_ID = "in-the-hands-of-the-fans";
@@ -48,30 +55,7 @@ function resolveInvolved(
     .filter((x): x is InvolvedAvatar => x !== null);
 }
 
-const ASIDE_MIN_WIDTH = 240;
-const ASIDE_MAX_WIDTH = 560;
-const ASIDE_DEFAULT_WIDTH = 320;
-
-/** Other Season-50 castaways this player has played a prior season with. */
-function findSharedHistory(player: CastMember): Array<{
-  member: CastMember;
-  sharedSeasons: number[];
-}> {
-  const mine = new Set(player.seasons.map((s) => s.season));
-  const matches: Array<{ member: CastMember; sharedSeasons: number[] }> = [];
-  for (const other of castData) {
-    if (other.id === player.id) continue;
-    const shared = other.seasons
-      .map((s) => s.season)
-      .filter((s) => mine.has(s));
-    if (shared.length > 0) matches.push({ member: other, sharedSeasons: shared });
-  }
-  return matches.sort(
-    (a, b) =>
-      b.sharedSeasons.length - a.sharedSeasons.length ||
-      a.member.name.localeCompare(b.member.name),
-  );
-}
+const EMPTY_LENS: ReadonlyMap<string, VoteLensEntry> = new Map();
 
 type CastSort = "default" | "name" | "tribe" | "seasons" | "rank";
 
@@ -96,8 +80,7 @@ function seasonRankScore(player: CastMember): number {
 /** Return a new array of cast sorted by the chosen key (never mutates input). */
 function sortCast(cast: CastMember[], sort: CastSort): CastMember[] {
   if (sort === "default") return cast;
-  const byName = (a: CastMember, b: CastMember) =>
-    a.name.localeCompare(b.name);
+  const byName = (a: CastMember, b: CastMember) => a.name.localeCompare(b.name);
   const copy = [...cast];
   switch (sort) {
     case "name":
@@ -119,280 +102,430 @@ function sortCast(cast: CastMember[], sort: CastSort): CastMember[] {
   }
 }
 
-function placementSummary(player: CastMember): {
-  status: string;
-  detail: string;
-} {
-  const elim = findEliminationRecord(player.id);
-  if (!elim) return { status: "Sole Survivor", detail: "Winner of Season 50" };
-  const type = elim.type;
-  const label =
-    type === "injury"
-      ? "Medevac"
-      : type === "fire"
-        ? "Lost at fire"
-        : type === "jury"
-          ? "Jury vote (Final 3)"
-          : "Voted out";
-  return { status: `Out · Ep ${elim.episode}`, detail: label };
-}
-
-interface PlayerDetailProps {
-  player: CastMember;
-  onClose: () => void;
-  /** Jump to a different player's detail (used by Played With). */
-  onSelectPlayer: (id: string) => void;
-}
-
-function PlayerDetail({ player, onClose, onSelectPlayer }: PlayerDetailProps) {
-  const elim = findEliminationRecord(player.id);
-  const shared = useMemo(() => findSharedHistory(player), [player]);
-  const { status, detail } = placementSummary(player);
-
+/* The other half of the pair: you put their name down and they stayed.
+   Ring, four ticks and a centre dot — thicker strokes than the drawing
+   wants at reading size, because at 12px a hairline ring fills in. */
+function CastCrosshair() {
   return (
-    <div className="player-detail">
-      <button
-        type="button"
-        className="player-detail-close"
-        onClick={onClose}
-        aria-label="Back to season overview"
-      >
-        ← Back
-      </button>
+    <svg
+      className="dashboard-cast-crosshair"
+      viewBox="0 0 24 24"
+      aria-hidden
+      focusable="false"
+    >
+      <path
+        fillRule="evenodd"
+        d="M12 3.4a8.6 8.6 0 1 0 0 17.2 8.6 8.6 0 0 0 0-17.2Zm0 3a5.6 5.6 0 1 1 0 11.2 5.6 5.6 0 0 1 0-11.2ZM10.7.6h2.6V5h-2.6V.6ZM10.7 19h2.6v4.4h-2.6V19ZM.6 10.7H5v2.6H.6v-2.6ZM19 10.7h4.4v2.6H19v-2.6ZM12 9.6a2.4 2.4 0 1 0 0 4.8 2.4 2.4 0 0 0 0-4.8Z"
+      />
+    </svg>
+  );
+}
 
-      <div className="player-detail-portrait">
-        <img
-          src={player.httpPhoto}
-          alt={player.name}
-          loading="eager"
-          decoding="async"
-          onError={handleImageError}
+/* The shared skull glyph; the chip color shows through its sockets. */
+function CastSkull() {
+  return (
+    <svg
+      className="dashboard-cast-skull"
+      viewBox="0 0 24 24"
+      aria-hidden
+      focusable="false"
+    >
+      <path
+        fillRule="evenodd"
+        d={SKULL_PATH}
+      />
+    </svg>
+  );
+}
+
+/** The vote-lens badges, shared by the cast grid and the aside tree.
+ *
+ *  Voting against someone and ending them are two different facts, so
+ *  they get two badges rather than one chip that tries to say both: the
+ *  solid skull for "you ended them," the hollow crosshair for "you put
+ *  their name down." The aim badge rides beside the skull only when its
+ *  count says more than the skull already implies — a bare crosshair next
+ *  to a skull would just repeat it, and 104 of the season's 127 vote pairs
+ *  are skull pairs, so that repeat would land on most of the grid. */
+function CastMark({ entry, name }: { entry: VoteLensEntry; name: string }) {
+  const first = name.split(" ")[0];
+  const times = `${entry.count} ${entry.count === 1 ? "time" : "times"}`;
+  const showAim = !entry.out || entry.count > 1;
+  return (
+    <span className="dashboard-cast-marks">
+      {entry.out && (
+        <span
+          className="dashboard-cast-mark is-out"
+          title={`Voted out ${first}`}
+        >
+          <CastSkull />
+        </span>
+      )}
+      {showAim && (
+        <span
+          className="dashboard-cast-mark is-missed"
+          title={
+            entry.out
+              ? `Voted against ${first} ${times} before ending them`
+              : `Voted against ${first} ${times}, but someone else sent them home`
+          }
+        >
+          <CastCrosshair />
+          {entry.count > 1 && (
+            <span className="dashboard-cast-mark-count">
+              &times;{entry.count}
+            </span>
+          )}
+        </span>
+      )}
+    </span>
+  );
+}
+
+/** What the ring and the marks on a tile mean, in words, from the
+ *  selected player's side — the same facts the eye gets from the wash,
+ *  the skull and the crosshair. Empty when there is nothing to say. */
+function tileDescription(
+  player: CastMember,
+  selectedFirst: string | null,
+  isPlayedWith: boolean,
+  entry: VoteLensEntry | undefined,
+): string {
+  if (!selectedFirst) return "";
+  const first = player.name.split(" ")[0];
+  const parts: string[] = [];
+  if (isPlayedWith) parts.push(`Past castmate of ${selectedFirst}.`);
+  if (entry) {
+    const times = `${entry.count} ${entry.count === 1 ? "time" : "times"}`;
+    parts.push(
+      entry.out
+        ? entry.count > 1
+          ? `${selectedFirst} voted ${first} out, after voting against them ${times}.`
+          : `${selectedFirst} voted ${first} out.`
+        : `${selectedFirst} voted against ${first} ${times}, but someone else sent them home.`,
+    );
+  }
+  return parts.join(" ");
+}
+
+/** Scrolls the main pane to an element; the aside never moves. */
+function scrollToElement(id: string, block: ScrollLogicalPosition) {
+  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block });
+}
+
+/** Every outcome maps onto one of four marks, so the diagram stays
+ *  readable without a legend beside it. "Out" borrows the cast grid's
+ *  skull, which already means exactly this. */
+const OUTCOME_MARK: Record<TwistOutcome, { cls: string; label: string }> = {
+  played: { cls: "is-ok", label: "Played it" },
+  won: { cls: "is-ok", label: "Won" },
+  safe: { cls: "is-ok", label: "Survived it" },
+  unused: { cls: "is-none", label: "Never played it" },
+  failed: { cls: "is-fail", label: "Failed" },
+  out: { cls: "is-out", label: "Eliminated" },
+};
+
+function OutcomeGlyph({ outcome }: { outcome: TwistOutcome }) {
+  const cls = OUTCOME_MARK[outcome].cls;
+  if (cls === "is-out") return <CastSkull />;
+  if (cls === "is-fail")
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden focusable="false">
+        <path d="M5.4 3.2 12 9.8l6.6-6.6 2.2 2.2L14.2 12l6.6 6.6-2.2 2.2L12 14.2l-6.6 6.6-2.2-2.2L9.8 12 3.2 5.4Z" />
+      </svg>
+    );
+  if (cls === "is-none")
+    // A struck-through ring: it existed, it never got used.
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden focusable="false">
+        <path
+          fillRule="evenodd"
+          d="M12 2.6a9.4 9.4 0 1 0 0 18.8 9.4 9.4 0 0 0 0-18.8Zm0 2.8a6.6 6.6 0 1 1 0 13.2 6.6 6.6 0 0 1 0-13.2Z"
         />
-      </div>
+        <path d="M5.1 17.3 17.3 5.1l1.8 1.8L6.9 19.1Z" />
+      </svg>
+    );
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden focusable="false">
+      <path d="M9.6 19.2 2.4 12l2.3-2.3 4.9 4.9L19.3 4.9l2.3 2.3Z" />
+    </svg>
+  );
+}
 
-      <header className="player-detail-head">
-        <h2 className="player-detail-name">{player.name}</h2>
-        <div className="player-detail-status">
-          <span
-            className={`player-detail-status-badge ${elim ? "" : "is-winner"}`}
-          >
-            {status}
-          </span>
-          <span className="player-detail-status-detail">{detail}</span>
-        </div>
-      </header>
-
-      <section className="player-detail-section">
-        <h3 className="player-detail-section-title">Tribe Timeline</h3>
-        <ol className="player-detail-tribes">
-          {(() => {
-            // A tribe event only matters if the player was still in by the time
-            // it started. Drop later tribes for anyone eliminated before them.
-            const visible = elim
-              ? player.tribeJourney.filter((e) => e.fromEpisode <= elim.episode)
-              : player.tribeJourney;
-
-            return visible.map((event, i) => {
-              const next = visible[i + 1];
-              // End-of-segment is the episode before the next tribe event,
-              // or the elimination episode if there isn't one (clamped).
-              let tillEp: number | null;
-              if (next) {
-                tillEp = elim
-                  ? Math.min(next.fromEpisode - 1, elim.episode)
-                  : next.fromEpisode - 1;
-              } else {
-                tillEp = elim ? elim.episode : null;
-              }
-
-              const rangeLabel =
-                tillEp === null
-                  ? `Ep ${event.fromEpisode}+`
-                  : event.fromEpisode === tillEp
-                    ? `Ep ${event.fromEpisode}`
-                    : `Eps ${event.fromEpisode}–${tillEp}`;
-
-              return (
-                <li key={i} className="player-detail-tribe-row">
-                  <span
-                    className="player-detail-tribe-dot"
-                    style={{ backgroundColor: TRIBE_COLORS[event.tribe] }}
-                  />
-                  <span className="player-detail-tribe-name">
-                    {event.tribe}
-                  </span>
-                  <span className="player-detail-tribe-range">
-                    {rangeLabel}
-                  </span>
-                </li>
-              );
-            });
-          })()}
-        </ol>
-      </section>
-
-      <section className="player-detail-section">
-        <h3 className="player-detail-section-title">
-          Past Seasons
-          <span className="player-detail-section-count">
-            {player.seasons.length}
-          </span>
-        </h3>
-        <ol className="player-detail-seasons">
-          {player.seasons
-            .slice()
-            .sort((a, b) => a.season - b.season)
-            .map((s) => (
-              <li key={s.season} className="player-detail-season-row">
-                <span className="player-detail-season-num">S{s.season}</span>
-                <span className="player-detail-season-title">
-                  {getSeasonSubtitle(s.season)}
-                </span>
-              </li>
-            ))}
-        </ol>
-      </section>
-
-      <section className="player-detail-section">
-        <h3 className="player-detail-section-title">
-          Past Castmates
-          <span className="player-detail-section-count">{shared.length}</span>
-        </h3>
-        {shared.length === 0 ? (
-          <p className="player-detail-empty">
-            No prior shared seasons with this cast.
-          </p>
+/** A face with the outcome stamped on its corner, the way a cast tile
+ *  carries its vote-lens mark. */
+function TwistActor({
+  id,
+  outcome,
+  lookup,
+}: {
+  id: string;
+  outcome?: TwistOutcome;
+  lookup: (id: string) => { name: string; photo: string } | null;
+}) {
+  const person = lookup(id);
+  const name = person?.name ?? id;
+  const mark = outcome ? OUTCOME_MARK[outcome] : null;
+  return (
+    <span className="twist-actor">
+      <span className="twist-actor-photo">
+        {person?.photo ? (
+          <img
+            src={person.photo}
+            alt=""
+            loading="lazy"
+            onError={handleImageError}
+          />
         ) : (
-          <ul className="player-detail-played-with">
-            {shared.map(({ member, sharedSeasons }) => (
-              <li key={member.id}>
-                <button
-                  type="button"
-                  className="player-detail-played-row"
-                  onClick={() => onSelectPlayer(member.id)}
-                  title={`${member.name} — shared S${sharedSeasons.join(", S")}`}
-                  aria-label={`View ${member.name}'s detail`}
-                >
-                  <div className="player-detail-played-photo">
-                    <img
-                      src={member.photo}
-                      alt=""
-                      loading="lazy"
-                      onError={handleImageError}
-                    />
-                  </div>
-                  <span className="player-detail-played-name">
-                    {member.name.split(" ")[0]}
-                  </span>
-                  <span className="player-detail-played-count">
-                    ×{sharedSeasons.length}
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
+          <span className="twist-actor-initials" aria-hidden>
+            {name
+              .split(/\s+/)
+              .slice(0, 2)
+              .map((w) => w[0])
+              .join("")}
+          </span>
         )}
-      </section>
+        {mark && outcome && (
+          <span className={`twist-actor-mark ${mark.cls}`} title={mark.label}>
+            <OutcomeGlyph outcome={outcome} />
+          </span>
+        )}
+      </span>
+      <span className="twist-actor-name">{name.split(" ")[0]}</span>
+    </span>
+  );
+}
+
+function TwistDiagramView({
+  fromLabel,
+  toLabel,
+  steps,
+  lookup,
+}: {
+  fromLabel?: string;
+  toLabel: string;
+  steps: readonly TwistStep[];
+  lookup: (id: string) => { name: string; photo: string } | null;
+}) {
+  const hasSource = steps.some((st) => st.from);
+  // Nothing passed, nothing marked, nothing noted — the diagram is a cast
+  // list, and seven of those stacked one per row would run off the card.
+  const isRoster =
+    !hasSource && steps.every((st) => !st.outcome && !st.note);
+  return (
+    <div className="twist-diagram">
+      <div className={`twist-diagram-heads ${hasSource ? "has-source" : ""}`}>
+        {hasSource && <span>{fromLabel}</span>}
+        <span>{toLabel}</span>
+      </div>
+      <ul className={`twist-diagram-rows ${isRoster ? "is-roster" : ""}`}>
+        {steps.map((st, i) => (
+          <li
+            className="twist-diagram-row"
+            key={`${st.from ?? ""}-${st.to}-${i}`}
+          >
+            {hasSource && (
+              <>
+                {st.from ? (
+                  <TwistActor id={st.from} lookup={lookup} />
+                ) : (
+                  <span className="twist-actor" aria-hidden />
+                )}
+                <span className="twist-arrow" aria-hidden />
+              </>
+            )}
+            <TwistActor id={st.to} outcome={st.outcome} lookup={lookup} />
+            {/* The mark carries the outcome; this says the one thing the
+                mark cannot. Both are optional — a row can be just an
+                arrow between two people. */}
+            {(st.note || st.outcome) && (
+              <span className="twist-diagram-note">
+                {st.note ?? (st.outcome ? OUTCOME_MARK[st.outcome].label : "")}
+              </span>
+            )}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
 
-interface TwistDetailProps {
+/**
+ * One twist, as a card that turns over. The front is the illustration at
+ * the size it was drawn for; the back carries the whole record, so reading
+ * a twist never pushes the rest of the page down the screen.
+ */
+function TwistCard({
+  twist,
+  isPremise,
+  isFlipped,
+  onToggle,
+}: {
   twist: Twist;
-  onClose: () => void;
-}
+  isPremise: boolean;
+  isFlipped: boolean;
+  onToggle: () => void;
+}) {
+  const flipRef = useRef<HTMLButtonElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  /* Set by this card's own buttons, so focus follows only a flip the user
+     made here — not a card closed from the background or by opening
+     another one. */
+  const followFocus = useRef(false);
 
-function TwistDetail({ twist, onClose }: TwistDetailProps) {
-  const involved = useMemo(() => {
+  const toggleFromButton = () => {
+    followFocus.current = true;
+    onToggle();
+  };
+
+  // The face that just left is inert now, so the focus that was on its
+  // button is gone with it; hand it to the face that arrived.
+  useEffect(() => {
+    if (!followFocus.current) return;
+    followFocus.current = false;
+    (isFlipped ? closeRef : flipRef).current?.focus();
+  }, [isFlipped]);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Escape" && isFlipped) {
+      e.stopPropagation();
+      toggleFromButton();
+    }
+  };
+
+  const { involved, lookup } = useMemo(() => {
     const playerMap = new Map<string, CastMember>();
-    castData.forEach((p) => playerMap.set(p.id, p));
+    castData.forEach((pl) => playerMap.set(pl.id, pl));
     const prodMap = new Map<string, ProductionMember>();
     productionMembers.forEach((m) => prodMap.set(m.id, m));
-    return resolveInvolved(twist.involvedCast, playerMap, prodMap);
+    return {
+      involved: resolveInvolved(twist.involvedCast, playerMap, prodMap),
+      lookup: (id: string) => {
+        const pl = playerMap.get(id);
+        if (pl) return { name: pl.name, photo: pl.photo };
+        const pr = prodMap.get(id);
+        return pr ? { name: pr.name, photo: pr.photo } : null;
+      },
+    };
   }, [twist]);
 
+  const epLabel = isPremise
+    ? "The Premise"
+    : `EP ${twist.episode.toString().padStart(2, "0")}`;
+
   return (
-    <div className="player-detail twist-detail">
-      <button
-        type="button"
-        className="player-detail-close"
-        onClick={onClose}
-        aria-label="Back to season overview"
-      >
-        ← Back
-      </button>
-
-      <div className="twist-detail-art">
-        <div className="twist-detail-art-glow" aria-hidden />
-        <img
-          src={twist.svgImage}
-          alt=""
-          className="twist-detail-art-img"
-          loading="eager"
-          decoding="async"
-        />
-      </div>
-
-      <header className="player-detail-head">
-        <span className="twist-detail-ep">
-          EP {twist.episode.toString().padStart(2, "0")}
-        </span>
-        <h2 className="player-detail-name">{twist.title}</h2>
-      </header>
-
-      <section className="player-detail-section">
-        <h3 className="player-detail-section-title">Mechanic</h3>
-        <p className="twist-detail-text">{twist.mechanic}</p>
-      </section>
-
-      <section className="player-detail-section">
-        <h3 className="player-detail-section-title">How it played out</h3>
-        <p className="twist-detail-text">{twist.howItPlayedOut}</p>
-      </section>
-
-      {involved.length > 0 && (
-        <section className="player-detail-section">
-          <h3 className="player-detail-section-title">
-            Involved
-            <span className="player-detail-section-count">
-              {involved.length}
+    <div
+      className={`twist-card ${isPremise ? "is-premise" : ""} ${
+        isFlipped ? "is-flipped" : ""
+      }`}
+      onKeyDown={handleKeyDown}
+    >
+      <div className="twist-card-inner">
+        {/* Only the face in view is in the accessibility tree — a
+            backface-visibility:hidden element is still read aloud. */}
+        <div
+          className="twist-face twist-front"
+          aria-hidden={isFlipped}
+          inert={isFlipped || undefined}
+        >
+          <span className="twist-ep">{epLabel}</span>
+          <img
+            className="twist-art"
+            src={twist.svgImage}
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
+          {/* A heading, so the twists are in the outline before any card
+              is turned; the back has its own h3 and is inert meanwhile. */}
+          <h3 className="twist-title">{twist.title}</h3>
+          <button
+            type="button"
+            className="twist-flip"
+            ref={flipRef}
+            onClick={toggleFromButton}
+            aria-label={`${twist.title} — read the details`}
+          >
+            <span className="twist-flip-chip" aria-hidden>
+              Details
             </span>
-          </h3>
-          <ul className="player-detail-played-with">
-            {involved.map((a) => (
-              <li
-                key={a.id}
-                className={`player-detail-played-row twist-detail-involved twist-detail-involved--${a.kind}`}
-              >
-                <div className="player-detail-played-photo">
-                  {a.photo ? (
-                    <img
-                      src={a.photo}
-                      alt={a.name}
-                      loading="lazy"
-                      onError={handleImageError}
-                    />
-                  ) : (
-                    <div className="twist-detail-involved-fallback">
-                      {a.name
-                        .split(/\s+/)
-                        .slice(0, 2)
-                        .map((p) => p[0])
-                        .join("")}
-                    </div>
-                  )}
-                </div>
-                <span className="player-detail-played-name">
-                  {a.name.split(" ")[0]}
-                </span>
-                {a.kind === "production" && (
-                  <span className="twist-detail-involved-tag">Guest</span>
+          </button>
+        </div>
+
+        <div
+          className="twist-face twist-back"
+          aria-hidden={!isFlipped}
+          inert={!isFlipped || undefined}
+        >
+          <div className="twist-back-head">
+            <span className="twist-ep twist-ep--back">{epLabel}</span>
+            <button
+              type="button"
+              className="twist-close"
+              ref={closeRef}
+              onClick={toggleFromButton}
+              aria-label={`Close ${twist.title}`}
+            >
+              <span aria-hidden>&times;</span>
+            </button>
+          </div>
+          <h3 className="twist-back-title">{twist.title}</h3>
+          {/* A safety valve, not the plan: the card is sized to hold the
+              longest twist in the season without scrolling. */}
+          <div className="twist-back-body">
+            <p className="twist-back-label">Mechanic</p>
+            <p className="twist-back-text">{twist.mechanic}</p>
+            {/* The rule stays in words — a diagram cannot state a rule.
+                What happened is drawn instead, wherever the events have a
+                shape to draw. */}
+            {twist.diagram ? (
+              <TwistDiagramView
+                fromLabel={twist.diagram.fromLabel}
+                toLabel={twist.diagram.toLabel}
+                steps={twist.diagram.steps}
+                lookup={lookup}
+              />
+            ) : (
+              <>
+                <p className="twist-back-label">How it played out</p>
+                <p className="twist-back-text">{twist.howItPlayedOut}</p>
+                {involved.length > 0 && (
+                  <>
+                    <p className="twist-back-label">Involved</p>
+                    <ul className="twist-back-cast">
+                      {involved.map((a) => (
+                        <li key={a.id} className="twist-back-cast-item">
+                          <span className="twist-back-cast-photo">
+                            {a.photo ? (
+                              <img
+                                src={a.photo}
+                                alt=""
+                                loading="lazy"
+                                onError={handleImageError}
+                              />
+                            ) : (
+                              <span className="twist-back-cast-initials">
+                                {a.name
+                                  .split(/\s+/)
+                                  .slice(0, 2)
+                                  .map((w) => w[0])
+                                  .join("")}
+                              </span>
+                            )}
+                          </span>
+                          <span className="twist-back-cast-name">
+                            {a.name.split(" ")[0]}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
                 )}
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+              </>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -416,22 +549,38 @@ function DashboardSection({
   count: number;
   children: React.ReactNode;
 }) {
+  const titleId = `${id}-title`;
   return (
-    <section id={id} className={`dashboard-section ${modifier}`}>
-      <SectionHead title={title} count={count} />
+    <section
+      id={id}
+      className={`dashboard-section ${modifier}`}
+      // Named by its own heading, so it is a region a reader can jump to.
+      aria-labelledby={titleId}
+    >
+      <SectionHead title={title} titleId={titleId} count={count} />
       {children}
     </section>
   );
 }
 
-function SectionHead({ title, count }: { title: string; count: number }) {
+function SectionHead({
+  title,
+  titleId,
+  count,
+}: {
+  title: string;
+  titleId: string;
+  count: number;
+}) {
   const { ref, visible } = useReveal<HTMLElement>();
   return (
     <header
       ref={ref}
       className={`dashboard-section-head ${visible ? "is-revealed" : ""}`}
     >
-      <h2 className="dashboard-section-title">{title}</h2>
+      <h2 id={titleId} className="dashboard-section-title">
+        {title}
+      </h2>
       <span className="dashboard-section-count">{count}</span>
     </header>
   );
@@ -444,48 +593,10 @@ const NAV_SECTIONS: ReadonlyArray<{ id: string; label: string }> = [
 ];
 
 /**
- * In-page navigation for the dashboard's main pane sections. Each link
- * smooth-scrolls to its target so the aside stays put while the main
- * content moves underneath.
+ * Scroll-spy over NAV_SECTIONS, driving the masthead's current-section
+ * state.
  */
-function SectionNav() {
-  const handleNavigate =
-    (id: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
-      e.preventDefault();
-      const target = document.getElementById(id);
-      if (target) {
-        target.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    };
-
-  return (
-    <nav className="dashboard-aside-nav" aria-label="Dashboard sections">
-      <span className="dashboard-aside-eyebrow">Sections</span>
-      <ul>
-        {NAV_SECTIONS.map((s, i) => (
-          <li key={s.id}>
-            <a href={`#${s.id}`} onClick={handleNavigate(s.id)}>
-              <span className="dashboard-aside-nav-num">
-                {(i + 1).toString().padStart(2, "0")}
-              </span>
-              <span className="dashboard-aside-nav-label">{s.label}</span>
-              <span className="dashboard-aside-nav-arrow" aria-hidden>
-                →
-              </span>
-            </a>
-          </li>
-        ))}
-      </ul>
-    </nav>
-  );
-}
-
-/**
- * Fixed bottom tab bar, shown only on mobile (CSS-gated). Thumb-reachable
- * section navigation with a scroll-spy active state — replaces the buried
- * in-aside nav on small screens.
- */
-function MobileNav() {
+function useActiveSection(): [string, (id: string) => void] {
   const [activeId, setActiveId] = useState<string>(NAV_SECTIONS[0].id);
 
   useEffect(() => {
@@ -500,9 +611,7 @@ function MobileNav() {
       (entries) => {
         const inBand = entries
           .filter((e) => e.isIntersecting)
-          .sort(
-            (a, b) => a.boundingClientRect.top - b.boundingClientRect.top,
-          );
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
         if (inBand[0]) setActiveId(inBand[0].target.id);
       },
       { rootMargin: "-45% 0px -45% 0px", threshold: 0 },
@@ -511,30 +620,50 @@ function MobileNav() {
     return () => observer.disconnect();
   }, []);
 
-  const handleNavigate =
-    (id: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
-      e.preventDefault();
-      document
-        .getElementById(id)
-        ?.scrollIntoView({ behavior: "smooth", block: "start" });
-    };
+  return [activeId, setActiveId];
+}
+
+/**
+ * Sticky masthead. The aside used to carry the identity and a full tree of
+ * every player, vote and twist; the sections already hold all of that, so
+ * what is left is the logo and a way to reach each section. Same scroll-spy
+ * the tree used, at every width — there is no second nav to disagree with.
+ */
+function DashboardHeader({ activeId }: { activeId: string }) {
+  const go = (id: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    scrollToElement(id, "start");
+  };
 
   return (
-    <nav className="dashboard-mobile-nav" aria-label="Sections">
-      {NAV_SECTIONS.map((s) => (
-        <a
-          key={s.id}
-          href={`#${s.id}`}
-          className={`dashboard-mobile-nav-item ${
-            activeId === s.id ? "is-active" : ""
-          }`}
-          aria-current={activeId === s.id ? "true" : undefined}
-          onClick={handleNavigate(s.id)}
-        >
-          {s.label}
-        </a>
-      ))}
-    </nav>
+    <header className="dashboard-header">
+      <a
+        className="dashboard-header-brand"
+        href={`#${NAV_SECTIONS[0].id}`}
+        onClick={go(NAV_SECTIONS[0].id)}
+      >
+        <img
+          src={logoUrl}
+          alt="Survivor 50 — In the Hands of the Fans"
+          className="dashboard-header-logo"
+        />
+      </a>
+      <nav className="dashboard-header-nav" aria-label="Sections">
+        {NAV_SECTIONS.map((s) => (
+          <a
+            key={s.id}
+            href={`#${s.id}`}
+            className={`dashboard-header-link ${
+              activeId === s.id ? "is-active" : ""
+            }`}
+            aria-current={activeId === s.id ? "true" : undefined}
+            onClick={go(s.id)}
+          >
+            {s.label}
+          </a>
+        ))}
+      </nav>
+    </header>
   );
 }
 
@@ -545,117 +674,146 @@ function MobileNav() {
  */
 function VoteCard({
   vote,
-  revealSignal,
-  resetSignal,
+  forceRevealed,
 }: {
   vote: FanVote;
-  revealSignal: number;
-  resetSignal: number;
+  /** "Reveal all": show the result without a pick. Reset remounts the
+   *  card (by key) rather than unwinding it, so nothing here listens for
+   *  a reset. */
+  forceRevealed: boolean;
 }) {
   const [guessIndex, setGuessIndex] = useState<number | null>(null);
-  /** Results are shown once the user guesses OR "Reveal all" fires. */
-  const [revealed, setRevealed] = useState(false);
-  /**
-   * Three-stage flow after reveal:
-   *   interactive → revealed (1s of "current UI") → collapsed (losers fade,
-   *   leaving the winner slid up to the top).
-   */
-  const [phase, setPhase] = useState<"interactive" | "revealed" | "collapsed">(
-    "interactive",
-  );
+  /** The 1s "current UI" beat after reveal has passed: losers fold away. */
+  const [collapsed, setCollapsed] = useState(false);
   const hasGuessed = guessIndex !== null;
   const userPickWasRight =
     hasGuessed && vote.options[guessIndex].winner === true;
 
+  /** Results are shown once the user guesses OR "Reveal all" fires. */
+  const revealed = hasGuessed || forceRevealed;
+  /**
+   * Three-stage flow, derived rather than stored so a prop change needs no
+   * effect to catch it:
+   *   interactive → revealed (1s of "current UI") → collapsed (losers fade,
+   *   leaving the winner slid up to the top).
+   */
+  const phase: "interactive" | "revealed" | "collapsed" = !revealed
+    ? "interactive"
+    : collapsed
+      ? "collapsed"
+      : "revealed";
+
+  const articleRef = useRef<HTMLElement>(null);
+  const winnerRef = useRef<HTMLButtonElement>(null);
+
   useEffect(() => {
     if (phase !== "revealed") return;
-    const id = window.setTimeout(() => setPhase("collapsed"), 1000);
+    const id = window.setTimeout(() => {
+      // The losing rows are about to go inert. If the user's focus is on
+      // one of them (a wrong guess, made by keyboard), hand it to the
+      // winner before the row vanishes under it.
+      if (articleRef.current?.contains(document.activeElement)) {
+        winnerRef.current?.focus();
+      }
+      setCollapsed(true);
+    }, 1000);
     return () => window.clearTimeout(id);
   }, [phase]);
-
-  // "Reveal all" — show results without recording a user pick.
-  useEffect(() => {
-    if (revealSignal === 0) return;
-    setRevealed(true);
-    setPhase((p) => (p === "interactive" ? "revealed" : p));
-  }, [revealSignal]);
-
-  // "Reset" — back to the untouched interactive state.
-  useEffect(() => {
-    if (resetSignal === 0) return;
-    setGuessIndex(null);
-    setRevealed(false);
-    setPhase("interactive");
-  }, [resetSignal]);
 
   const handleGuess = (i: number) => {
     if (revealed) return;
     setGuessIndex(i);
-    setRevealed(true);
-    setPhase("revealed");
   };
 
+  /* What a screen reader hears once the result is in. Only a guess made on
+     this card speaks here; "Reveal all" announces once, from its button,
+     rather than eleven times from eleven cards. */
+  const winner = vote.options.find((o) => o.winner);
+  const winnerText = winner
+    ? `${winner.label}${
+        winner.percentage !== undefined ? ` with ${winner.percentage}%` : ""
+      }`
+    : "";
+  const announcement =
+    revealed && hasGuessed && winner
+      ? `${userPickWasRight ? "Correct" : "Not quite"}. The audience picked ${winnerText}.`
+      : "";
+
   return (
-    <div className="dashboard-vote-card" style={{position: "relative"}}>
-    <img className="push-pin" src={pushPinIcon} alt="Push pin" />
-    <article
-      className={`dashboard-vote ${revealed ? "is-answered" : ""} ${
-        hasGuessed
-          ? userPickWasRight
-            ? "is-correct"
-            : "is-wrong"
-          : ""
-      } phase-${phase}`}
+    <div
+      id={voteCardId(vote.id)}
+      className="dashboard-vote-card"
+      style={{ position: "relative" }}
     >
-      <header className="dashboard-vote-head">
-        <span className="dashboard-vote-subject">{vote.subject}</span>
-      </header>
+      <img className="push-pin" src={pushPinIcon} alt="" />
+      <article
+        ref={articleRef}
+        className={`dashboard-vote ${revealed ? "is-answered" : ""} ${
+          hasGuessed ? (userPickWasRight ? "is-correct" : "is-wrong") : ""
+        } phase-${phase}`}
+      >
+        <header className="dashboard-vote-head">
+          <span className="dashboard-vote-subject">{vote.subject}</span>
+        </header>
+        {/* Always mounted, so the region exists before it gets text. */}
+        <p className="visually-hidden" aria-live="polite">
+          {announcement}
+        </p>
 
-      {!hasGuessed && (
-        <></>
-        // <p className="dashboard-vote-prompt">What did the audience pick?</p>
-      )}
-
-      <ul className="dashboard-vote-options">
-        {vote.options.map((opt, i) => {
-          const isUserPick = guessIndex === i;
-          const showResult = revealed;
-          const isCollapsing = phase === "collapsed" && !opt.winner;
-          return (
-            <li
-              key={i}
-              className={`dashboard-vote-option ${
-                showResult && opt.winner ? "is-winner" : ""
-              } ${isUserPick ? "is-user-pick" : ""} ${
-                isCollapsing ? "is-collapsing" : ""
-              }`}
-            >
-              <button
-                type="button"
-                className="dashboard-vote-option-button"
-                onClick={() => handleGuess(i)}
-                disabled={revealed}
-                aria-pressed={isUserPick}
+        <ul className="dashboard-vote-options">
+          {vote.options.map((opt, i) => {
+            const isUserPick = guessIndex === i;
+            const showResult = revealed;
+            const isCollapsing = phase === "collapsed" && !opt.winner;
+            return (
+              <li
+                key={i}
+                className={`dashboard-vote-option ${
+                  showResult && opt.winner ? "is-winner" : ""
+                } ${isUserPick ? "is-user-pick" : ""} ${
+                  isCollapsing ? "is-collapsing" : ""
+                }`}
+                /* A collapsed row is 0px tall — out of the tree too. */
+                inert={isCollapsing || undefined}
               >
-                <span className="dashboard-vote-marker" aria-hidden>
-                  {showResult && opt.winner
-                    ? "✓"
-                    : isUserPick && !opt.winner
-                      ? "✗"
-                      : "·"}
-                </span>
-                <span className="dashboard-vote-label">{opt.label}</span>
-                {showResult && opt.percentage !== undefined && (
-                  <span className="dashboard-vote-percent">
-                    {opt.percentage}%
+                {/* aria-disabled, not disabled: a disabled button drops
+                    focus to <body>, and handleGuess already ignores
+                    clicks once the result is showing. */}
+                <button
+                  type="button"
+                  ref={opt.winner ? winnerRef : undefined}
+                  className="dashboard-vote-option-button"
+                  onClick={() => handleGuess(i)}
+                  aria-disabled={revealed || undefined}
+                  aria-pressed={isUserPick}
+                >
+                  <span className="dashboard-vote-marker" aria-hidden>
+                    {showResult && opt.winner
+                      ? "✓"
+                      : isUserPick && !opt.winner
+                        ? "✗"
+                        : "·"}
                   </span>
-                )}
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-    </article>
+                  {/* The glyph and the green/red flood say it to the eye;
+                      this says it to the reader. */}
+                  {showResult && opt.winner && (
+                    <span className="visually-hidden">Audience pick: </span>
+                  )}
+                  {showResult && isUserPick && !opt.winner && (
+                    <span className="visually-hidden">Your guess: </span>
+                  )}
+                  <span className="dashboard-vote-label">{opt.label}</span>
+                  {showResult && opt.percentage !== undefined && (
+                    <span className="dashboard-vote-percent">
+                      {opt.percentage}%
+                    </span>
+                  )}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </article>
     </div>
   );
 }
@@ -673,59 +831,40 @@ export default function DashboardView() {
     () => orderedTwists.filter((t) => t.id !== CENTER_TWIST_ID),
     [orderedTwists],
   );
+  /** The premise leads, then the season in episode order. */
+  const allTwists = useMemo(
+    () => (centerTwist ? [centerTwist, ...satelliteTwists] : satelliteTwists),
+    [centerTwist, satelliteTwists],
+  );
 
-  const [asideWidth, setAsideWidth] = useState(ASIDE_DEFAULT_WIDTH);
-  const [asideOpen, setAsideOpen] = useState(true);
-  const [isDragging, setIsDragging] = useState(false);
   const [selection, setSelection] = useState<Selection>(null);
-  const [voteRevealSignal, setVoteRevealSignal] = useState(0);
-  const [voteResetSignal, setVoteResetSignal] = useState(0);
+  const [votesRevealed, setVotesRevealed] = useState(false);
+  /** Bumped on Reset: the strip remounts and every card starts over. */
+  const [votesEpoch, setVotesEpoch] = useState(0);
+  const [voteControlsNote, setVoteControlsNote] = useState("");
   const [castSort, setCastSort] = useState<CastSort>("default");
-  const draggingRef = useRef(false);
 
   const sortedCast = useMemo(() => sortCast(castData, castSort), [castSort]);
 
-  /** id → set of castmate ids who share a prior season (computed once). */
-  const sharedByPlayer = useMemo(() => {
-    const map = new Map<string, Set<string>>();
-    for (const p of castData) {
-      map.set(p.id, new Set(findSharedHistory(p).map((s) => s.member.id)));
-    }
-    return map;
-  }, []);
+  /** Every player's castmates and voting record — the season's data,
+   *  computed once; the grid's vote-lens reads it. */
+  const records = useMemo(() => buildPlayerRecords(), []);
 
   // Played-with ring keys off selection only — hovering shouldn't
   // ripple through the grid.
-  const activePlayerId =
-    selection?.kind === "player" ? selection.id : null;
-  const playedWithIds = activePlayerId
-    ? (sharedByPlayer.get(activePlayerId) ?? null)
+  const activePlayerId = selection?.kind === "player" ? selection.id : null;
+  const activeRecord: PlayerRecord | null = activePlayerId
+    ? (records.get(activePlayerId) ?? null)
+    : null;
+  const playedWithIds = activeRecord?.castmates ?? null;
+  const voteLens: ReadonlyMap<string, VoteLensEntry> =
+    activeRecord?.votes ?? EMPTY_LENS;
+  const activeFirstName = activePlayerId
+    ? (castData.find((p) => p.id === activePlayerId)?.name.split(" ")[0] ??
+      null)
     : null;
 
-  const toggleAside = useCallback(() => setAsideOpen((v) => !v), []);
-
-  const effectiveAsideWidth = asideOpen ? asideWidth : 0;
-
-  /** Auto-open the aside whenever something gets selected so the new
-   *  detail content is visible. Never auto-closes — that stays user-driven. */
-  useEffect(() => {
-    if (selection !== null) setAsideOpen(true);
-  }, [selection]);
-
-  const selectedPlayer = useMemo(
-    () =>
-      selection?.kind === "player"
-        ? castData.find((p) => p.id === selection.id) ?? null
-        : null,
-    [selection],
-  );
-  const selectedTwist = useMemo(
-    () =>
-      selection?.kind === "twist"
-        ? twists.find((t) => t.id === selection.id) ?? null
-        : null,
-    [selection],
-  );
+  const [activeSectionId] = useActiveSection();
 
   const togglePlayer = useCallback((id: string) => {
     setSelection((curr) =>
@@ -746,7 +885,7 @@ export default function DashboardView() {
    * so their onClick fires and stops before this bubble-phase handler runs.
    */
   const handleBackgroundClick = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
+    (e: React.MouseEvent<HTMLElement>) => {
       const target = e.target as HTMLElement;
       if (
         target.closest(
@@ -760,104 +899,16 @@ export default function DashboardView() {
     [],
   );
 
-  const handlePointerDown = useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
-      draggingRef.current = true;
-      setIsDragging(true);
-      e.currentTarget.setPointerCapture(e.pointerId);
-      document.body.style.cursor = "ew-resize";
-      document.body.style.userSelect = "none";
-    },
-    [],
-  );
-
-  const handlePointerMove = useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
-      if (!draggingRef.current) return;
-      const next = Math.max(
-        ASIDE_MIN_WIDTH,
-        Math.min(ASIDE_MAX_WIDTH, e.clientX),
-      );
-      setAsideWidth(next);
-    },
-    [],
-  );
-
-  const handlePointerUp = useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
-      if (!draggingRef.current) return;
-      draggingRef.current = false;
-      setIsDragging(false);
-      e.currentTarget.releasePointerCapture(e.pointerId);
-      document.body.style.cursor = "";
-      document.body.style.userSelect = "";
-    },
-    [],
-  );
-
   return (
-    <div
-      className={`dashboard ${asideOpen ? "" : "is-aside-collapsed"} ${
-        selection !== null ? "is-detail-open" : ""
-      }`}
-    >
-      <aside
-        className={`dashboard-aside ${isDragging ? "is-dragging" : ""}`}
-        style={{ width: effectiveAsideWidth }}
-        aria-hidden={!asideOpen}
-        inert={!asideOpen || undefined}
-      >
-        {selectedPlayer ? (
-          <PlayerDetail
-            player={selectedPlayer}
-            onClose={() => setSelection(null)}
-            onSelectPlayer={togglePlayer}
-          />
-        ) : selectedTwist ? (
-          <TwistDetail
-            twist={selectedTwist}
-            onClose={() => setSelection(null)}
-          />
-        ) : (
-          <>
-            <img
-              src={logoUrl}
-              alt="Survivor 50 — In the Hands of the Fans"
-              className="dashboard-aside-logo"
-            />
-            <SectionNav />
-          </>
-        )}
-        <div
-          className="dashboard-aside-handle"
-          role="separator"
-          aria-orientation="vertical"
-          aria-valuenow={asideWidth}
-          aria-valuemin={ASIDE_MIN_WIDTH}
-          aria-valuemax={ASIDE_MAX_WIDTH}
-          aria-label="Resize aside panel"
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerCancel={handlePointerUp}
-          onDoubleClick={() => setAsideWidth(ASIDE_DEFAULT_WIDTH)}
-        />
-      </aside>
+    <div className="dashboard">
+      <DashboardHeader activeId={activeSectionId} />
 
-      {/* Floating toggle. Tracks the right edge of the aside when open,
-          parks at left:0 when collapsed. */}
-      <button
-        type="button"
-        className={`dashboard-aside-toggle ${asideOpen ? "is-open" : "is-closed"}`}
-        onClick={toggleAside}
-        style={{ left: effectiveAsideWidth }}
-        aria-label={asideOpen ? "Collapse aside panel" : "Open aside panel"}
-        aria-expanded={asideOpen}
-      >
-        <span aria-hidden>{asideOpen ? "‹" : "›"}</span>
-      </button>
-
-      <div className="dashboard-main" onClick={handleBackgroundClick}>
+      <main className="dashboard-main" onClick={handleBackgroundClick}>
+        {/* The page's one h1. The logo in the header says this to the eye;
+            the heading says it to the outline. */}
+        <h1 className="visually-hidden">
+          Survivor 50: In the Hands of the Fans
+        </h1>
         <DashboardSection
           id="section-cast"
           modifier="dashboard-section--cast"
@@ -866,28 +917,18 @@ export default function DashboardView() {
         >
           <div className="dashboard-cast-controls">
             <ul className="dashboard-cast-legend">
+              <li className="is-played">Past Castmate</li>
               <li>
-                <span
-                  className="dashboard-cast-legend-swatch dashboard-cast-legend-swatch--played"
-                  aria-hidden
-                />
-                Past Castmate
+                <span className="dashboard-cast-mark is-out" aria-hidden>
+                  <CastSkull />
+                </span>
+                Voted Out
               </li>
               <li>
-                <span
-                  className="dashboard-cast-legend-swatch dashboard-cast-legend-swatch--vs"
-                  aria-hidden
-                >
-                  3
+                <span className="dashboard-cast-mark is-missed" aria-hidden>
+                  <CastCrosshair />
                 </span>
                 Voted Against
-              </li>
-              <li>
-                <span
-                  className="dashboard-cast-legend-swatch dashboard-cast-legend-swatch--out"
-                  aria-hidden
-                />
-                Voted Out
               </li>
             </ul>
             <label className="dashboard-cast-sort">
@@ -906,66 +947,70 @@ export default function DashboardView() {
             </label>
           </div>
           <div className="dashboard-cast-grid">
-            {sortedCast.map((player) => {
+            {sortedCast.map((player, tileIndex) => {
               const isSelected =
                 selection?.kind === "player" && selection.id === player.id;
               const isPlayedWith = playedWithIds?.has(player.id) ?? false;
-              const startingTribe = player.tribeJourney[0].tribe;
-              const tribeColor = TRIBE_COLORS[startingTribe];
               // Vote-lens: when a player is selected, project THEIR voting
-              // record onto every other tile — how many times they voted
-              // against this castmate, and whether that castmate is out.
-              const selectedId =
-                selection?.kind === "player" ? selection.id : null;
-              const showVoteLens = selectedId !== null && selectedId !== player.id;
-              const vsCount = showVoteLens
-                ? voteCountFromTo(selectedId, player.id)
-                : 0;
-              const isVotedOut = showVoteLens
-                ? didVoteOut(selectedId, player.id)
-                : false;
+              // record onto every other tile.
+              const lensEntry = voteLens.get(player.id);
+              const description = isSelected
+                ? ""
+                : tileDescription(
+                    player,
+                    activeFirstName,
+                    isPlayedWith,
+                    lensEntry,
+                  );
+              const descId = `${castTileId(player.id)}-desc`;
               return (
                 <button
                   key={player.id}
+                  id={castTileId(player.id)}
                   type="button"
                   className={`dashboard-cast-tile ${
                     isSelected ? "is-selected" : ""
                   } ${isPlayedWith ? "is-played-with" : ""}`}
                   title={player.name}
+                  /* The full name, once: the photo is decorative and the
+                     visible label is only the first name. */
+                  aria-label={player.name}
                   aria-pressed={isSelected}
+                  aria-describedby={description ? descId : undefined}
                   onClick={() => togglePlayer(player.id)}
                   style={
                     {
-                      "--player-tribe-color": tribeColor,
+                      // Staggers the marker stroke across the grid.
+                      "--tile-i": tileIndex,
                     } as React.CSSProperties
                   }
                 >
                   <div className="dashboard-cast-photo">
                     <img
                       src={player.photo}
-                      alt={player.name}
+                      alt=""
                       loading="lazy"
                       decoding="async"
                       onError={handleImageError}
                     />
-                    {vsCount > 0 && (
-                      <span
-                        className="dashboard-cast-photo-vs"
-                        title={`Voted against ${player.name.split(" ")[0]} ${vsCount} ${vsCount === 1 ? "time" : "times"}`}
-                      >
-                        {vsCount}
-                      </span>
-                    )}
                   </div>
+                  {lensEntry && (
+                    <CastMark
+                      // Remounts on every change of selection, so the
+                      // punch-in replays instead of React reusing a node
+                      // that has already finished animating.
+                      key={`${activePlayerId}-${lensEntry.out}`}
+                      entry={lensEntry}
+                      name={player.name}
+                    />
+                  )}
                   <span className="dashboard-cast-name">
                     {player.name.split(" ")[0]}
                   </span>
-                  {isVotedOut && (
-                    <span
-                      className="dashboard-cast-tile-out"
-                      aria-hidden
-                      title={`${player.name.split(" ")[0]} was voted out`}
-                    />
+                  {description && (
+                    <span id={descId} className="visually-hidden">
+                      {description}
+                    </span>
                   )}
                 </button>
               );
@@ -983,25 +1028,36 @@ export default function DashboardView() {
             <button
               type="button"
               className="dashboard-votes-control"
-              onClick={() => setVoteRevealSignal((n) => n + 1)}
+              onClick={() => {
+                setVotesRevealed(true);
+                setVoteControlsNote(
+                  `All ${fanVotes.length} audience results revealed.`,
+                );
+              }}
             >
               Reveal all
             </button>
             <button
               type="button"
               className="dashboard-votes-control"
-              onClick={() => setVoteResetSignal((n) => n + 1)}
+              onClick={() => {
+                setVotesRevealed(false);
+                setVotesEpoch((n) => n + 1);
+                setVoteControlsNote("Audience results hidden.");
+              }}
             >
               Reset
             </button>
+            <p className="visually-hidden" aria-live="polite">
+              {voteControlsNote}
+            </p>
           </div>
-          <div className="dashboard-votes-strip">
+          <div className="dashboard-votes-strip" key={votesEpoch}>
             {fanVotes.map((vote) => (
               <VoteCard
                 key={vote.id}
                 vote={vote}
-                revealSignal={voteRevealSignal}
-                resetSignal={voteResetSignal}
+                forceRevealed={votesRevealed}
               />
             ))}
           </div>
@@ -1014,88 +1070,20 @@ export default function DashboardView() {
           count={orderedTwists.length}
         >
           <div className="dashboard-twists-grid">
-            {centerTwist && (
-              <button
-                type="button"
-                className={`dashboard-twist dashboard-twist--center ${
-                  selection?.kind === "twist" &&
-                  selection.id === centerTwist.id
-                    ? "is-selected"
-                    : ""
-                }`}
-                onClick={() => toggleTwist(centerTwist.id)}
-                aria-pressed={
-                  selection?.kind === "twist" &&
-                  selection.id === centerTwist.id
+            {allTwists.map((twist) => (
+              <TwistCard
+                key={twist.id}
+                twist={twist}
+                isPremise={twist.id === CENTER_TWIST_ID}
+                isFlipped={
+                  selection?.kind === "twist" && selection.id === twist.id
                 }
-                title={centerTwist.title}
-              >
-                <span className="dashboard-twist-glow" aria-hidden />
-                <span className="dashboard-twist-ep-chip dashboard-twist-ep-chip--center">
-                  The Premise
-                </span>
-                <img
-                  className="dashboard-twist-img"
-                  src={centerTwist.svgImage}
-                  alt=""
-                  loading="eager"
-                  decoding="async"
-                />
-                <span className="dashboard-twist-label">
-                  <span className="dashboard-twist-label-title">
-                    {centerTwist.title}
-                  </span>
-                </span>
-              </button>
-            )}
-
-            {satelliteTwists.map((twist) => {
-              const isSelected =
-                selection?.kind === "twist" && selection.id === twist.id;
-              return (
-                <button
-                  key={twist.id}
-                  type="button"
-                  className={`dashboard-twist dashboard-twist--satellite ${
-                    isSelected ? "is-selected" : ""
-                  }`}
-                  onClick={() => toggleTwist(twist.id)}
-                  aria-pressed={isSelected}
-                  title={twist.title}
-                >
-                  <span className="dashboard-twist-glow" aria-hidden />
-                  <span className="dashboard-twist-ep-chip">
-                    EP {twist.episode.toString().padStart(2, "0")}
-                  </span>
-                  <img
-                    className="dashboard-twist-img"
-                    src={twist.svgImage}
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                  />
-                  <span className="dashboard-twist-label">
-                    <span className="dashboard-twist-label-title">
-                      {twist.title}
-                    </span>
-                  </span>
-                </button>
-              );
-            })}
+                onToggle={() => toggleTwist(twist.id)}
+              />
+            ))}
           </div>
         </DashboardSection>
-      </div>
-
-      {/* Mobile-only: tap-away backdrop behind the detail bottom sheet. */}
-      {selection !== null && (
-        <div
-          className="dashboard-sheet-backdrop"
-          onClick={() => setSelection(null)}
-          aria-hidden
-        />
-      )}
-
-      <MobileNav />
+      </main>
     </div>
   );
 }
