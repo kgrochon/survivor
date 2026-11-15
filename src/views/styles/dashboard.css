@@ -901,27 +901,26 @@
    scroll, and nothing below it moves. */
 .dashboard-twists-grid {
   display: grid;
-  /* 300px is not arbitrary: it is the narrowest column where the
-     longest twist in the season (608 characters) still sets without
-     scrolling the back face. */
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  /* Sized for the front: a square drawing and a title. The back no
+     longer dictates the column — its body scrolls when a twist's record
+     outruns the card. */
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  /* Every row the height of the tallest card, so a one-line title and a
+     three-line title give the same card at every width. */
+  grid-auto-rows: 1fr;
   gap: var(--space-2);
 }
 
 .twist-card {
   perspective: 1400px;
-  /* Both faces are absolutely positioned, so the card cannot take its
-     height from content. Measured in the browser against the real data at
-     this column width, with the 12px text floor: the worst back is Jeff
-     Probst joining the challenge (a paragraph of mechanic plus five
-     diagram rows) at 544px, so this clears every card in the season with
-     a line to spare. */
-  height: 552px;
+  /* The front face is in flow and sets the height: a square drawing plus
+     the title. The back is laid over it and scrolls inside that box. */
 }
 
 .twist-card-inner {
   position: relative;
   width: 100%;
+  /* The grid stretches the card to its row; the faces fill the card. */
   height: 100%;
   transform-style: preserve-3d;
   transition: transform 560ms var(--ease);
@@ -949,20 +948,28 @@
 
 /* ── Front ── */
 .twist-front {
+  /* In flow, so the row takes its height from the tallest front. */
+  position: relative;
+  height: 100%;
   padding: 14px;
   gap: 10px;
 }
 
 .twist-art {
-  flex: 1;
-  min-height: 0;
+  flex: none;
   width: 100%;
+  /* Every drawing is square or near it (one is 496×421); a fixed box
+     keeps the grid rows even. */
+  aspect-ratio: 1 / 1;
   /* contain, not cover: these are drawings, and cropping one loses the
      thing it is a drawing of. */
   object-fit: contain;
 }
 
 .twist-title {
+  /* Any spare height sits between drawing and title, so titles line up
+     along the bottom of every card in the row. */
+  margin-top: auto;
   font-family: var(--font-display);
   font-size: 17px;
   font-weight: 600;
@@ -1405,5 +1412,24 @@
   .dashboard-main {
     padding: var(--space-3) var(--space-2) var(--space-5);
     gap: var(--space-5);
+  }
+
+  /* Two across on a phone rather than one tall card per screen. */
+  .dashboard-twists-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .twist-front,
+  .twist-back {
+    padding: 10px;
+  }
+
+  /* A flipped card takes the full row, so its record has room to read
+     without scrolling a 100px window. The row below shifts; on a phone
+     that beats a cramped back. */
+  .twist-card.is-flipped {
+    grid-column: 1 / -1;
+    grid-row: span 2;
   }
 }

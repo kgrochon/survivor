@@ -470,9 +470,14 @@ function TwistCard({
             </button>
           </div>
           <h3 className="twist-back-title">{twist.title}</h3>
-          {/* A safety valve, not the plan: the card is sized to hold the
-              longest twist in the season without scrolling. */}
-          <div className="twist-back-body">
+          {/* The body scrolls when a record outruns the card. Focusable so
+              the keyboard can scroll it; named so the stop makes sense. */}
+          <div
+            className="twist-back-body"
+            tabIndex={0}
+            role="region"
+            aria-label={`${twist.title}: details`}
+          >
             <p className="twist-back-label">Mechanic</p>
             <p className="twist-back-text">{twist.mechanic}</p>
             {/* The rule stays in words — a diagram cannot state a rule.
